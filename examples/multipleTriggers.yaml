@@ -1,0 +1,14 @@
+listeners:
+  - event: dissemination
+    request:
+      destination: ZAG
+      stream: enfo
+    triggers:
+      - type: echo
+      - type: log
+        path: log/testLog.log
+      - type: command
+        command: examples/script.sh --date ${request.date} -s ${request.stream}
+        environment:
+          STEP: ${request.step}
+          TIME: "The time is ${request.time}"

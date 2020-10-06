@@ -1,0 +1,24 @@
+listeners:
+  - event: dissemination
+    request:
+      destination: ZAG
+      stream: enfo
+      date: 20190810
+      step: [1]
+    triggers:
+      - type: echo
+
+  - event: dissemination
+    request:
+      destination: ZAG
+      stream: enfo
+      time: '0000'
+    triggers:
+      - type: echo
+
+  - event: dissemination
+    request:
+      destination: ZAG
+      stream: enfo
+    triggers:
+      - type: echo

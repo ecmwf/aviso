@@ -1,0 +1,30 @@
+compactor:
+  url: http://localhost:2379
+  retention_period: 2
+cleaner:
+  url: http://localhost:2379
+logging:
+  version: 1
+  disable_existing_loggers: False
+  formatters:
+    line-format:
+      format: '%(asctime)s - %(process)d - %(thread)d - %(name)s - %(filename)s - %(lineno)d - %(levelname)s - %(message)s'
+    console-format:
+      format: '%(message)s'
+  handlers:
+    console:
+      class: logging.StreamHandler
+      level: INFO
+      formatter: console-format
+      stream: ext://sys.stderr
+    debug-line_file:
+      class: logging.handlers.TimedRotatingFileHandler
+      level: DEBUG
+      formatter: line-format
+      when: D
+      utc: True
+      backupCount: 30
+      filename: ~/.aviso-admin/log/aviso-admin.debug-line.log
+  root:
+    level: DEBUG
+    handlers: [console, debug-line_file]

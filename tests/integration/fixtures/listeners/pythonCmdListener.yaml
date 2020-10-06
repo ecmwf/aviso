@@ -1,0 +1,12 @@
+listeners:
+  - event: dissemination
+    request:
+      destination: FOO
+      stream: enfo
+    triggers:
+      - type: command
+        command: python tests/integration/fixtures/pythonScript.py
+        environment:
+          STEP: ${request.step}
+          TIME: "The time is ${request.time}"
+

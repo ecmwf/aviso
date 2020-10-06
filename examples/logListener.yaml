@@ -1,0 +1,9 @@
+listeners:
+  - event: dissemination
+    request:
+      destination: ZAG
+      stream: enfo
+    triggers:
+      - type: log
+        path: log/testLog.log
+

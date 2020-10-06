@@ -1,0 +1,12 @@
+.*
+!.gitignore
+default.etcd
+venv*/*
+__pycache*
+htmlcov
+etcd3/*
+dist/*
+aviso.egg-info/*
+admin/aviso_admin.egg-info/*
+tests/stress/*
+studies/*

@@ -1,0 +1,11 @@
+listeners:
+  - event: dissemination
+    request:
+      destination: FOO
+      stream: enfo
+      date: 20190810
+      time: 0
+      step: [001]
+    triggers:
+      - type: echo
+      - arg: 3

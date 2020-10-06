@@ -1,0 +1,7 @@
+listeners:
+  - event: dissemination
+    request:
+      destination: ZAG
+    triggers:
+      - type: command
+        command: examples/script.sh --jsonpath ${jsonpath}

@@ -1,0 +1,14 @@
+listeners:
+  - event: dissemination
+    request:
+      destination: ZAG
+      class: od
+      expver: 1
+      domain: g
+      date: 20190810
+      time: '0000'
+      stream: enfo
+      step: [0]
+    triggers:
+      - type: echo
+

@@ -1,0 +1,29 @@
+notification_engine:
+  type: etcd_grpc
+  host: test
+  port: 8080
+  polling_interval: 1
+  timeout: 30
+  https: true
+  catchup: true
+  service: aviso/v2
+configuration_engine:
+  type: etcd_grpc
+  host: test
+  port: 8080
+  max_file_size: 500
+  timeout: null
+  https: true
+auth_type: etcd
+key_file: tests/unit/fixtures/key
+debug: true
+quiet: true
+no_fail: true
+key_ttl: 10
+username: root
+frontend:
+  host: frontend.int
+  port: 80
+  server_type: gunicorn
+  workers: 4
+

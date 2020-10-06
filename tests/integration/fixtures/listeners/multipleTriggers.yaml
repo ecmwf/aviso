@@ -1,0 +1,14 @@
+listeners:
+  - event: dissemination
+    request:
+      destination: FOO
+      stream: enfo
+    triggers:
+      - type: echo
+      - type: log
+        path: testLog.log
+      - type: command
+        command: echo "AAAAA" > test.txt
+        environment:
+          STEP: ${request.step}
+          TIME: "The time is ${request.time}"

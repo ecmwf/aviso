@@ -1,0 +1,8 @@
+listeners:
+  - event: dissemination
+    request:
+      destination: FOO
+      stream: enfo
+    triggers:
+      - type: command
+        command: tests/integration/fixtures/script.sh --json ${json}

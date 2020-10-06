@@ -1,0 +1,9 @@
+listeners:
+  - event: dissemination
+    request:
+      destination: FOO
+      stream: enfo
+      step: [1,2,3]
+    triggers:
+      - type: echo
+

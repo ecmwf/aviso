@@ -1,0 +1,9 @@
+listeners:
+  - event: dissemination
+    request:
+      destination: FOO
+      stream: enfo
+    triggers:
+      - type: log
+        path: testLog.log
+

@@ -1,0 +1,9 @@
+listeners:
+  - event: dissemination
+    request:
+      date: 20190810
+      time: 0
+      step: [001]
+    triggers:
+      - type: echo
+
