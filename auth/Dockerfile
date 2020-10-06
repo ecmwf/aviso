@@ -1,4 +1,3 @@
-# This dockerfile is used to build the image for the Aviso-rest component, it's here because of the context.
 FROM registry.hub.docker.com/library/python:3.6.8-alpine3.8
 ARG proxy=
 
@@ -11,12 +10,10 @@ ENV HTTPS_PROXY=$proxy
 RUN apk add --no-cache --virtual .build-deps gcc musl-dev g++ linux-headers
 
 # install aviso requirements
-WORKDIR /aviso-rest
+WORKDIR /pyaviso
 COPY . .
 RUN set -eux && pip install --editable .
 
-RUN set -eux && pip install --editable frontend
-
 RUN apk --no-cache add curl
 
-CMD aviso-rest
+CMD aviso-auth

@@ -15,7 +15,7 @@ setup(
     description='Aviso is a notification application allowing users to define the events for which being notified and '
                 'to define the triggers to be executed once a notification is received',
     version=VERSION,
-    url='https://git.ecmwf.int/projects/LEX/repos/aviso/browse',
+    url='https://git.ecmwf.int/projects/AVISO/repos/aviso/browse',
     author='ECMWF',
     packages=find_packages(),
     zip_safe=False,

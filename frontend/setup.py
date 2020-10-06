@@ -14,7 +14,7 @@ setup(
     description='Aviso-rest is a REST interface that allows notification providers to submit notifications to the Aviso '
                 'service by a REST API',
     version=VERSION,
-    url='https://git.ecmwf.int/projects/LEX/repos/aviso/browse',
+    url='https://git.ecmwf.int/projects/AVISO/repos/aviso/browse',
     author='ECMWF',
     packages=find_packages(),
     zip_safe=False,

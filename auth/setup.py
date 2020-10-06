@@ -7,11 +7,12 @@
 # nor does it submit to any jurisdiction.
 
 from setuptools import setup, find_packages
-from aviso_admin import VERSION
+from aviso_auth import VERSION
 
 setup(
-    name='aviso-admin',
-    description='Aviso-admin is a component in charge of the maintenance of the Aviso service',
+    name='aviso-auth',
+    description='Aviso-auth is a proxy designed to authenticate and authorise the listening request directed towards '
+                'aviso server',
     version=VERSION,
     url='https://git.ecmwf.int/projects/AVISO/repos/aviso/browse',
     author='ECMWF',
@@ -22,11 +23,14 @@ setup(
         'PyYAML==5.1.2',
         'python-json-logger==0.1.11',
         'requests==2.23.0',
-        'schedule==0.6.0'
+        'gunicorn==20.0.4',
+        'flask==1.1.2',
+        'Flask-Caching==1.8.0',
+        'six==1.15.0'
     ],
     entry_points={
         'console_scripts': [
-            'aviso-admin=aviso_admin.admin:main'
+            'aviso-auth=aviso_auth.frontend:main'
         ]
     }
 )
