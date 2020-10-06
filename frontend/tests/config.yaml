@@ -1,0 +1,50 @@
+notification_engine:
+  type: etcd_rest
+  host: localhost
+  port: 2379
+  polling_interval: 1
+  https: false
+configuration_engine:
+  type: etcd_rest
+  host: localhost
+  port: 2379
+  https: false
+auth_type: none
+frontend:
+  host: 127.0.0.1
+  port: 8081
+  server_type: flask
+listener_schema:
+  stream: [scef, scwe]
+listeners:
+  - event: dissemination
+    request:
+      destination: FOO
+      stream: enfo
+    triggers:
+      - type: echo
+logging:
+  version: 1
+  disable_existing_loggers: False
+  formatters:
+    line-format:
+      format: '%(asctime)s - %(process)d - %(thread)d - %(name)s - %(filename)s - %(lineno)d - %(levelname)s - %(message)s'
+    console-format:
+      format: '%(message)s'
+  handlers:
+    console:
+      class: logging.StreamHandler
+      level: INFO
+      formatter: console-format
+      stream: ext://sys.stderr
+    debug-line_file:
+      class: logging.handlers.TimedRotatingFileHandler
+      level: DEBUG
+      formatter: line-format
+      when: D
+      utc: True
+      backupCount: 30
+      filename: ~/.aviso/log/aviso.debug-line.log
+  root:
+    level: DEBUG
+    handlers: [console, debug-line_file]

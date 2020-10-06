@@ -117,6 +117,7 @@ Users can define the following environment variables with similar scope as for t
 * `AVISO_DEBUG`                  Enable the debug log.
 * `AVISO_QUIET`                  Suppress non-error messages from the console output.
 * `AVISO_USERNAME`               Username required by the notification server.
+* `AVISO_USERNAME_FILE`          File path containing the username required to authenticate the user.
 * `AVISO_NO_FAIL`                Suppress any error exit code. This is meant to be used when the application is part of 
                                  of a critical chain and any error generated shall not stop the chain.
 * `AVISO_KEY_FILE`               Path to the key file required for authentication.
@@ -469,7 +470,7 @@ The listening will happen in a background thread defined as daemon therefore it 
 the main thread alive.
 
 ```
-from pyaviso import NotificationManager
+from pyaviso.notification_manager import NotificationManager
 
 # define function to be called
 def do_something(notification):

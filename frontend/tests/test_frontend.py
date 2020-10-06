@@ -17,7 +17,7 @@ import requests
 from pyaviso import logger
 from pyaviso import user_config
 from pyaviso.cli_aviso import _parse_inline_params
-from pyaviso.frontend.frontend import Frontend
+from aviso_rest.frontend import Frontend
 from pyaviso.notification_manager import NotificationManager
 
 config = user_config.UserConfig(conf_path="tests/config.yaml")

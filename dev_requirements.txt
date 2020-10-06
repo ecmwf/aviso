@@ -4,7 +4,7 @@ PyYAML==5.1.2
 python-json-logger==0.1.11
 parse==1.12.1
 black==19.3b0
-pytest==5.0.1
+pytest==5.4.2
 pytest-cov==2.7.1
 requests==2.23.0
 pyinotify==0.9.6

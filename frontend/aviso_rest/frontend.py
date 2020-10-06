@@ -67,7 +67,7 @@ class Frontend:
 
         @handler.route("/", methods=['GET'])
         def root():
-            with open("pyaviso/frontend/web/index.html") as fh:
+            with open("aviso_rest/web/index.html") as fh:
                 content = fh.read()
             content = content.format(
                 page_title="Aviso",
