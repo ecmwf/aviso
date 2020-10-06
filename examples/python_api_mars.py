@@ -8,7 +8,7 @@
 
 from ecmwfapi import ECMWFService
 
-from pyaviso import NotificationManager
+from pyaviso.notification_manager import NotificationManager
 
 
 # define function to be called

@@ -6,7 +6,7 @@
 # granted to it by virtue of its status as an intergovernmental organisation
 # nor does it submit to any jurisdiction.
 
-from pyaviso import NotificationManager
+from pyaviso.notification_manager import NotificationManager
 
 
 # define function to be called

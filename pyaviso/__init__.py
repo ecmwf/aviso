@@ -24,7 +24,3 @@ SYSTEM_FOLDER = "/etc/aviso"
 
 # This is a thread-safe communication channel. It is used to tell the main thread when to terminate.
 exit_channel = Queue()
-
-# This import cannot be at the top because otherwise it creates an error because it needs the logger to be created first
-# noinspection PyPep8
-from .notification_manager import NotificationManager

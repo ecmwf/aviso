@@ -1,5 +1,6 @@
 .*
 !.gitignore
+!.dockerignore
 default.etcd
 venv*/*
 __pycache*

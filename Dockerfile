@@ -10,13 +10,12 @@ ENV HTTPS_PROXY=$proxy
 RUN apk add --no-cache --virtual .build-deps gcc musl-dev g++ linux-headers
 
 # install aviso requirements
-WORKDIR /pyaviso
+WORKDIR /aviso-rest
 COPY . .
-RUN set -eux \
-        && pip install --ignore-installed -r frontend_requirements.txt
-RUN set -eux \
-        && pip install --editable .
+RUN set -eux && pip install --editable .
+
+RUN set -eux && pip install --editable frontend
 
 RUN apk --no-cache add curl
 
-CMD python3 pyaviso/frontend/frontend.py
+CMD aviso-rest

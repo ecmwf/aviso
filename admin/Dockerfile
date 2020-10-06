@@ -9,7 +9,7 @@ ENV HTTPS_PROXY=$proxy
 
 RUN apk add --no-cache --virtual .build-deps gcc musl-dev g++ linux-headers
 
-# install aviso-admin requirements
+# install aviso-rest requirements
 WORKDIR /aviso_admin
 COPY . .
 RUN set -eux && pip install --editable .
