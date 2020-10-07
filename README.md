@@ -15,6 +15,8 @@ This page gives a quick introduction on the notification functionality only.
 For a detailed description of the notification functionality and of the configuration client application please 
 refer to the [user manual](user_manual.md).
 
+For information regarding the installation please refer to the [installation guide](install.md).
+
 For information on how to contribute to the development and to the architectural design please refer to the [development 
 guide](development.md).
 
