@@ -31,7 +31,10 @@ application, this assumes that a notification server is already up and running.
     listeners:
       - event: dissemination
         request:
-          destination: FOO
+          destination: <user_destination>
+          class: od
+          expver: 1
+          domain: g
           stream: enfo
           step: [1,2,3]
         triggers:
@@ -68,28 +71,21 @@ More information are available in the [user manual](user_manual.md).
 ## Submitting test notifications
 Aviso provides the capability of submitting notifications. This functionality can be used by the user to test the 
 listener configuration. 
-
-1. Terminate the aviso application and edit the following setting of the configuration file _~/.aviso/config.yaml_
-   ```
-   notification_engine:
-     type: test 
-   ```
-   This setting allows to connect to a local file-based notification server, part of the aviso application, that is 
-   able to simulate the notification server behaviour.
    
-   Alternatively, the user can add the `--test` option to all the commands below.
-   
-1. Launch again the aviso application.
+1. Launch the aviso application in test mode. This allows to connect to a local file-based notification server, part of 
+the aviso application, that is able to simulate the notification server behaviour.
     ```
-    $ aviso listen
+    $ aviso listen --test
     ```
     The console should display a `Test Mode` message.
     
-1. Send notifications. From another terminal run the `notifiy` command. Here an example:
+1. Send a test dissemination notification. From another terminal run the notify command. Here an example, matching the 
+example configuration presented above:
     ```
-    $ aviso notify event=dissemination,class=od,date=20190810,destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=0,location=xxxxxxxx
+    $ aviso notify event=dissemination,class=od,date=20190810,destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=0,location=xxxxxxxx --test
     ```
     Note the list of parameters required, the order is not important, but the command requires all of them.
+    Note, to submit a test mars notification the fields destination and location have to be removed
     
 1. The console output should display the notification.
 
@@ -108,22 +104,22 @@ configuration file defined above.
 ```
 from pyaviso.notification_manager import NotificationManager
 
+
 # define function to be called
 def do_something(notification):
-    # do something with the notification
-    ...
+    print(f"Notification for step {notification['request']['step']} received")
+    # now do something useful with it ...
+
 
 # define the trigger
 trigger = {"type": "function", "function": do_something}
 
 # create a event listener request that uses that trigger
-request = {"destination": "FOO", "stream": "enfo", "date": 20190810, "time": 0}
-listener = {"event": "dissemination", "request": request, "triggers": [trigger]}
+request = {"class": "od", "stream": "oper", "expver": 1, "domain": "g", "step": 1}
+listener = {"event": "mars", "request": request, "triggers": [trigger]}
 listeners = {"listeners": [listener]}
 
 # run it
 aviso = NotificationManager()
 aviso.listen(listeners=listeners)
-
-# wait ...
 ```
