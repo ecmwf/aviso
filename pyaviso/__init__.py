@@ -10,7 +10,7 @@ import logging
 from queue import Queue
 
 # version number for the application
-VERSION = '0.7.0'
+VERSION = '0.7.1'
 
 # setting application logger
 logger = logging.getLogger("aviso")

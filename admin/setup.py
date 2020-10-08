@@ -19,10 +19,10 @@ setup(
     zip_safe=False,
     include_package_data=True,
     install_requires=[
-        'PyYAML==5.1.2',
-        'python-json-logger==0.1.11',
-        'requests==2.23.0',
-        'schedule==0.6.0'
+        'PyYAML>=5.1.2',
+        'python-json-logger>=0.1.11',
+        'requests>=2.23.0',
+        'schedule>=0.6.0'
     ],
     entry_points={
         'console_scripts': [
