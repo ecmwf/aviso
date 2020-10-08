@@ -17,7 +17,7 @@ setup(
     version=VERSION,
     url='https://git.ecmwf.int/projects/AVISO/repos/aviso/browse',
     author='ECMWF',
-    packages=find_packages(),
+    packages=find_packages(exclude=("tests","frontend", "admin", "auth",)),
     zip_safe=False,
     include_package_data=True,
     install_requires=[
