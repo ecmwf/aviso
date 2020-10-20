@@ -157,7 +157,7 @@ class UserConfig:
         return current_config
 
     def _read_env_variables(self) -> Dict[str, any]:
-        config = {"notification_engine": {}, "configuration_engine": {}, "frontend": {}}
+        config = {"backend": {}, "authentication_server": {}, "authorisation_server": {}, "frontend": {}}
         if "AVISO_AUTH_DEBUG" in os.environ:
             config["debug"] = os.environ["AVISO_AUTH_DEBUG"]
         if "AVISO_AUTH_FRONTEND_HOST" in os.environ:

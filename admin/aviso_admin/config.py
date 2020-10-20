@@ -136,7 +136,7 @@ class Config:
         return current_config
 
     def _read_env_variables(self) -> Dict[str, any]:
-        config = {"notification_engine": {}, "configuration_engine": {}, "frontend": {}}
+        config = {"cleaner": {}, "compactor": {}}
         if "AVISO_ADMIN_DEBUG" in os.environ:
             config["debug"] = os.environ["AVISO_ADMIN_DEBUG"]
         if "AVISO_ADMIN_CLEANER_URL" in os.environ:

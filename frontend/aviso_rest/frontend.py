@@ -99,8 +99,8 @@ class Frontend:
         return handler
 
     def run_server(self):
-        logger.debug(f"Running AVISO Frontend - version { __version__} on server {self.config.frontend['server_type']}")
-        logger.debug(f"Configuration loaded: {self.config}")
+        logger.info(f"Running AVISO Frontend - version { __version__} on server {self.config.frontend['server_type']}")
+        logger.info(f"Configuration loaded: {self.config}")
 
         if self.config.frontend["server_type"] == "flask":
             # flask internal server for non-production environments
