@@ -16,7 +16,7 @@ from queue import Queue
 from typing import List, Dict
 
 from . import EngineType
-from .. import logger, VERSION, exit_channel
+from .. import logger, __version__, exit_channel
 from ..authentication.auth import Auth
 from ..user_config import EngineConfig
 
@@ -210,7 +210,7 @@ class Engine(ABC):
             "etcd_user": self.auth.username,
             "message": message,
             "unix_user": getpass.getuser(),
-            "aviso_version": VERSION,
+            "aviso_version": __version__,
             "engine": self._engine_type.name,
             "hostname": os.uname().nodename,
             "date_time": datetime.utcnow().strftime(DATE_FORMAT)

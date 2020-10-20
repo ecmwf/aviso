@@ -14,6 +14,7 @@ import os
 import re
 import sys
 from typing import Optional, Dict
+
 import yaml
 
 from . import logger, HOME_FOLDER, SYSTEM_FOLDER
@@ -157,16 +158,22 @@ class UserConfig:
 
     def _read_env_variables(self) -> Dict[str, any]:
         config = {"notification_engine": {}, "configuration_engine": {}, "frontend": {}}
-        if "AVISO_DEBUG" in os.environ:
-            config["debug"] = os.environ["AVISO_DEBUG"]
-        if "AVISO_FRONTEND_HOST" in os.environ:
-            config["frontend"]["host"] = os.environ["AVISO_FRONTEND_HOST"]
-        if "AVISO_FRONTEND_PORT" in os.environ:
-            config["frontend"]["port"] = int(os.environ["AVISO_FRONTEND_PORT"])
-        if "AVISO_FRONTEND_SERVER_TYPE" in os.environ:
-            config["frontend"]["server_type"] = os.environ["AVISO_FRONTEND_SERVER_TYPE"]
-        if "AVISO_FRONTEND_WORKERS" in os.environ:
-            config["frontend"]["workers"] = int(os.environ["AVISO_FRONTEND_WORKERS"])
+        if "AVISO_AUTH_DEBUG" in os.environ:
+            config["debug"] = os.environ["AVISO_AUTH_DEBUG"]
+        if "AVISO_AUTH_FRONTEND_HOST" in os.environ:
+            config["frontend"]["host"] = os.environ["AVISO_AUTH_FRONTEND_HOST"]
+        if "AVISO_AUTH_FRONTEND_PORT" in os.environ:
+            config["frontend"]["port"] = int(os.environ["AVISO_AUTH_FRONTEND_PORT"])
+        if "AVISO_AUTH_FRONTEND_SERVER_TYPE" in os.environ:
+            config["frontend"]["server_type"] = os.environ["AVISO_AUTH_FRONTEND_SERVER_TYPE"]
+        if "AVISO_AUTH_FRONTEND_WORKERS" in os.environ:
+            config["frontend"]["workers"] = int(os.environ["AVISO_AUTH_FRONTEND_WORKERS"])
+        if "AVISO_AUTH_BACKEND_URL" in os.environ:
+            config["backend"]["url"] = os.environ["AVISO_AUTH_BACKEND_URL"]
+        if "AVISO_AUTH_AUTHENTICATION_URL" in os.environ:
+            config["authentication_server"]["url"] = os.environ["AVISO_AUTH_AUTHENTICATION_URL"]
+        if "AVISO_AUTH_AUTHORISATION_URL" in os.environ:
+            config["authorisation_server"]["url"] = os.environ["AVISO_AUTH_AUTHORISATION_URL"]
         return config
 
     def logging_setup(self, logging_conf_path: str):

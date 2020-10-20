@@ -9,7 +9,7 @@
 import logging
 
 # version number for the application.
-VERSION = '0.1.0'
+__version__ = '0.1.0'
 
 # setting application logger
 logger = logging.getLogger("aviso-admin")

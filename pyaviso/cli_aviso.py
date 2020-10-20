@@ -15,7 +15,7 @@ from typing import List, Dict
 
 import click
 
-from . import logger, VERSION
+from . import logger, __version__
 from . import user_config as conf
 from .custom_exceptions import *
 from .engine import EngineType
@@ -181,7 +181,7 @@ def user_config_setup(f):
         kwargs.pop("username")
         kwargs.pop("key")
 
-        logger.debug(f"Running Aviso v.{VERSION}")
+        logger.debug(f"Running Aviso v.{ __version__}")
         logger.debug(f"Configuration loaded: {configuration}")
 
         return f(*args, **kwargs)
@@ -193,7 +193,7 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
 
 @click.group(context_settings=CONTEXT_SETTINGS)
-@click.version_option(version=VERSION)
+@click.version_option(version= __version__)
 def cli(): pass
 
 

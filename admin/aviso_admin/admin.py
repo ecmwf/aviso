@@ -9,7 +9,7 @@
 import time
 
 import schedule
-from aviso_admin import logger, VERSION
+from aviso_admin import logger, __version__
 from aviso_admin.cleaner import Cleaner
 from aviso_admin.compactor import Compactor
 from aviso_admin.config import Config
@@ -18,7 +18,7 @@ from aviso_admin.config import Config
 def main():
     # load the configuration
     config = Config()
-    logger.info(f"Running Aviso-admin v.{VERSION}")
+    logger.info(f"Running Aviso-admin v.{__version__}")
     logger.info(f"Configuration loaded: {config}")
 
     # instantiate the compactor and cleaner
