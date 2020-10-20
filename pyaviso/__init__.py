@@ -9,10 +9,9 @@
 import logging
 from queue import Queue
 
-# version number for the application
-VERSION = '0.7.1'
+from .version import __version__
 
-# setting application logger
+# setting application logger - this goes before anything else
 logger = logging.getLogger("aviso")
 logger.setLevel(logging.DEBUG)
 
@@ -24,3 +23,6 @@ SYSTEM_FOLDER = "/etc/aviso"
 
 # This is a thread-safe communication channel. It is used to tell the main thread when to terminate.
 exit_channel = Queue()
+
+
+from .notification_manager import NotificationManager

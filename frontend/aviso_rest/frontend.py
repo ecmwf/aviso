@@ -16,10 +16,10 @@ from flask import request
 from gunicorn import glogging
 from six import iteritems
 
+from pyaviso import logger, __version__
+from pyaviso.custom_exceptions import InvalidInputError
 # from flask_swagger_ui import get_swaggerui_blueprint
 from pyaviso.notification_manager import NotificationManager
-from pyaviso import logger, VERSION
-from pyaviso.custom_exceptions import InvalidInputError
 from pyaviso.user_config import UserConfig
 
 SWAGGER_URL = '/openapi'
@@ -71,7 +71,7 @@ class Frontend:
                 content = fh.read()
             content = content.format(
                 page_title="Aviso",
-                welcome_title=f"Aviso v. {VERSION} homepage",
+                welcome_title=f"Aviso v. { __version__} homepage",
                 welcome_text="This is the frontend of the Aviso notification system"
             )
             return content
@@ -99,7 +99,7 @@ class Frontend:
         return handler
 
     def run_server(self):
-        logger.debug(f"Running AVISO Frontend - version {VERSION} on server {self.config.frontend['server_type']}")
+        logger.debug(f"Running AVISO Frontend - version { __version__} on server {self.config.frontend['server_type']}")
         logger.debug(f"Configuration loaded: {self.config}")
 
         if self.config.frontend["server_type"] == "flask":

@@ -6,14 +6,14 @@
 # granted to it by virtue of its status as an intergovernmental organisation
 # nor does it submit to any jurisdiction.
 
+from aviso_auth import __version__
 from setuptools import setup, find_packages
-from aviso_auth import VERSION
 
 setup(
     name='aviso-auth',
     description='Aviso-auth is a proxy designed to authenticate and authorise the listening request directed towards '
                 'aviso server',
-    version=VERSION,
+    version= __version__,
     url='https://git.ecmwf.int/projects/AVISO/repos/aviso/browse',
     author='ECMWF',
     packages=find_packages(),
