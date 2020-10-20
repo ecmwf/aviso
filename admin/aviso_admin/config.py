@@ -139,6 +139,18 @@ class Config:
         config = {"notification_engine": {}, "configuration_engine": {}, "frontend": {}}
         if "AVISO_ADMIN_DEBUG" in os.environ:
             config["debug"] = os.environ["AVISO_ADMIN_DEBUG"]
+        if "AVISO_ADMIN_CLEANER_URL" in os.environ:
+            config["cleaner"]["url"] = os.environ["AVISO_ADMIN_CLEANER_URL"]
+        if "AVISO_ADMIN_CLEANER_RETENTION_PERIOD" in os.environ:
+            config["cleaner"]["retention_period"] = os.environ["AVISO_ADMIN_CLEANER_RETENTION_PERIOD"]
+        if "AVISO_ADMIN_CLEANER_SCHEDULED_TIME" in os.environ:
+            config["cleaner"]["scheduled_time"] = os.environ["AVISO_ADMIN_CLEANER_SCHEDULED_TIME"]
+        if "AVISO_ADMIN_COMPACTOR_URL" in os.environ:
+            config["compactor"]["url"] = os.environ["AVISO_ADMIN_COMPACTOR_URL"]
+        if "AVISO_ADMIN_COMPACTOR_RETENTION_PERIOD" in os.environ:
+            config["compactor"]["retention_period"] = os.environ["AVISO_ADMIN_COMPACTOR_RETENTION_PERIOD"]
+        if "AVISO_ADMIN_COMPACTOR_SCHEDULED_TIME" in os.environ:
+            config["compactor"]["scheduled_time"] = os.environ["AVISO_ADMIN_COMPACTOR_SCHEDULED_TIME"]
         return config
 
     def logging_setup(self, logging_conf_path: str):
