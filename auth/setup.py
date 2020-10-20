@@ -20,13 +20,13 @@ setup(
     zip_safe=False,
     include_package_data=True,
     install_requires=[
-        'PyYAML==5.1.2',
-        'python-json-logger==0.1.11',
-        'requests==2.23.0',
-        'gunicorn==20.0.4',
-        'flask==1.1.2',
-        'Flask-Caching==1.8.0',
-        'six==1.15.0'
+        'PyYAML>=5.1.2',
+        'python-json-logger>=0.1.11',
+        'requests>=2.23.0',
+        'gunicorn>=20.0.4',
+        'flask>=1.1.2',
+        'Flask-Caching>=1.8.0',
+        'six>=1.15.0'
     ],
     entry_points={
         'console_scripts': [

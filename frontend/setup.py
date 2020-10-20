@@ -20,15 +20,15 @@ setup(
     zip_safe=False,
     include_package_data=True,
     install_requires=[
-        'Click==7.0',
-        'etcd3==0.11.1',
-        'PyYAML==5.1.2',
-        'python-json-logger==0.1.11',
-        'requests==2.23.0',
-        'parse==1.12.1',
-        'gunicorn==20.0.4',
-        'flask==1.1.2',
-        'pyinotify==0.9.6'
+        'Click>=7.0',
+        'etcd3>=0.11.1',
+        'PyYAML>=5.1.2',
+        'python-json-logger>=0.1.11',
+        'requests>=2.23.0',
+        'parse>=1.12.1',
+        'gunicorn>=20.0.4',
+        'flask>=1.1.2',
+        'pyinotify>=0.9.6'
     ],
     entry_points={
         'console_scripts': [
