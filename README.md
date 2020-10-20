@@ -102,7 +102,7 @@ the main thread alive.
 Please note that the user configuration has not been defined in this example, the system will automatically read the
 configuration file defined above.
 ```
-from pyaviso.notification_manager import NotificationManager
+from pyaviso import NotificationManager
 
 
 # define function to be called

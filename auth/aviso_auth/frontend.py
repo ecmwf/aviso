@@ -10,20 +10,19 @@ import json
 import logging
 
 import gunicorn.app.base
+from aviso_auth import logger, __version__
+from aviso_auth.authentication import Authenticator
+from aviso_auth.authorisation import Authoriser
+from aviso_auth.backend_adapter import BackendAdapter
+from aviso_auth.config import UserConfig
+from aviso_auth.custom_exceptions import InvalidInputError, NotFoundException, InternalSystemError, \
+    AuthenticationException, ForbiddenRequestException
 from flask import Flask
 from flask import Response
 from flask import request
 from flask_caching import Cache
 from gunicorn import glogging
 from six import iteritems
-
-from aviso_auth import logger, VERSION
-from aviso_auth.authentication import Authenticator
-from aviso_auth.authorisation import Authoriser
-from aviso_auth.config import UserConfig
-from aviso_auth.custom_exceptions import InvalidInputError, NotFoundException, InternalSystemError,\
-    AuthenticationException, ForbiddenRequestException
-from aviso_auth.backend_adapter import BackendAdapter
 
 
 class Frontend:
@@ -100,7 +99,7 @@ class Frontend:
         return handler
 
     def run_server(self):
-        logger.debug(f"Running aviso-auth - version {VERSION} on server {self.config.frontend['server_type']}")
+        logger.debug(f"Running aviso-auth - version { __version__} on server {self.config.frontend['server_type']}")
         logger.debug(f"Configuration loaded: {self.config}")
 
         if self.config.frontend["server_type"] == "flask":

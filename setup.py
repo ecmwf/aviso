@@ -6,18 +6,24 @@
 # granted to it by virtue of its status as an intergovernmental organisation
 # nor does it submit to any jurisdiction.
 
+import io
+import re
+
 from setuptools import setup, find_packages
 
-from pyaviso import VERSION
+__version__ = re.search(
+    r'__version__\s*=\s*[\'"]([^\'"]*)[\'"]',  # It excludes inline comment too
+    io.open('pyaviso/version.py', encoding='utf_8_sig').read()
+).group(1)
 
 setup(
     name='aviso',
     description='Aviso is a notification application allowing users to define the events for which being notified and '
                 'to define the triggers to be executed once a notification is received',
-    version=VERSION,
+    version=__version__,
     url='https://git.ecmwf.int/projects/AVISO/repos/aviso/browse',
     author='ECMWF',
-    packages=find_packages(exclude=("tests","frontend", "admin", "auth",)),
+    packages=find_packages(exclude=("tests", "frontend", "admin", "auth")),
     zip_safe=False,
     include_package_data=True,
     install_requires=[

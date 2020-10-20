@@ -253,9 +253,9 @@ CTRL+C, CTRL+D, CTRL+\
 <a name="service"></a> 
 #### Running as a service
 Aviso can be executed as a system service. In this case, it can run under the same user or under a different user. 
-In the latter the users would refer to the configuration file 
-in the system directory, _/etc/aviso/config.yaml_ and they would add there a system logging path.
-The following steps help to configure Aviso to run as a service:
+In the latter users would refer to the configuration file 
+in the system directory _/etc/aviso/config.yaml_ and they would add a system logging path in there.
+The following steps are required to configure Aviso to run as a service that would automatically restart:
 
 1. Identify the location of the Aviso executable:
     ```
@@ -268,12 +268,17 @@ The following steps help to configure Aviso to run as a service:
     
     [Service]​
     User = <username> (if omitted it will run as root)
-    Group= <groupname>
+    Group= <groupname> (optional)
     WorkingDirectory= <home_directory> (optional)
     ExecStart=<aviso_location> listen​
+    Restart=always
     
     [Install]​
     WantedBy=multi-user.target​
+    ```
+1. Enable the aviso service:
+    ```
+    $ sudo systemctl enable aviso.service​
     ```
 1. Reload systemd:
     ```
@@ -470,7 +475,7 @@ The listening will happen in a background thread defined as daemon therefore it 
 the main thread alive.
 
 ```
-from pyaviso.notification_manager import NotificationManager
+from pyaviso import NotificationManager
 
 # define function to be called
 def do_something(notification):

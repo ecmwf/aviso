@@ -12,7 +12,7 @@ import sys
 
 import click
 
-from . import logger, VERSION
+from . import logger, __version__
 from .cli_aviso import user_config_setup, KNOWN_EXCEPTION
 from .service_config_manager import ServiceConfigManager
 from .user_config import UserConfig
@@ -40,7 +40,7 @@ def configuration_server_setup(f):
 
 
 @click.group(context_settings=CONTEXT_SETTINGS)
-@click.version_option(version=VERSION)
+@click.version_option(version= __version__)
 def cli(): pass
 
 
