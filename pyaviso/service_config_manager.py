@@ -80,7 +80,7 @@ class ServiceConfigManager:
                 kv: Dict[str, bytes] = {"key": key, "value": value}
                 kvs.append(kv)
                 pushed_files.append(f.name)
-                logger.debug(f"Pushing {kv}")
+                logger.debug(f"Pushing file")
 
         # check if we need to delete any file
         ks_delete = []
