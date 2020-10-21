@@ -14,3 +14,6 @@ auth/aviso_auth.egg-info/*
 tests/stress/*
 studies/*
 auth/tests/*
+Dockerfile
+admin/Dockerfile
+auth/Dockerfile
