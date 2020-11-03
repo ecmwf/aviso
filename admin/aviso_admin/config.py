@@ -34,15 +34,17 @@ class Config:
                  logging_path: Optional[str] = None,
                  debug: Optional[bool] = None,
                  compactor: [Dict[str, any]] = None,
-                 cleaner: [Dict[str, any]] = None):
+                 cleaner: [Dict[str, any]] = None,
+                 monitor: [Dict[str, any]] = None):
         """
         :param conf_path: path to the system configuration file. If not provided,
         the default location is HOME_FOLDER/user_config.yaml.
         :param logging_path: path to the logging configuration file. If not provided,
         the default location is the logging section of the HOME_FOLDER/user_config.yaml.
         :param debug: flag to activate the debug log to the console output
-        :param compactor: config for compactor process
-        :param cleaner: config for cleaner process
+        :param compactor: config for the compactor process
+        :param cleaner: config for the cleaner process
+        :param monitor: config for monitor processes
         """
         try:
             # we build the configuration in priority order from the lower to the higher
@@ -58,6 +60,7 @@ class Config:
             self.debug = debug
             self.compactor = compactor
             self.cleaner = cleaner
+            self.monitor = monitor
 
             logger.debug(f"Loading configuration completed")
 
@@ -69,28 +72,45 @@ class Config:
     @staticmethod
     def _create_default_config() -> Dict[str, any]:
         # compactor
-        compactor = {}
-        compactor["url"] = "http://localhost:2379"
-        compactor["req_timeout"] = 60  # seconds
-        compactor["history_path"] = "/ec/admin/history"
-        compactor["retention_period"] = 16  # days
-        compactor["scheduled_time"] = "00:00"
+        compactor = {
+            "url": "http://localhost:2379",
+            "req_timeout": 60,  # seconds
+            "history_path": "/ec/admin/history",
+            "retention_period": 16,  # days
+            "scheduled_time": "00:00",
+        }
 
         # cleaner
-        cleaner = {}
-        cleaner["url"] = "http://localhost:2379"
-        cleaner["req_timeout"] = 60  # seconds
-        cleaner["dest_path"] = "/ec/admin/"
-        cleaner["diss_path"] = "/ec/diss/"
-        cleaner["mars_path"] = "/ec/mars/"
-        cleaner["retention_period"] = 15  # days
-        cleaner["scheduled_time"] = "00:00"
+        cleaner = {
+            "url": "http://localhost:2379",
+            "req_timeout": 60,  # seconds
+            "dest_path": "/ec/admin/",
+            "diss_path": "/ec/diss/",
+            "mars_path": "/ec/mars/",
+            "retention_period": 15,  # days
+            "scheduled_time": "00:00"
+        }
+
+        # monitors
+        etcd = {
+            "member_urls": ["http://localhost:2379"],
+            "metrics": ["etcd_store_size", "etcd_cluster_status", "etcd_diss_keys", "etcd_mars_keys"]
+        }
+        monitor = {
+            "server_url": "https://localhost",
+            "service_host": "aviso",
+            "req_timeout": 60,  # seconds
+            "frequency": 5,  # in minutes
+            "etcd": etcd
+        }
 
         # main config
-        config = {}
-        config["compactor"] = compactor
-        config["cleaner"] = cleaner
-        config["debug"] = False
+        config = {
+            "compactor": compactor,
+            "cleaner": cleaner,
+            "monitor": monitor,
+            "debug": False
+        }
         return config
 
     def _parse_config_files(self, user_conf_path: str) -> Dict[str, any]:
@@ -229,6 +249,30 @@ class Config:
         self._cleaner = cl
 
     @property
+    def monitor(self) -> Dict[str, any]:
+        return self._monitor
+
+    @monitor.setter
+    def monitor(self, monitor: Dict[str, any]):
+        m = self._config.get("monitor")
+        if monitor is not None and m is not None:
+            Config.deep_update(m, monitor)
+        elif monitor is not None:
+            m = monitor
+        # verify is valid
+        assert m is not None, "monitor has not been configured"
+        assert m.get("frequency") is not None, "frequency has not been configured"
+        assert m.get("etcd") is not None, "etcd monitor has not been configured"
+        assert m.get("server_url") is not None, "server_url has not been configured"
+        assert m.get("service_host") is not None, "service_host has not been configured"
+        assert m.get("username") is not None, "username has not been configured"
+        assert m.get("password") is not None, "password has not been configured"
+        assert m.get("req_timeout") is not None, "req_timeout has not been configured"
+        assert m["etcd"].get("member_urls") is not None, "etcd member_urls have not been configured"
+        assert m["etcd"].get("metrics") is not None, "etcd metrics have not been configured"
+        self._monitor = m
+
+    @property
     def debug(self) -> bool:
         return self._debug
 
@@ -253,6 +297,7 @@ class Config:
         config_string = (
                 f"compactor: {self.compactor}" +
                 f", cleaner: {self.cleaner}" +
+                f", monitor: {self.monitor}" +
                 f", debug: {self.debug}"
         )
         return config_string

@@ -3,6 +3,10 @@ compactor:
   retention_period: 2
 cleaner:
   url: http://localhost:2379
+monitor:
+  etcd:
+    member_urls:
+      - "http://k8s-dataservices-master.ecmwf.int:31000"
 logging:
   version: 1
   disable_existing_loggers: False
