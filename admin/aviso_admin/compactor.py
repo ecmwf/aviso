@@ -25,6 +25,7 @@ class Compactor:
         self.req_timeout = config["req_timeout"]
         self.history_path = config["history_path"]
         self.retention_period = config["retention_period"]
+        self.enabled = config["enabled"]
 
     def get_current_server_rev(self):
         """
@@ -147,7 +148,7 @@ class Compactor:
         # read from the history all the revisions older than date
         history = self.get_history()
         old_revs = list(filter(
-            lambda he: datetime.datetime.strptime(he.get("timestamp"), DATE_FORMAT) < ret_per_start, history))
+            lambda he: datetime.datetime.strptime(he.get("timestamp"), DATE_FORMAT) <= ret_per_start, history))
 
         # remove all the old revisions and save the history
         new_hist = [h for h in history if h not in old_revs]
@@ -212,7 +213,7 @@ class Compactor:
         # check the current server revision
         curr_rev = self.get_current_server_rev()
 
-        now = datetime.datetime.now()
+        now = datetime.datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
         # save the rev to file with now as date
         self.save_rev(curr_rev, now)
 

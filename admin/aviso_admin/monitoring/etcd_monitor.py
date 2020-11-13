@@ -8,8 +8,8 @@
 
 import importlib
 from enum import Enum
-
-from aviso_admin import logger
+from .monitor import Monitor
+from .. import logger
 
 
 class EtcdMetricType(Enum):
@@ -23,32 +23,38 @@ class EtcdMetricType(Enum):
     etcd_mars_keys = ("etcd_collectors", "MarsKeysCollector")
 
     def get_class(self):
-        module = importlib.import_module("aviso_admin.monitoring.etcd." + self.value[0])
+        module = importlib.import_module("aviso_admin.monitoring.collectors." + self.value[0])
         return getattr(module, self.value[1])
 
 
-class EtcdMonitor:
+class EtcdMonitor(Monitor):
 
     def __init__(self, config):
-        self.member_urls = config["member_urls"]
-        self.metrics_name = config["metrics"]
+        etcd_config = config["etcd_monitor"]
+        self.member_urls = etcd_config["member_urls"]
+        self.metrics_name = etcd_config["metrics"]
+        self.frequency = etcd_config["frequency"]
+        self.enabled = etcd_config["enabled"]
+        self.req_timeout = etcd_config["req_timeout"]
+        super().__init__(config)
 
     def retrieve_metrics(self):
         """
-        :return: True if successful
+        This method for each metric to collect instantiates the relative collector and run it
+        :return: the metrics collected
         """
-        logger.debug("Running etcd monitor...")
+        logger.debug("Collecting metrics...")
 
         # array of metric to return
         r_metrics = []
         for mn in self.metrics_name:
             # create the relative metric collector
             m_type = EtcdMetricType[mn.lower()]
-            collector = m_type.get_class()(m_type, self.member_urls)
+            collector = m_type.get_class()(m_type, self.req_timeout, member_urls=self.member_urls)
 
             # retrieve metric
             r_metrics.append(collector.metric())
 
-        logger.debug("etcd monitor completed")
+        logger.debug("Metrics collection completed")
 
         return r_metrics

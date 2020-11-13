@@ -26,6 +26,7 @@ class Cleaner:
         self.diss_path = config["diss_path"]
         self.mars_path = config["mars_path"]
         self.retention_period = config["retention_period"]
+        self.enabled = config["enabled"]
 
     def get_destinations(self, date):
         """
@@ -149,7 +150,7 @@ class Cleaner:
         logger.info("Running cleaner...")
 
         # determine the retention period
-        now = datetime.datetime.now()
+        now = datetime.datetime.utcnow()
         retention_start_date = now - datetime.timedelta(days=self.retention_period)
 
         # Dissemination keys

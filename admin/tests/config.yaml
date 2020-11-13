@@ -4,9 +4,12 @@ compactor:
 cleaner:
   url: http://localhost:2379
 monitor:
-  etcd:
+  etcd_monitor:
     member_urls:
       - "http://k8s-dataservices-master.ecmwf.int:31000"
+  aviso_rest_monitor:
+    url: "http://k8s-dataservices-master.ecmwf.int:30003"
+    req_timeout: 5,  # seconds
 logging:
   version: 1
   disable_existing_loggers: False
