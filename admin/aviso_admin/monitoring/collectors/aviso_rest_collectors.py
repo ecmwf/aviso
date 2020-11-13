@@ -66,8 +66,8 @@ class ResponseTimeCollector(AvisoRestCollector):
         body = {
             "type": "aviso", 
             "data": {
-                "event": "dissemination", 
-                "request": { "class": "od", "date": "20000101", "domain": "g", "expver": "1", "step": "0", "stream": "enfo", "time": "12", "destination": "EC1", "location": "ss" }
+                "event": "mars", 
+                "request": { "class": "od", "date": "20000101", "domain": "g", "expver": "1", "step": "0", "stream": "enfo", "time": "0" }
                 }, 
             "datacontenttype": "application/json", 
             "id": "0c02fdc5-148c-43b5-b2fa-cb1f590369ff", 

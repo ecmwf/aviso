@@ -105,7 +105,7 @@ class Config:
             "url": "http://localhost:2379",
             "username": "TBD",
             "password":"TBD",
-            "metrics": ["auth_test_notification"],
+            "metrics": ["auth_resp_time"],
             "enabled": True,
             "frequency": 2,  # in minutes
             "req_timeout": 60,  # seconds
