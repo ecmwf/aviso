@@ -63,7 +63,7 @@ def test_bad_dates_listen(conf):
     result = runner.invoke(listen, ["tests/unit/fixtures/disseminationListener.yaml",
                                     "--from", "2019-20-01T00:00:00.0Z"])
     assert result.exit_code == 2
-    assert result.output.find("Invalid value for \"--from\": invalid datetime format: 2019-20-01T00:00:00.0Z") != -1
+    assert result.output.find(" invalid datetime format: 2019-20-01T00:00:00.0Z") != -1
 
     result = runner.invoke(listen, ["tests/unit/fixtures/disseminationListener.yaml",
                                     "--from", "2030-02-01T00:00:00.0Z"])
@@ -166,7 +166,7 @@ def test_key_missing_time(conf):
     logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
     runner = CliRunner()
     result = runner.invoke(key, [
-        "event=dissemination,class=od,date=20191112,destination=FOO,domain=g,expver=1,step=1,stream=enfo"])
+        "event=dissemination,target=E1,class=od,date=20191112,destination=FOO,domain=g,expver=1,step=1,stream=enfo"])
 
     assert result.exit_code == -1
     assert "Wrong parameters: time required" in result.output
@@ -176,7 +176,7 @@ def test_key_missing_event(conf):
     logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
     runner = CliRunner()
     result = runner.invoke(key, [
-        "class=od,date=20191112,destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=18"])
+        "class=od,target=E1,date=20191112,destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=18"])
 
     assert result.exit_code == -1
     assert "Invalid notification, 'event' could not be located" in result.output
@@ -186,7 +186,7 @@ def test_key_bad_event(conf):
     logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
     runner = CliRunner()
     result = runner.invoke(key, [
-        "event=disseminati,class=od,date=20191112,destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=18"])
+        "event=disseminati,target=E1,class=od,date=20191112,destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=18"])
 
     assert result.exit_code == -1
     assert "Invalid notification, disseminati could not be located in the schema" in result.output
@@ -196,7 +196,7 @@ def test_key_bad_format(conf):
     logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
     runner = CliRunner()
     result = runner.invoke(key, [
-        "event:dissemination,class:od,date:20191112,destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=18"])
+        "event:dissemination,target=E1,class:od,date:20191112,destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=18"])
 
     assert result.exit_code == -1
     assert "Wrong structure for the notification string, it should be <key_name>=<key_value>,..." in result.output
@@ -206,7 +206,7 @@ def test_key_bad_format2(conf):
     logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
     runner = CliRunner()
     result = runner.invoke(key, [
-        "event=dissemination-class=od-date=20191112-destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=18"])
+        "event=dissemination-class=od-date=20191112-destination=FOO,target=E1,domain=g,expver=1,step=1,stream=enfo,time=18"])
 
     assert result.exit_code == -1
     assert "Wrong structure for the notification string, it should be <key_name>=<key_value>,..." in result.output
@@ -218,7 +218,7 @@ def test_key_missing_params(conf):
     result = runner.invoke(key, [])
 
     assert result.exit_code == 2
-    assert "Missing argument \"PARAMETERS" in result.output
+    assert "Missing argument" in result.output
 
 
 def test_key_help():
@@ -235,7 +235,7 @@ def test_value_bad_format(conf):
     logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
     runner = CliRunner()
     result = runner.invoke(value, [
-        "event:dissemination,class:od,date:20191112,destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=18"])
+        "event:dissemination,class:od,date:20191112,destination=FOO,target=E1,domain=g,expver=1,step=1,stream=enfo,time=18"])
 
     assert result.exit_code == -1
     assert "Wrong structure for the notification string, it should be <key_name>=<key_value>,..." in result.output
@@ -247,7 +247,7 @@ def test_value_missing_params(conf):
     result = runner.invoke(value, [])
 
     assert result.exit_code == 2
-    assert "Missing argument \"PARAMETERS" in result.output
+    assert "Missing argument " in result.output
 
 
 def test_value_help():
@@ -276,14 +276,14 @@ def test_notify_missing_params(conf):
     result = runner.invoke(notify, [])
 
     assert result.exit_code == 2
-    assert "Missing argument \"PARAMETERS" in result.output
+    assert "Missing argument" in result.output
 
 
 def test_notify_missing_value(conf):
     logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
     runner = CliRunner()
     result = runner.invoke(notify, [
-        "event=dissemination,class=od,date=20191112,destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=18"])
+        "event=dissemination,class=od,date=20191112,target=E1,destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=18"])
 
     assert result.exit_code == -1
     assert "Invalid notification, 'location' could not be located" in result.output
@@ -293,7 +293,7 @@ def test_notify_bad_server(conf):
     logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
     runner = CliRunner()
     result = runner.invoke(notify, [
-        "event=dissemination,class=od,date=20191112,destination=Z,domain=g,expver=1,step=1,stream=enfo,time=0,location=1",
+        "event=dissemination,target=E1,class=od,date=20191112,destination=Z,domain=g,expver=1,step=1,stream=enfo,time=0,location=1",
         "-Hhost"])
 
     assert result.exit_code == -1
