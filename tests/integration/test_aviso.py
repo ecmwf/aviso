@@ -111,7 +111,7 @@ def send_notification_as_cli(config, step=1, listener="dissemination", stream="e
     # noinspection PyPep8
     params = ""
     if listener == "dissemination":
-        params = f"event={listener},class=od,date=20190810,destination=FOO,domain=g,expver=1,step={str(step)},stream={stream},time=0,location=value0"
+        params = f"event={listener},target=E1,class=od,date=20190810,destination=FOO,domain=g,expver=1,step={str(step)},stream={stream},time=0,location=value0"
     elif listener == "mars":
         params = f"event={listener},class=od,date=20190810,domain=g,expver=1,step={str(step)},stream={stream},time=0"
     ps = _parse_inline_params(params)
@@ -120,6 +120,7 @@ def send_notification_as_cli(config, step=1, listener="dissemination", stream="e
 
 def send_notification_as_dict(config):
     notification = {"event": "dissemination",
+                    "target": "E1",
                     "class": "od",
                     "date": "20190810",
                     "destination": "ZAG",
@@ -643,13 +644,13 @@ def test_key(config):
     logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
     runner = CliRunner()
     result = runner.invoke(key, [
-        "event=dissemination,class=od,date=20191112,destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=0"])
+        "event=dissemination,target=E1,class=od,date=20191112,destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=0"])
 
     assert result.exit_code == 0
     if config.notification_engine.type == EngineType.TEST:
-        assert "/tmp/aviso/diss/FOO/od/0001/g/20191112/00/enfo/1" in result.output
+        assert "/tmp/aviso/diss/FOO/E1/od/0001/g/20191112/00/enfo/1" in result.output
     else:
-        assert "/ec/diss/FOO/date=20191112,class=od,expver=0001,domain=g,time=00,stream=enfo,step=1" in result.output
+        assert "/ec/diss/FOO/date=20191112,target=E1,class=od,expver=0001,domain=g,time=00,stream=enfo,step=1" in result.output
 
 
 @pytest.mark.parametrize("config", configs)
@@ -658,14 +659,14 @@ def test_notify_and_value(config):
     runner = CliRunner()
     # noinspection PyPep8
     result = runner.invoke(notify, [
-        "event=dissemination,class=od,date=20191112,destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=0,location=xxx"])
+        "event=dissemination,target=E1,class=od,date=20191112,destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=0,location=xxx"])
 
     assert result.exit_code == 0
     assert "Done" in result.output
 
     # now test the value command
     result = runner.invoke(value, [
-        "event=dissemination,class=od,date=20191112,destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=0"])
+        "event=dissemination,target=E1,class=od,date=20191112,destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=0"])
     assert result.exit_code == 0
     assert "xxx" in result.output
 
@@ -678,10 +679,10 @@ def test_notify_and_value(config):
     assert len(kvs) == 1
     status = kvs[0]["value"].decode()
     if eng.engine_type == EngineType.TEST:
-        assert "notification to key /tmp/aviso/diss/FOO/od/0001/g/20191112/00/enfo/1" in status
+        assert "notification to key /tmp/aviso/diss/FOO/E1/od/0001/g/20191112/00/enfo/1" in status
     else:
         assert "notification to key " \
-               "/ec/diss/FOO/date=20191112,class=od,expver=0001,domain=g,time=00,stream=enfo,step=1" in status
+               "/ec/diss/FOO/date=20191112,target=E1,class=od,expver=0001,domain=g,time=00,stream=enfo,step=1" in status
 
     # now test the admin registry has been updated
     if eng.engine_type != EngineType.TEST:
@@ -695,7 +696,7 @@ def test_notify_test(config):
     runner = CliRunner()
     # noinspection PyPep8
     result = runner.invoke(notify, [
-        "event=dissemination,class=od,date=20191112,destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=0,location=xxx",
+        "event=dissemination,target=E1,class=od,date=20191112,destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=0,location=xxx",
         "--test"])
 
     assert result.exit_code == 0
@@ -709,16 +710,16 @@ def test_notify_no_fail(config):
     # simulate an error -> removing the "value" parameter
     # noinspection PyPep8
     out = subprocess.Popen(
-        "aviso notify event=dissemination,class=od,date=20191112,destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=0",
+        "aviso notify event=dissemination,target=E1,class=od,date=20191112,destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=0",
         shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE
     )
     stdout, stderr = out.communicate()
-    assert out.returncode == 255
+    assert out.returncode != 0
 
     # run the same with the no-fail option -> it should return the error code 0
     # noinspection PyPep8
     out = subprocess.Popen(
-        "aviso notify event=dissemination,class=od,date=20191112,destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=0 --no-fail",
+        "aviso notify event=dissemination,target=E1,class=od,date=20191112,destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=0 --no-fail",
         shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE
     )
     stdout, stderr = out.communicate()
@@ -738,7 +739,7 @@ def test_notify_timeout(config):
     # run a notify command pointing on port 8099 -> the request will never return
     # noinspection PyPep8
     out2 = subprocess.Popen(
-        f"aviso notify event=dissemination,class=od,date=20191112,destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=0,location=xxx --port={port}",
+        f"aviso notify event=dissemination,target=E1,class=od,date=20191112,destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=0,location=xxx --port={port}",
         shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE
     )
     stdout, stderr = out2.communicate()
@@ -759,14 +760,14 @@ def test_notify_ttl(config):
     runner = CliRunner()
     # noinspection PyPep8
     result = runner.invoke(notify, [
-        "event=dissemination,class=od,date=20191112,destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=0,location=xxx,ttl=1"])
+        "event=dissemination,class=od,target=E1,date=20191112,destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=0,location=xxx,ttl=1"])
 
     assert result.exit_code == 0
     assert "Done" in result.output
 
     # now retrieve it
     result = runner.invoke(value, [
-        "event=dissemination,class=od,date=20191112,destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=0"])
+        "event=dissemination,class=od,target=E1,date=20191112,destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=0"])
     assert result.exit_code == 0
     assert "xxx" in result.output
 
@@ -775,7 +776,7 @@ def test_notify_ttl(config):
 
     # now test the value command
     result = runner.invoke(value, [
-        "event=dissemination,class=od,date=20191112,destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=0"])
+        "event=dissemination,class=od,target=E1,date=20191112,destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=0"])
     assert result.exit_code == 0
     assert "None" in result.output
 

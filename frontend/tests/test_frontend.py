@@ -39,7 +39,7 @@ def prepost_module():
 def test_homepage():
     time.sleep(1)
     logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
-    assert requests.get(frontend_url_home)
+    assert requests.get(frontend_url_home).status_code == 500
 
 
 def test_valid_dissemination_notification():
@@ -49,6 +49,7 @@ def test_valid_dissemination_notification():
         "data": {  # this is aviso specific
             "event": "dissemination",
             "request": {
+                "target": "E1",
                 "class": "od",
                 "date": "20190810",
                 "destination": "MACI",
@@ -131,6 +132,7 @@ def test_bad_request_no_id():
                 "step": "1",
                 "stream": "enfo",
                 "time": "0",
+                "target": "E1"
             },
             "location": "s3://data.ecmwf.int/diss/foo/bar/20190810/xyz",
         },
@@ -161,6 +163,7 @@ def test_bad_request_no_source():
                 "step": "1",
                 "stream": "enfo",
                 "time": "0",
+                "target": "E1"
             },
             "location": "s3://data.ecmwf.int/diss/foo/bar/20190810/xyz",
         },
@@ -191,6 +194,7 @@ def test_bad_request_no_spec():
                 "step": "1",
                 "stream": "enfo",
                 "time": "0",
+                "target": "E1"
             },
             "location": "s3://data.ecmwf.int/diss/foo/bar/20190810/xyz",
         },
@@ -237,6 +241,7 @@ def test_bad_request_no_data():
                 "step": "1",
                 "stream": "enfo",
                 "time": "0",
+                "target": "E1"
             },
             "location": "s3://data.ecmwf.int/diss/foo/bar/20190810/xyz",
         },
@@ -267,6 +272,7 @@ def test_bad_request_no_event():
                 "step": "1",
                 "stream": "enfo",
                 "time": "0",
+                "target": "E1"
             },
             "location": "s3://data.ecmwf.int/diss/foo/bar/20190810/xyz",
         },
@@ -298,6 +304,7 @@ def test_bad_request_no_location():
                 "step": "1",
                 "stream": "enfo",
                 "time": "0",
+                "target": "E1"
             },
         },
         "datacontenttype": "application/json",
@@ -353,6 +360,7 @@ def test_notify_ttl():
         "data": {  # this is aviso specific
             "event": "dissemination",
             "request": {
+                "target": "E1",
                 "class": "od",
                 "date": "20191112",
                 "destination": "FOO",
@@ -379,7 +387,7 @@ def test_notify_ttl():
     assert message.get("message") == "Notification successfully submitted"
 
     # now retrieve it
-    ps = _parse_inline_params("event=dissemination,class=od,date=20191112,destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=0")
+    ps = _parse_inline_params("event=dissemination,target=E1,class=od,date=20191112,destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=0")
     result = NotificationManager().value(ps, config=config)
     assert "xxx" in result
 
@@ -387,7 +395,7 @@ def test_notify_ttl():
     time.sleep(3)
 
     # now test the value command
-    ps = _parse_inline_params("event=dissemination,class=od,date=20191112,destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=0")
+    ps = _parse_inline_params("event=dissemination,target=E1,class=od,date=20191112,destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=0")
     result = NotificationManager().value(ps, config=config)
     assert result is None
 
@@ -440,6 +448,7 @@ def test_send_notification():
                 "step": "1",
                 "stream": "enfo",
                 "time": "0",
+                "target": "E1"
             },
             "location": "s3://data.ecmwf.int/diss/foo/bar/20190810/xyz",
         },
