@@ -443,7 +443,8 @@ an example of the dictionary:
         "expver": "0001",
         "step": "001",
         "stream": "enfo",
-        "time": "18"
+        "time": "18",
+        "target": "E1"
     },
     "location": "https://xxx.ecmwf.int/xxx/xxx.xx"
 }    
@@ -524,11 +525,11 @@ Options:
 ```
 Here an example of this command:
 ```
-$ aviso key event=dissemination,class=od,date=20190810,destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=0
+$ aviso key event=dissemination,target=E1,class=od,date=20190810,destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=0
 ```
 Note the various parameters required by the notification. The output from this command will be something like:
 ```
-/ec/diss/FOO/class=od,expver=0001,domain=g,date=20190810,time=00,stream=enfo,step=001
+/ec/diss/FOO/target=E1,class=od,expver=0001,domain=g,date=20190810,time=00,stream=enfo,step=001
 ```
 Note how the format and the order of the parameters have been adjusted to complying with the key schema.
 
@@ -559,7 +560,7 @@ Options:
 ```
 Here an example of this command:
 ```
-$ aviso value event=dissemination,class=od,date=20190810,destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=0
+$ aviso value event=dissemination,target=E1,class=od,date=20190810,destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=0
 ```
 Note the list of parameters required, it is the same list required by the _key_ command.
 
@@ -587,7 +588,7 @@ Options:
 ```
 Here an example of this command:
 ```
-$ aviso notify event=dissemination,class=od,date=20190810,destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=0,location=xxxxxxxx
+$ aviso notify event=dissemination,target=E1,class=od,date=20190810,destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=0,location=xxxxxxxx
 ```
 Note the list of parameters required, it is the same list required by the _key_ command with the addition of the `location` 
 pair. This is needed only for the `dissemination` event. 
@@ -608,7 +609,7 @@ from pyaviso import NotificationManager
 aviso = NotificationManager()
 
 # define the parameters of the notification
-params = "event=dissemination,class=od,date=20190810,destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=0,location=xxx"
+params = "event=dissemination,target=E1,class=od,date=20190810,destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=0,location=xxx"
 
 # send the notification
 aviso.notify(params)

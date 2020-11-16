@@ -82,7 +82,7 @@ the aviso application, that is able to simulate the notification server behaviou
 1. Send a test dissemination notification. From another terminal run the notify command. Here an example, matching the 
 example configuration presented above:
     ```
-    $ aviso notify event=dissemination,class=od,date=20190810,destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=0,location=xxxxxxxx --test
+    $ aviso notify event=dissemination,target=E1,class=od,date=20190810,destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=0,location=xxxxxxxx --test
     ```
     Note the list of parameters required, the order is not important, but the command requires all of them.
     Note, to submit a test mars notification the fields destination and location have to be removed
