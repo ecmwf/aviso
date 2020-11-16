@@ -12,4 +12,5 @@ Example of python script triggered by a Command trigger
 import os
 print('Test demonstrating a python script triggered by a Command trigger')
 # noinspection PyUnresolvedReferences
-print(f"Notification received at {os.environ['TIME']} for step {os.environ['STEP']}")
+print("Notification received") 
+print(os.environ['TIME'])
