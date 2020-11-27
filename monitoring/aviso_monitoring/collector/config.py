@@ -18,7 +18,7 @@ from .. import logger
 
 class Config:
     """
-    This class is in charge of holding the user configuration, which can be defined by arguments,
+    This class is in charge of holding the configuration for the collector, which can be defined by arguments,
     environment variables or defaults.
     """
 

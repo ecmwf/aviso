@@ -12,22 +12,23 @@ import requests
 import urllib3
 import math
 from .. import logger
+from ..config import Config
 
 class Reporter(ABC):
 
-    def __init__(self, config, tlm_receiver):
+    def __init__(self, config: Config, tlm_receiver):
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-        self.ms_url = config["monitor_server"]["url"]
-        self.ms_service_host = config["monitor_server"]["service_host"]
-        self.ms_req_timeout = config["monitor_server"]["req_timeout"]
-        self.ms_username = config["monitor_server"]["username"]
-        self.ms_password = config["monitor_server"]["password"]
+        self.ms_url = config.monitor_server["url"]
+        self.ms_service_host = config.monitor_server["service_host"]
+        self.ms_req_timeout = config.monitor_server["req_timeout"]
+        self.ms_username = config.monitor_server["username"]
+        self.ms_password = config.monitor_server["password"]
         self.tlm_receiver = tlm_receiver
 
     def ms_authenticate(self):
         '''
         This method authenticate to the monitoring server
-        :return: token if succefully authenticated, None otherwise
+        :return: token if successfully authenticated, None otherwise
         '''
         headers = {"Content-type": "application/json", "Accept": "application/json"}
         data = {"username": self.ms_username, "password": self.ms_password}
@@ -113,17 +114,17 @@ class Reporter(ABC):
         r_tlms = map(lambda t: t.get("telemetry"), tlms)
         # setup the aggregated tlm to return 
         agg_tlm = {
-            self.TLM_TYPE+"_counter": 0,
-            self.TLM_TYPE+"_avg": 0,
-            self.TLM_TYPE+"_max": -math.inf,
-            self.TLM_TYPE+"_min": math.inf
+            self.tlm_type+"_counter": 0,
+            self.tlm_type+"_avg": 0,
+            self.tlm_type+"_max": -math.inf,
+            self.tlm_type+"_min": math.inf
             }
         sum = 0
         for tlm in r_tlms:
-            agg_tlm[self.TLM_TYPE+"_counter"] += tlm[self.TLM_TYPE+"_counter"]
-            agg_tlm[self.TLM_TYPE+"_max"] = tlm[self.TLM_TYPE+"_max"] if tlm[self.TLM_TYPE+"_max"] > agg_tlm[self.TLM_TYPE+"_max"] else agg_tlm[self.TLM_TYPE+"_max"]
-            agg_tlm[self.TLM_TYPE+"_min"] = tlm[self.TLM_TYPE+"_min"] if tlm[self.TLM_TYPE+"_min"] < agg_tlm[self.TLM_TYPE+"_min"] else agg_tlm[self.TLM_TYPE+"_min"]
-            sum = tlm[self.TLM_TYPE+"_counter"] * tlm[self.TLM_TYPE+"_avg"]
-        agg_tlm[self.TLM_TYPE+"_avg"] = sum / agg_tlm[self.TLM_TYPE+"_counter"]
+            agg_tlm[self.tlm_type+"_counter"] += tlm[self.tlm_type+"_counter"]
+            agg_tlm[self.tlm_type+"_max"] = tlm[self.tlm_type+"_max"] if tlm[self.tlm_type+"_max"] > agg_tlm[self.tlm_type+"_max"] else agg_tlm[self.tlm_type+"_max"]
+            agg_tlm[self.tlm_type+"_min"] = tlm[self.tlm_type+"_min"] if tlm[self.tlm_type+"_min"] < agg_tlm[self.tlm_type+"_min"] else agg_tlm[self.tlm_type+"_min"]
+            sum = tlm[self.tlm_type+"_counter"] * tlm[self.tlm_type+"_avg"]
+        agg_tlm[self.tlm_type+"_avg"] = sum / agg_tlm[self.tlm_type+"_counter"]
         
         return agg_tlm

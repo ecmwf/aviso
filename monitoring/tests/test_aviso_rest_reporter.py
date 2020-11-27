@@ -8,9 +8,10 @@
 
 import os
 import datetime
-from monitoring.aviso_monitoring import logger
-from monitoring.aviso_monitoring.reporter.aviso_rest_reporter import AvisoRestReporter
-from monitoring.aviso_monitoring.receiver import Receiver
+from aviso_monitoring import logger
+from aviso_monitoring.reporter.aviso_rest_reporter import AvisoRestReporter
+from aviso_monitoring.receiver import Receiver
+from aviso_monitoring.config import Config
 
 
 tlm_type = "test2"  # to be defined
@@ -24,8 +25,8 @@ config = {
     # this are the setting for sending the telemetry to a monitoring server like Opsview
     "monitor_server": {
         "url": "https://monitoring-dev.ecmwf.int/rest",
-        "username": "api-aviso",
-        "password": "aviso2020",
+        "username": "TBD",
+        "password": "TBD",
         "service_host": "aviso",
         "req_timeout": 60,  # seconds
     }
@@ -65,13 +66,14 @@ def receiver():
 # you need to set the connection to opsview to run this test and select a tml_type associated to a passive check
 def test_run_reporter():
     logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
-    reporter = AvisoRestReporter(config, receiver())
+    reporter = AvisoRestReporter(Config(**config), receiver())
     reporter.run()
 
 def test_process_tlms():
     logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
-    reporter = AvisoRestReporter(config, receiver())
+    reporter = AvisoRestReporter(Config(**config), receiver())
     metrics = reporter.process_tlms()
     assert len(metrics) == 1
-    assert metrics[0].get("m_value") == 4
+    assert len(metrics[0].get("metrics")) == 3
+    assert len(list(filter(lambda m: m["m_value"] == 4, metrics[0].get("metrics")))) == 1
 

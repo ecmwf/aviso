@@ -18,12 +18,14 @@ from . import logger
 
 class Config:
     """
-    This class is in charge of holding the user configuration, which can be defined by arguments,
+    This class is in charge of holding the configuration for the monitoring system, including UDP server and reporters, which can be defined by arguments,
     environment variables or defaults.
     """
 
     def __init__(self,
-                 collector=None):
+                 upd_server=None,
+                 monitor_server=None,
+                 aviso_rest_reporter=None):
 
         try:
             # we build the configuration in priority order from the lower to the higher
@@ -32,7 +34,9 @@ class Config:
             # add environment variables
             Config.deep_update(self._config, self._read_env_variables())
             # add constructor parameters
-            self.collector = collector
+            self.upd_server = upd_server
+            self.monitor_server = monitor_server
+            self.aviso_rest_reporter = aviso_rest_reporter
 
             logger.debug(f"Loading configuration completed")
 
@@ -44,20 +48,33 @@ class Config:
     @staticmethod
     def _create_default_config() -> Dict:
    
-        collector = {
-            "transmitter": {
-                "monitoring_server_host": "127.0.0.1",
-                "monitoring_server_port": 1111,
-                "component_name": "test_component",
-                "frequency": 2,
-            },
+        upd_server = {
+            "host": "127.0.0.1",
+            "port": 1111,
+            "buffer_size": 64 * 1024
+        }
+        # this are the setting for sending the telemetry to a monitoring server like Opsview
+        monitor_server = {
+            "url": "https://localhost",
+            "username": "TBD",
+            "password":"TBD",
+            "service_host": "aviso",
+            "req_timeout": 60,  # seconds
+
+        }
+        aviso_rest_reporter = {
+            "tlm_type": "rest_resp_time",
             "enabled": True,
-            "telemetry_type": "test_time",
+            "frequency": 2,  # in minutes
+            "warning_t": 5,  # s
+            "critical_t": 10, # s
         }
 
         # main config
         config = {}
-        config["collector"] = collector
+        config["upd_server"] = upd_server
+        config["monitor_server"] = monitor_server
+        config["aviso_rest_reporter"] = aviso_rest_reporter
         return config
 
     def _read_env_variables(self) -> Dict:
@@ -67,24 +84,68 @@ class Config:
 
 
     @property
-    def collector(self) -> Dict:
-        return self._collector
+    def upd_server(self):
+        return self._upd_server
 
-    @collector.setter
-    def collector(self, collector: Dict):
-        c = self._config.get("collector")
-        if collector is not None and c is not None:
-            Config.deep_update(c, collector)
-        elif collector is not None:
-            m = collector
+    @upd_server.setter
+    def upd_server(self, upd_server):
+        u = self._config.get("upd_server")
+        if upd_server is not None and u is not None:
+            Config.deep_update(u, upd_server)
+        elif upd_server is not None:
+            u = upd_server
         # verify is valid
-        assert m is not None, "collector has not been configured"
-        self._monitoring = m
+        assert u is not None, "upd_server has not been configured"
+        assert u.get("host") is not None, "upd_server host has not been configured"
+        assert u.get("port") is not None, "upd_server port has not been configured"
+        assert u.get("buffer_size") is not None, "upd_server buffer_size has not been configured"
+        self._upd_server = u
+
+    @property
+    def monitor_server(self):
+        return self._monitor_server
+
+    @monitor_server.setter
+    def monitor_server(self, monitor_server):
+        m = self._config.get("monitor_server")
+        if monitor_server is not None and m is not None:
+            Config.deep_update(m, monitor_server)
+        elif monitor_server is not None:
+            m = monitor_server
+        # verify is valid
+        assert m is not None, "monitor_server has not been configured"
+        assert m.get("url") is not None, "monitor_server url has not been configured"
+        assert m.get("username") is not None, "monitor_server username has not been configured"
+        assert m.get("password") is not None, "monitor_server password has not been configured"
+        assert m.get("service_host") is not None, "monitor_server service_host has not been configured"
+        assert m.get("req_timeout") is not None, "monitor_server req_timeout has not been configured"
+        self._monitor_server = m
+
+    @property
+    def aviso_rest_reporter(self):
+        return self._aviso_rest_reporter
+
+    @aviso_rest_reporter.setter
+    def aviso_rest_reporter(self, aviso_rest_reporter):
+        ar = self._config.get("aviso_rest_reporter")
+        if aviso_rest_reporter is not None and ar is not None:
+            Config.deep_update(ar, aviso_rest_reporter)
+        elif aviso_rest_reporter is not None:
+            ar = aviso_rest_reporter
+        # verify is valid
+        assert ar is not None, "aviso_rest_reporter has not been configured"
+        assert ar.get("tlm_type") is not None, "aviso_rest_reporter tlm_type has not been configured"
+        assert ar.get("enabled") is not None, "aviso_rest_reporter enabled has not been configured"
+        assert ar.get("frequency") is not None, "aviso_rest_reporter frequency has not been configured"
+        assert ar.get("warning_t") is not None, "aviso_rest_reporter warning_t has not been configured"
+        assert ar.get("critical_t") is not None, "aviso_rest_reporter critical_t has not been configured"
+        self._aviso_rest_reporter = ar
 
     def __str__(self):
         config_string = (
-            f"host: {self.host}" +
-            f", monitoring: {self.monitoring}"
+            f"upd_server: {self.upd_server}" +
+            f", monitor_server: {self.monitor_server}" +
+            f", aviso_rest_reporter: {self.aviso_rest_reporter}"
         )
         return config_string
 

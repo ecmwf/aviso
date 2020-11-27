@@ -16,11 +16,11 @@ from flask import request
 from gunicorn import glogging
 from six import iteritems
 
-from pyaviso import logger, __version__
+from aviso_rest import logger, __version__
 from pyaviso.custom_exceptions import InvalidInputError
 # from flask_swagger_ui import get_swaggerui_blueprint
 from pyaviso.notification_manager import NotificationManager
-from rest.aviso_rest.config import Config
+from aviso_rest.config import Config
 from aviso_monitoring.collector.time_collector import TimeCollector
 
 SWAGGER_URL = '/openapi'

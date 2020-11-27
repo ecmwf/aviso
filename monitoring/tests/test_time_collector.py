@@ -8,9 +8,10 @@
 
 from time import sleep
 import os
-from monitoring.aviso_monitoring.udp_server import UdpServer
-from monitoring.aviso_monitoring.collector.time_collector import TimeCollector
-from monitoring.aviso_monitoring import logger
+from aviso_monitoring.udp_server import UdpServer
+from aviso_monitoring.collector.time_collector import TimeCollector
+from aviso_monitoring.collector.config import Config
+from aviso_monitoring import logger
 
 def take_some_time(seconds=0.1, flag=False, flag2=True):
     sleep(seconds)
@@ -61,7 +62,7 @@ def test_measure_time():
     udp_server.start()
 
     # create the collector
-    timer = TimeCollector(collector_config)
+    timer = TimeCollector(Config(**collector_config))
 
     # call the function
     for i in range(10):
@@ -76,7 +77,7 @@ def test_calling_timer():
     logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
 
      # create the collector
-    timer = TimeCollector(collector_config)
+    timer = TimeCollector(Config(**collector_config))
 
     assert timer(take_some_time)
     timer(take_some_time, args=(0.1))
