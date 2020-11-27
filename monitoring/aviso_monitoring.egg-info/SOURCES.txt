@@ -1,0 +1,11 @@
+setup.py
+aviso_monitoring/__init__.py
+aviso_monitoring/config.py
+aviso_monitoring/receiver.py
+aviso_monitoring/udp_server.py
+aviso_monitoring.egg-info/PKG-INFO
+aviso_monitoring.egg-info/SOURCES.txt
+aviso_monitoring.egg-info/dependency_links.txt
+aviso_monitoring.egg-info/not-zip-safe
+aviso_monitoring.egg-info/requires.txt
+aviso_monitoring.egg-info/top_level.txt

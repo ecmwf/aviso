@@ -20,7 +20,8 @@ from pyaviso import logger, __version__
 from pyaviso.custom_exceptions import InvalidInputError
 # from flask_swagger_ui import get_swaggerui_blueprint
 from pyaviso.notification_manager import NotificationManager
-from pyaviso.user_config import UserConfig
+from rest.aviso_rest.config import Config
+from aviso_monitoring.collector.time_collector import TimeCollector
 
 SWAGGER_URL = '/openapi'
 API_URL = 'frontend/web/openapi.yaml'
@@ -28,11 +29,12 @@ API_URL = 'frontend/web/openapi.yaml'
 
 class Frontend:
 
-    def __init__(self, config: UserConfig):
+    def __init__(self, config):
         self.config = config
         # initialise the handler
         self.handler = self.create_handler()
         self.notification_manager = NotificationManager()
+        self.timer = TimeCollector(config.monitoring)
 
     def create_handler(self) -> Flask:
         handler = Flask(__name__)
@@ -88,9 +90,10 @@ class Frontend:
             try:
                 # parse the body as cloud event
                 notification = self._parse_cloud_event(body)
+                logger.info(f"New event received: {notification}")
 
-                # send the notification
-                self.notification_manager.notify(notification, config=self.config)
+                # send the notification and time it
+                self.timer(self.notification_manager.notify, args=(notification, self.config.aviso))
             except InvalidInputError as e:
                 return bad_request(e)
             logger.debug("Notification successfully submitted")
@@ -99,25 +102,25 @@ class Frontend:
         return handler
 
     def run_server(self):
-        logger.info(f"Running AVISO Frontend - version { __version__} on server {self.config.frontend['server_type']}")
+        logger.info(f"Running AVISO Frontend - version { __version__} on server {self.config.server_type}")
         logger.info(f"Configuration loaded: {self.config}")
 
-        if self.config.frontend["server_type"] == "flask":
+        if self.config.server_type == "flask":
             # flask internal server for non-production environments
             # should only be used for testing and debugging
-            self.handler.run(debug=self.config.debug, host=self.config.frontend["host"],
-                             port=self.config.frontend["port"], use_reloader=False)
-        elif self.config.frontend["server_type"] == "gunicorn":
-            options = {"bind": f"{self.config.frontend['host']}:{self.config.frontend['port']}",
-                       "workers": self.config.frontend['workers']}
+            self.handler.run(debug=self.config.debug, host=self.config.host,
+                             port=self.config.port, use_reloader=False)
+        elif self.config.server_type == "gunicorn":
+            options = {"bind": f"{self.config.host}:{self.config.port}",
+                       "workers": self.config.workers}
             GunicornServer(self.handler, options).run()
         else:
-            logging.error(f"server_type {self.config.frontend['server_type']} not supported")
+            logging.error(f"server_type {self.config.server_type} not supported")
             raise NotImplementedError
 
-    def _parse_cloud_event(self, message) -> Dict[str, any]:
+    def _parse_cloud_event(self, message) -> Dict:
         """
-        This helper method parses cloud event messagge, validate it and return the notification associated to it
+        This helper method parses cloud event message, validate it and return the notification associated to it
         :param message: cloud event
         :return: notification as dictionary
         """
@@ -146,7 +149,7 @@ class Frontend:
 
 def main():
     # initialising the user configuration configuration
-    config = UserConfig()
+    config = Config()
 
     # create the frontend class and run it
     frontend = Frontend(config)

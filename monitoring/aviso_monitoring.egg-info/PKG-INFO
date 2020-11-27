@@ -1,0 +1,10 @@
+Metadata-Version: 1.0
+Name: aviso-monitoring
+Version: 0.1.0
+Summary: Aviso_monitoring is a library providing collectors to fetch telemetries, receivers and reporters to transmit them to the monitoring servers
+Home-page: https://git.ecmwf.int/projects/AVISO/repos/aviso/browse
+Author: ECMWF
+Author-email: UNKNOWN
+License: UNKNOWN
+Description: UNKNOWN
+Platform: UNKNOWN

@@ -1,0 +1,3 @@
+[console_scripts]
+aviso-rest = aviso_rest.frontend:main
+

@@ -8,7 +8,7 @@
 
 from setuptools import setup, find_packages
 
-from pyaviso import __version__
+from aviso_rest import __version__
 
 setup(
     name='aviso-rest',

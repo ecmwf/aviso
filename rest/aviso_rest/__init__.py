@@ -6,3 +6,17 @@
 # granted to it by virtue of its status as an intergovernmental organisation
 # nor does it submit to any jurisdiction.
 
+import logging
+
+# version number for the application.
+__version__ = '0.1.0'
+
+# setting application logger
+logger = logging.getLogger("aviso-rest")
+logger.setLevel(logging.DEBUG)
+
+# home folder for configuration, state and log
+HOME_FOLDER = "~/.aviso-rest"
+
+# system folder for configuration
+SYSTEM_FOLDER = "/etc/aviso-rest"

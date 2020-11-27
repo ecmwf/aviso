@@ -10,18 +10,19 @@ import json
 import os
 import time
 from multiprocessing import Process
-
 import pytest
 import requests
+import os
 
-from pyaviso import logger
-from pyaviso import user_config
+from rest.aviso_rest import logger
+from rest.aviso_rest.config import Config
 from pyaviso.cli_aviso import _parse_inline_params
-from aviso_rest.frontend import Frontend
+from rest.aviso_rest.frontend import Frontend
 from pyaviso.notification_manager import NotificationManager
+from monitoring.aviso_monitoring.udp_server import UdpServer
 
-config = user_config.UserConfig(conf_path="tests/config.yaml")
-frontend_url_home = f"http://{config.frontend['host']}:{config.frontend['port']}"
+config = Config(conf_path="rest/tests/config.yaml")
+frontend_url_home = f"http://{config.host}:{config.port}"
 frontend_url_api = f"{frontend_url_home}/api/v1"
 
 
@@ -388,7 +389,7 @@ def test_notify_ttl():
 
     # now retrieve it
     ps = _parse_inline_params("event=dissemination,target=E1,class=od,date=20191112,destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=0")
-    result = NotificationManager().value(ps, config=config)
+    result = NotificationManager().value(ps, config=config.aviso)
     assert "xxx" in result
 
     # wait for it to expire
@@ -396,7 +397,7 @@ def test_notify_ttl():
 
     # now test the value command
     ps = _parse_inline_params("event=dissemination,target=E1,class=od,date=20191112,destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=0")
-    result = NotificationManager().value(ps, config=config)
+    result = NotificationManager().value(ps, config=config.aviso)
     assert result is None
 
 
@@ -465,4 +466,3 @@ def test_send_notification():
     message = json.loads(resp.text)
     assert message.get("message")
     assert message.get("message") == "Notification successfully submitted"
-

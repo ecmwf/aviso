@@ -1,28 +1,28 @@
-notification_engine:
-  type: etcd_rest
-  host: localhost
-  port: 2379
-  polling_interval: 1
-  https: false
-configuration_engine:
-  type: etcd_rest
-  host: localhost
-  port: 2379
-  https: false
-auth_type: none
-frontend:
-  host: 127.0.0.1
-  port: 8081
-  server_type: flask
-listener_schema:
-  stream: [scef, scwe]
-listeners:
-  - event: dissemination
-    request:
-      destination: FOO
-      stream: enfo
-    triggers:
-      - type: echo
+host: 127.0.0.1
+port: 8081
+server_type: flask
+aviso:
+  notification_engine:
+    type: etcd_rest
+    host: localhost
+    port: 2379
+    polling_interval: 1
+    https: false
+  configuration_engine:
+    type: etcd_rest
+    host: localhost
+    port: 2379
+    https: false
+  auth_type: none
+  listener_schema:
+    stream: [scef, scwe]
+  listeners:
+    - event: dissemination
+      request:
+        destination: FOO
+        stream: enfo
+      triggers:
+        - type: echo
 logging:
   version: 1
   disable_existing_loggers: False
