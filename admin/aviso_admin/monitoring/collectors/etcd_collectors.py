@@ -80,7 +80,7 @@ class StoreSizeCollector(EtcdCollector):
         size = int(data.get("dbSize"))
 
         # convert byte in GiB
-        size: float = round(size / (1024 * 1024 * 1024), 2)
+        #size: float = round(size / (1024 * 1024 * 1024), 2)
 
         return size
 

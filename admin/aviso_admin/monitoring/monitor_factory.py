@@ -8,7 +8,6 @@
 
 from .. import logger
 from .etcd_monitor import EtcdMonitor
-from .aviso_rest_monitor import AvisoRestMonitor
 from .aviso_auth_monitor import AvisoAuthMonitor
 
 
@@ -18,6 +17,5 @@ class MonitorFactory:
         # instantiate the various monitors
         self.monitors = [
             EtcdMonitor(config),
-            AvisoRestMonitor(config),
             AvisoAuthMonitor(config),
             ]

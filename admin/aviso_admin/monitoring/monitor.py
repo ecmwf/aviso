@@ -80,7 +80,7 @@ class Monitor(ABC):
         monitoring server
         :return: True if successful
         """
-        logger.info(f"Running {self.__class__.__name__}...")
+        logger.debug(f"Running {self.__class__.__name__}...")
 
         # Retrieve telemetries for etcd
         metrics = self.retrieve_metrics()
@@ -91,8 +91,8 @@ class Monitor(ABC):
             # send etcd metrics
             for m in metrics:
                 self.post_metric(token, m)
-            logger.info(f"{self.__class__.__name__} cycle completed")
+            logger.debug(f"{self.__class__.__name__} cycle completed")
             return True
         else:
-            logger.info(f"{self.__class__.__name__} cycle could not be complected, login to monitoring server not available")
+            logger.error(f"{self.__class__.__name__} cycle could not be complected, login to monitoring server not available")
             return False

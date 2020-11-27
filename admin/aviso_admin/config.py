@@ -18,6 +18,7 @@ from typing import Optional, Dict
 import yaml
 
 from . import logger, HOME_FOLDER, SYSTEM_FOLDER
+from aviso_monitoring.config import Config as MonitoringConfig
 
 # Default configuration location
 CONF_FILE = "config.yaml"
@@ -35,7 +36,8 @@ class Config:
                  debug=None,
                  compactor=None,
                  cleaner=None,
-                 monitor=None):
+                 monitor=None,
+                 monitoring=None):
         """
         :param conf_path: path to the system configuration file. If not provided,
         the default location is HOME_FOLDER/user_config.yaml.
@@ -61,6 +63,7 @@ class Config:
             self.compactor = compactor
             self.cleaner = cleaner
             self.monitor = monitor
+            self.monitoring = monitoring
 
             logger.debug(f"Loading configuration completed")
 
@@ -74,7 +77,7 @@ class Config:
         # compactor
         compactor = {
             "url": "http://localhost:2379",
-            "req_timeout": 60,  # seconds
+            "req_timeout": 120,  # seconds
             "history_path": "/ec/admin/history",
             "retention_period": 16,  # days
             "scheduled_time": "00:00",
@@ -113,7 +116,7 @@ class Config:
         aviso_rest = {
             "url": "http://localhost:2379",
             "metrics": ["rest_resp_time"],
-            "enabled": True,
+            "enabled": False,
             "frequency": 2,  # in minutes
             "req_timeout": 60,  # seconds
         }
@@ -138,6 +141,7 @@ class Config:
             "compactor": compactor,
             "cleaner": cleaner,
             "monitor": monitor,
+            "monitoring": {},
             "debug": False
         }
         return config
@@ -335,6 +339,21 @@ class Config:
         self._monitor = m
 
     @property
+    def monitoring(self) -> MonitoringConfig:
+        return self._monitoring
+
+    @monitoring.setter
+    def monitoring(self, monitoring: Dict):
+        m = self._config.get("monitoring")
+        if monitoring is not None and m is not None:
+            Config.deep_update(m, monitoring)
+        elif monitoring is not None:
+            m = monitoring
+        # verify is valid
+        assert m is not None, "monitoring has not been configured"
+        self._monitoring = MonitoringConfig(**m)
+
+    @property
     def debug(self):
         return self._debug
 
@@ -360,6 +379,7 @@ class Config:
                 f"compactor: {self.compactor}" +
                 f", cleaner: {self.cleaner}" +
                 f", monitor: {self.monitor}" +
+                f", monitoring: {self.monitoring}" +
                 f", debug: {self.debug}"
         )
         return config_string

@@ -199,6 +199,22 @@ class Compactor:
             logger.debug(f"Compacted revision {rev}")
         return True
 
+    def defrag(self):
+        """
+        Defragment the the store space for each member
+        :return: True if successful
+        """
+        logger.debug(f"Defragmenting server ...")
+
+        url = self.url + "/v3/maintenance/defragment"
+
+        #TBD make the call for each member
+        resp = requests.post(url, data={}, timeout=self.req_timeout)
+        assert resp.status_code == 200, f'Error returned from defragmentation call on {url}, status {resp.status_code}, ' \
+            f'{resp.reason}, {resp.content.decode()}'
+        logger.debug(f"Defragmentation completed")
+        return True
+
     def run(self, sec_ret_per=None):
         """
         Execute the compactor workflow:
@@ -208,7 +224,7 @@ class Compactor:
         :param sec_ret_per: if True the retention period is interpreted in seconds rather than days, useful for testing
         :return: True if successful
         """
-        logger.info("Running compactor...")
+        logger.debug("Running compactor...")
 
         # check the current server revision
         curr_rev = self.get_current_server_rev()
@@ -217,7 +233,7 @@ class Compactor:
         # save the rev to file with now as date
         self.save_rev(curr_rev, now)
 
-        logger.info(f"Revision {curr_rev} saved to history at date {now}")
+        logger.debug(f"Revision {curr_rev} saved to history at date {now}")
 
         # move the retention period
         if sec_ret_per:  # this is used for testing
@@ -232,7 +248,7 @@ class Compactor:
             self.compact(old_rev)
             logger.info(f"Server compacted at revision {old_rev}")
 
-        logger.info("Compactor execution completed.")
+        logger.debug("Compactor execution completed.")
         return True
 
 

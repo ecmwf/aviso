@@ -35,7 +35,7 @@ def test_run_monitor():
     monitor.run()
 
 
-def test_storage_size():
+def test_store_size():
     logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
     collector = StoreSizeCollector(EtcdMetricType.etcd_store_size, member_urls=conf().monitor["etcd_monitor"]["member_urls"])
     size = collector.store_size(conf().monitor["etcd_monitor"]["member_urls"][0])
