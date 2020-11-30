@@ -98,7 +98,9 @@ class Transmitter(Thread):
         byte_message = json.dumps(message).encode()
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         try: 
-            s.sendto(byte_message, (self.monitoring_server_host, self.monitoring_server_port))
+            logger.debug(f"Sending tlm {message} to {self.monitoring_server_host}:{self.monitoring_server_port}")
+            res = s.sendto(byte_message, (self.monitoring_server_host, self.monitoring_server_port))
+            logger.debug(f"Tlm sending return: {res}")
         except Exception as e:
             logger.warn(f"Telemetry could not be sent, {e}")
             return False

@@ -8,9 +8,7 @@
 
 from typing import Iterable
 from .collector import Collector
-import time
 from timeit import default_timer as timer
-from queue import Queue
 from .. import logger
 
 class TimeCollector(Collector):
