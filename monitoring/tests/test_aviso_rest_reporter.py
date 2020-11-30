@@ -29,6 +29,10 @@ config = {
         "password": "TBD",
         "service_host": "aviso",
         "req_timeout": 60,  # seconds
+    },
+    "udp_server": {
+        "host": "127.0.0.1",
+        "port": 1111
     }
 }
 
