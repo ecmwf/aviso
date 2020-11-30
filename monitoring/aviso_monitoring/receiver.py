@@ -69,7 +69,7 @@ class Receiver:
         if tlm_type in self._incoming_tlms:
             tlms =  self._incoming_tlms.get(tlm_type).copy()
             self._incoming_tlms.get(tlm_type).clear()
-            logger.debug(f"Telemetry list {tlm_type} extracted")
+            logger.debug(f"Telemetry list {tlm_type} extracted, {len(tlms)} tlms")
             return tlms
         else:
             return []

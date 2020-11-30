@@ -23,9 +23,10 @@ class Config:
     """
 
     def __init__(self,
-                 upd_server=None,
+                 udp_server=None,
                  monitor_server=None,
-                 aviso_rest_reporter=None):
+                 aviso_rest_reporter=None,
+                 test=None):
 
         try:
             # we build the configuration in priority order from the lower to the higher
@@ -34,7 +35,7 @@ class Config:
             # add environment variables
             Config.deep_update(self._config, self._read_env_variables())
             # add constructor parameters
-            self.upd_server = upd_server
+            self.udp_server = udp_server
             self.monitor_server = monitor_server
             self.aviso_rest_reporter = aviso_rest_reporter
 
@@ -48,7 +49,7 @@ class Config:
     @staticmethod
     def _create_default_config() -> Dict:
    
-        upd_server = {
+        udp_server = {
             "host": "127.0.0.1",
             "port": 1111,
             "buffer_size": 64 * 1024
@@ -72,7 +73,7 @@ class Config:
 
         # main config
         config = {}
-        config["upd_server"] = upd_server
+        config["udp_server"] = udp_server
         config["monitor_server"] = monitor_server
         config["aviso_rest_reporter"] = aviso_rest_reporter
         return config
@@ -84,22 +85,22 @@ class Config:
 
 
     @property
-    def upd_server(self):
-        return self._upd_server
+    def udp_server(self):
+        return self._udp_server
 
-    @upd_server.setter
-    def upd_server(self, upd_server):
-        u = self._config.get("upd_server")
-        if upd_server is not None and u is not None:
-            Config.deep_update(u, upd_server)
-        elif upd_server is not None:
-            u = upd_server
+    @udp_server.setter
+    def udp_server(self, udp_server):
+        u = self._config.get("udp_server")
+        if udp_server is not None and u is not None:
+            Config.deep_update(u, udp_server)
+        elif udp_server is not None:
+            u = udp_server
         # verify is valid
-        assert u is not None, "upd_server has not been configured"
-        assert u.get("host") is not None, "upd_server host has not been configured"
-        assert u.get("port") is not None, "upd_server port has not been configured"
-        assert u.get("buffer_size") is not None, "upd_server buffer_size has not been configured"
-        self._upd_server = u
+        assert u is not None, "udp_server has not been configured"
+        assert u.get("host") is not None, "udp_server host has not been configured"
+        assert u.get("port") is not None, "udp_server port has not been configured"
+        assert u.get("buffer_size") is not None, "udp_server buffer_size has not been configured"
+        self._udp_server = u
 
     @property
     def monitor_server(self):
@@ -143,7 +144,7 @@ class Config:
 
     def __str__(self):
         config_string = (
-            f"upd_server: {self.upd_server}" +
+            f"udp_server: {self.udp_server}" +
             f", monitor_server: {self.monitor_server}" +
             f", aviso_rest_reporter: {self.aviso_rest_reporter}"
         )
