@@ -62,8 +62,8 @@ class Transmitter(Thread):
 
             # read the event buffer and clear it
             tlms = self.tlm_buffer.copy()
+            logger.debug(f"{len(tlms)} TLMs found in the buffer")
             self.tlm_buffer.clear()
-            #logger.debug("Telemetry buffer cleared")
 
             # aggregate the telemetries
             agg_tlm = self.aggregate_tlms(tlms)

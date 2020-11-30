@@ -26,6 +26,7 @@ from aviso_monitoring.collector.time_collector import TimeCollector
 SWAGGER_URL = '/openapi'
 API_URL = 'frontend/web/openapi.yaml'
 
+timer = None
 
 class Frontend:
 
@@ -34,7 +35,7 @@ class Frontend:
         # initialise the handler
         self.handler = self.create_handler()
         self.notification_manager = NotificationManager()
-        self.timer = TimeCollector(config.monitoring)
+        self.timer = TimeCollector(self.config.monitoring)   
 
     def create_handler(self) -> Flask:
         handler = Flask(__name__)
@@ -112,7 +113,7 @@ class Frontend:
                              port=self.config.port, use_reloader=False)
         elif self.config.server_type == "gunicorn":
             options = {"bind": f"{self.config.host}:{self.config.port}",
-                       "workers": self.config.workers}
+                       "workers": self.config.workers, "post_worker_init": self.post_worker_init}
             GunicornServer(self.handler, options).run()
         else:
             logging.error(f"server_type {self.config.server_type} not supported")
@@ -146,6 +147,12 @@ class Frontend:
         except AssertionError as e:
             raise InvalidInputError(e)
 
+    def post_worker_init(self, worker):
+        """
+        This method is a Gunicorn server hooked needed as Gunicorn spawn the app over multiple workers as processes
+        """
+        logger.debug("Initialising a tlm collector per worker")
+        self.timer = TimeCollector(self.config.monitoring)
 
 def main():
     # initialising the user configuration configuration
@@ -192,3 +199,4 @@ class GunicornServer(gunicorn.app.base.BaseApplication):
 # when running directly from this file
 if __name__ == "__main__":
     main()
+
