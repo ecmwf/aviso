@@ -47,7 +47,7 @@ def main():
     # run UPD server
     # create the UDP server
     receiver = Receiver()
-    udp_server = UdpServer(config.monitoring.upd_server, receiver)
+    udp_server = UdpServer(config.monitoring.udp_server, receiver)
     udp_server.start()
 
     # schedule reporter
