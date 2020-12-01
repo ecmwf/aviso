@@ -124,7 +124,7 @@ class Reporter(ABC):
             agg_tlm[self.tlm_type+"_counter"] += tlm[self.tlm_type+"_counter"]
             agg_tlm[self.tlm_type+"_max"] = tlm[self.tlm_type+"_max"] if tlm[self.tlm_type+"_max"] > agg_tlm[self.tlm_type+"_max"] else agg_tlm[self.tlm_type+"_max"]
             agg_tlm[self.tlm_type+"_min"] = tlm[self.tlm_type+"_min"] if tlm[self.tlm_type+"_min"] < agg_tlm[self.tlm_type+"_min"] else agg_tlm[self.tlm_type+"_min"]
-            sum = tlm[self.tlm_type+"_counter"] * tlm[self.tlm_type+"_avg"]
+            sum += tlm[self.tlm_type+"_counter"] * tlm[self.tlm_type+"_avg"]
         agg_tlm[self.tlm_type+"_avg"] = sum / agg_tlm[self.tlm_type+"_counter"]
         
         return agg_tlm

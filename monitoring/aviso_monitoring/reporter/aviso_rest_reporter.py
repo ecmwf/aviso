@@ -99,6 +99,7 @@ class AvisoRestReporter(Reporter):
             m_status = {
                 "name": self.tlm_type,
                 "status": status,
+                "message": message
             }
         logger.debug(f"Response time metric: {m_status}")
         return m_status

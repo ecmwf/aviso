@@ -26,7 +26,7 @@ class Receiver:
         Returns:
             bool: True if successfully parsed, False otherwise
         """
-        logger.debug(f"Message received: {message}")
+        logger.debug(f"Message received")
 
         # validate message
         try:
