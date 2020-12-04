@@ -467,6 +467,7 @@ test_frontend = Flask("Test_Frontend")
 @test_frontend.route('/test',  methods=['POST'])
 def received():
     return f"Received {request.json}"
+#test_frontend.run(host="127.0.0.1", port=8001)
 
 @pytest.mark.parametrize("config", configs)
 def test_post_basic_listener(config: user_config.UserConfig, caplog, capsys):
@@ -474,7 +475,6 @@ def test_post_basic_listener(config: user_config.UserConfig, caplog, capsys):
     with caplog_for_logger(caplog):  # this allows to assert over the logging output
 
         # start a test frontend to send the notification to
-        # test_frontend.run(host="127.0.0.1", port=8001)
         server = Process(target=test_frontend.run, kwargs={"host": "127.0.0.1", "port": 8001})
         server.start()
     
@@ -490,6 +490,7 @@ def test_post_basic_listener(config: user_config.UserConfig, caplog, capsys):
         for record in caplog.records:
             assert record.levelname != "ERROR"
         assert "Post Trigger completed" in caplog.text
+        assert "CloudEvent notification sent successfully" in caplog.text
 
         # terminate frontend
         server.terminate()
@@ -517,6 +518,7 @@ def test_post_complete_listener(config: user_config.UserConfig, caplog, capsys):
         for record in caplog.records:
             assert record.levelname != "ERROR"
         assert "Post Trigger completed" in caplog.text
+        assert "CloudEvent notification sent successfully" in caplog.text
 
         # terminate frontend
         server.terminate()

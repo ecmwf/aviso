@@ -5,4 +5,7 @@ listeners:
       stream: enfo
     triggers:
       - type: post
-        url: http://127.0.0.1:8001/test
+        protocol: 
+          type: cloudevent
+          url: http://127.0.0.1:8001/test
+          
