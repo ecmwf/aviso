@@ -107,22 +107,6 @@ def clear_environment():
     except KeyError:
         pass
     try:
-        os.environ.pop("AVISO_FRONTEND_HOST")
-    except KeyError:
-        pass
-    try:
-        os.environ.pop("AVISO_FRONTEND_PORT")
-    except KeyError:
-        pass
-    try:
-        os.environ.pop("AVISO_FRONTEND_SERVER_TYPE")
-    except KeyError:
-        pass
-    try:
-        os.environ.pop("AVISO_FRONTEND_WORKERS")
-    except KeyError:
-        pass
-    try:
         os.environ.pop("AVISO_KEY_TTL")
     except KeyError:
         pass
@@ -153,10 +137,6 @@ def test_default():
     assert c["username_file"] is None
     assert c["auth_type"] == "ecmwf"
     assert c["key_ttl"] == -1
-    assert c["frontend"]["host"] == "127.0.0.1"
-    assert c["frontend"]["port"] == 8080
-    assert c["frontend"]["server_type"] == "flask"
-    assert c["frontend"]["workers"] == "1"
 
 
 def test_config_file():
@@ -182,10 +162,6 @@ def test_config_file():
     assert c.configuration_engine.timeout is None
     assert c.quiet
     assert c.no_fail
-    assert c.frontend["host"] == "frontend.int"
-    assert c.frontend["port"] == 80
-    assert c.frontend["server_type"] == "gunicorn"
-    assert c.frontend["workers"] == 4
     assert c.key_ttl == 10
 
 
@@ -213,10 +189,6 @@ def test_config_file_with_ev():
     assert c.configuration_engine.timeout is None
     assert c.quiet
     assert c.no_fail
-    assert c.frontend["host"] == "frontend.int"
-    assert c.frontend["port"] == 80
-    assert c.frontend["server_type"] == "gunicorn"
-    assert c.frontend["workers"] == 4
     assert c.key_ttl == 10
 
 
@@ -242,10 +214,6 @@ def test_env_variables():
     os.environ["AVISO_MAX_FILE_SIZE"] = "300"
     os.environ["AVISO_TIMEOUT"] = "null"
     os.environ["AVISO_AUTH_TYPE"] = "etcd"
-    os.environ["AVISO_FRONTEND_HOST"] = "f.int"
-    os.environ["AVISO_FRONTEND_PORT"] = "8"
-    os.environ["AVISO_FRONTEND_SERVER_TYPE"] = "guni"
-    os.environ["AVISO_FRONTEND_WORKERS"] = "8"
     os.environ["AVISO_KEY_TTL"] = "20"
     os.environ["AVISO_USERNAME_FILE"] = "tests/unit/fixtures/username"
 
@@ -271,10 +239,6 @@ def test_env_variables():
     assert c.configuration_engine.timeout is None
     assert c.quiet
     assert c.no_fail
-    assert c.frontend["host"] == "f.int"
-    assert c.frontend["port"] == 8
-    assert c.frontend["server_type"] == "guni"
-    assert c.frontend["workers"] == 8
     assert c.key_ttl == 20
 
 
@@ -299,10 +263,6 @@ def test_env_variables_with_config_file():
     os.environ["AVISO_MAX_FILE_SIZE"] = "300"
     os.environ["AVISO_TIMEOUT"] = "20"
     os.environ["AVISO_AUTH_TYPE"] = "ecmwf"
-    os.environ["AVISO_FRONTEND_HOST"] = "f.int"
-    os.environ["AVISO_FRONTEND_PORT"] = "8"
-    os.environ["AVISO_FRONTEND_SERVER_TYPE"] = "guni"
-    os.environ["AVISO_FRONTEND_WORKERS"] = "8"
     os.environ["AVISO_KEY_TTL"] = "20"
 
     # create a config with the configuration file but the environment variables take priority
@@ -328,10 +288,6 @@ def test_env_variables_with_config_file():
     assert c.configuration_engine.timeout == 20
     assert not c.quiet
     assert not c.no_fail
-    assert c.frontend["host"] == "f.int"
-    assert c.frontend["port"] == 8
-    assert c.frontend["server_type"] == "guni"
-    assert c.frontend["workers"] == 8
     assert c.key_ttl == 20
 
 
@@ -343,8 +299,6 @@ def test_constructor():
     configuration_engine = {"host": "localhost", "port": 2379, "type": "ETCD_REST", "max_file_size": 200, "timeout": 10,
                             "https": False}
 
-    frontend = {"host": "rest.int", "port": 9000, "server_type": "g", "workers": 10}
-
     c = UserConfig(
         conf_path=test_config_folder + "config.yaml",
         notification_engine=notification_engine,
@@ -355,7 +309,6 @@ def test_constructor():
         username="test2",
         key_file="tests/unit/fixtures/bad/key",
         auth_type="ecmwf",
-        frontend=frontend,
         key_ttl=30
     )
     assert not c.debug
@@ -378,10 +331,6 @@ def test_constructor():
     assert c.configuration_engine.timeout == 10
     assert not c.quiet
     assert not c.no_fail
-    assert c.frontend["host"] == "rest.int"
-    assert c.frontend["port"] == 9000
-    assert c.frontend["server_type"] == "g"
-    assert c.frontend["workers"] == 10
     assert c.key_ttl == 30
 
 
@@ -406,10 +355,6 @@ def test_constructor_with_env_var():
     os.environ["AVISO_MAX_FILE_SIZE"] = "300"
     os.environ["AVISO_TIMEOUT"] = "20"
     os.environ["AVISO_AUTH_TYPE"] = "etcd"
-    os.environ["AVISO_FRONTEND_HOST"] = "f.int"
-    os.environ["AVISO_FRONTEND_PORT"] = "8"
-    os.environ["AVISO_FRONTEND_SERVER_TYPE"] = "guni"
-    os.environ["AVISO_FRONTEND_WORKERS"] = "8"
     os.environ["AVISO_KEY_TTL"] = "20"
     os.environ["AVISO_USERNAME_FILE"] = "tests/unit/fixtures/username"
 
@@ -418,8 +363,6 @@ def test_constructor_with_env_var():
                            "timeout": 10, "https": False, "service": "aviso/v4", "catchup": False}
     configuration_engine = {"host": "localhost", "port": 2379, "type": "ETCD_REST", "max_file_size": 200, "timeout": 10,
                             "https": False}
-
-    frontend = {"host": "rest.int", "port": 9000, "server_type": "g", "workers": 10}
 
     c = UserConfig(
         conf_path=test_config_folder + "config.yaml",
@@ -431,7 +374,6 @@ def test_constructor_with_env_var():
         username="test2",
         key_file="tests/unit/fixtures/key",
         auth_type="ecmwf",
-        frontend=frontend,
         key_ttl=30
     )
     assert not c.debug
@@ -454,8 +396,4 @@ def test_constructor_with_env_var():
     assert c.configuration_engine.timeout == 10
     assert not c.quiet
     assert not c.no_fail
-    assert c.frontend["host"] == "rest.int"
-    assert c.frontend["port"] == 9000
-    assert c.frontend["server_type"] == "g"
-    assert c.frontend["workers"] == 10
     assert c.key_ttl == 30

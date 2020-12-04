@@ -1,0 +1,8 @@
+listeners:
+  - event: dissemination
+    request:
+      destination: FOO
+      stream: enfo
+    triggers:
+      - type: post
+        url: http://127.0.0.1:8001/test

@@ -28,6 +28,7 @@ class TriggerType(Enum):
     function = ("function_trigger", "FunctionTrigger")
     command = ("command_trigger", "CommandTrigger")
     echo = ("echo_trigger", "EchoTrigger")
+    post = ("post_trigger", "PostTrigger")
 
     def get_class(self):
         module = importlib.import_module("pyaviso.triggers."+self.value[0])

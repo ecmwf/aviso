@@ -6,4 +6,4 @@
 # granted to it by virtue of its status as an intergovernmental organisation
 # nor does it submit to any jurisdiction.
 
-__all__ = ["function_trigger", "log_trigger", "command_trigger", "echo_trigger"]
+__all__ = ["function_trigger", "log_trigger", "command_trigger", "echo_trigger", "cloudevent_trigger"]
