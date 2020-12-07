@@ -1,0 +1,18 @@
+listeners:
+  - event: dissemination
+    request:
+      destination: FOO
+      stream: enfo
+    triggers:
+      - type: post
+        protocol: 
+          type: cloudevent
+          url: http://127.0.0.1:8001/test
+          headers:
+            X-TEST: "test"
+          timeout: 30
+          cloudevent: 
+            type: aviso_cloudevent
+            source: my_test
+        
+        

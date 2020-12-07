@@ -269,7 +269,6 @@ def key(parameters: str, configuration: conf.UserConfig):
     except KNOWN_EXCEPTION as e:
         logger.error(f"{e}")
         logger.debug("", exc_info=True)
-        stop_listeners()
         sys.exit(-1)
     except Exception as e:
         logger.error(f"Error occurred while generating key from {parameters}, "
@@ -299,7 +298,6 @@ def value(parameters: str, configuration: conf.UserConfig):
     except KNOWN_EXCEPTION as e:
         logger.error(f"{e}")
         logger.debug("", exc_info=True)
-        stop_listeners()
         sys.exit(-1)
     except Exception as e:
         logger.error(f"Error occurred while return value for {parameters}, "
@@ -327,7 +325,6 @@ def notify(parameters: str, configuration: conf.UserConfig):
     except KNOWN_EXCEPTION as e:
         logger.error(f"{e}")
         logger.debug("", exc_info=True)
-        stop_listeners()
         sys.exit(-1)
     except Exception as e:
         logger.error(f"Error occurred while notifying the notification {parameters}, "

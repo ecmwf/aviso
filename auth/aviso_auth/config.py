@@ -146,8 +146,8 @@ class UserConfig:
             logger.debug(f"Configuration in {home_path} not found")
 
         # Third the env variable
-        if "AVISO_CONFIG" in os.environ:
-            env_path = os.environ["AVISO_CONFIG"]
+        if "AVISO_AUTH_CONFIG" in os.environ:
+            env_path = os.environ["AVISO_AUTH_CONFIG"]
             parse_config(env_path)
 
         # Finally the user config option

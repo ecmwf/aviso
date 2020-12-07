@@ -18,6 +18,7 @@ from typing import Optional, Dict
 import yaml
 
 from . import logger, HOME_FOLDER, SYSTEM_FOLDER
+from aviso_monitoring.config import Config as MonitoringConfig
 
 # Default configuration location
 CONF_FILE = "config.yaml"
@@ -30,19 +31,22 @@ class Config:
     """
 
     def __init__(self,
-                 conf_path: Optional[str] = None,
-                 logging_path: Optional[str] = None,
-                 debug: Optional[bool] = None,
-                 compactor: [Dict[str, any]] = None,
-                 cleaner: [Dict[str, any]] = None):
+                 conf_path=None,
+                 logging_path=None,
+                 debug=None,
+                 compactor=None,
+                 cleaner=None,
+                 monitor=None,
+                 monitoring=None):
         """
         :param conf_path: path to the system configuration file. If not provided,
         the default location is HOME_FOLDER/user_config.yaml.
         :param logging_path: path to the logging configuration file. If not provided,
         the default location is the logging section of the HOME_FOLDER/user_config.yaml.
         :param debug: flag to activate the debug log to the console output
-        :param compactor: config for compactor process
-        :param cleaner: config for cleaner process
+        :param compactor: config for the compactor process
+        :param cleaner: config for the cleaner process
+        :param monitor: config for monitor processes
         """
         try:
             # we build the configuration in priority order from the lower to the higher
@@ -58,6 +62,8 @@ class Config:
             self.debug = debug
             self.compactor = compactor
             self.cleaner = cleaner
+            self.monitor = monitor
+            self.monitoring = monitoring
 
             logger.debug(f"Loading configuration completed")
 
@@ -67,33 +73,80 @@ class Config:
             sys.exit(-1)
 
     @staticmethod
-    def _create_default_config() -> Dict[str, any]:
+    def _create_default_config():
         # compactor
-        compactor = {}
-        compactor["url"] = "http://localhost:2379"
-        compactor["req_timeout"] = 60  # seconds
-        compactor["history_path"] = "/ec/admin/history"
-        compactor["retention_period"] = 16  # days
-        compactor["scheduled_time"] = "00:00"
+        compactor = {
+            "url": "http://localhost:2379",
+            "req_timeout": 120,  # seconds
+            "history_path": "/ec/admin/history",
+            "retention_period": 16,  # days
+            "scheduled_time": "00:00",
+            "enabled": True
+        }
 
         # cleaner
-        cleaner = {}
-        cleaner["url"] = "http://localhost:2379"
-        cleaner["req_timeout"] = 60  # seconds
-        cleaner["dest_path"] = "/ec/admin/"
-        cleaner["diss_path"] = "/ec/diss/"
-        cleaner["mars_path"] = "/ec/mars/"
-        cleaner["retention_period"] = 15  # days
-        cleaner["scheduled_time"] = "00:00"
+        cleaner = {
+            "url": "http://localhost:2379",
+            "req_timeout": 60,  # seconds
+            "dest_path": "/ec/admin/",
+            "diss_path": "/ec/diss/",
+            "mars_path": "/ec/mars/",
+            "retention_period": 15,  # days
+            "scheduled_time": "00:00",
+            "enabled": True
+        }
+        
+        # monitors
+        etcd = {
+            "member_urls": ["http://localhost:2379"],
+            "metrics": ["etcd_store_size", "etcd_cluster_status", "etcd_diss_keys", "etcd_mars_keys"],
+            "enabled": True,
+            "frequency": 10,  # in minutes
+            "req_timeout": 60,  # seconds
+        }
+        aviso_auth = {
+            "url": "http://localhost:2379",
+            "username": "TBD",
+            "password":"TBD",
+            "metrics": ["auth_resp_time"],
+            "enabled": True,
+            "frequency": 2,  # in minutes
+            "req_timeout": 60,  # seconds
+        }
+        aviso_rest = {
+            "url": "http://localhost:2379",
+            "metrics": ["rest_resp_time"],
+            "enabled": False,
+            "frequency": 2,  # in minutes
+            "req_timeout": 60,  # seconds
+        }
+        # this are the setting for sending the telemetry to a monitoring server like Opsview
+        monitor_server = {
+            "url": "https://localhost",
+            "username": "TBD",
+            "password":"TBD",
+            "service_host": "aviso",
+            "req_timeout": 60,  # seconds
+
+        }
+        monitor = {
+            "monitor_server": monitor_server,
+            "etcd_monitor": etcd,
+            "aviso_rest_monitor": aviso_rest,
+            "aviso_auth_monitor": aviso_auth
+        }
 
         # main config
-        config = {}
-        config["compactor"] = compactor
-        config["cleaner"] = cleaner
-        config["debug"] = False
+        config = {
+            "compactor": compactor,
+            "cleaner": cleaner,
+            "monitor": monitor,
+            "monitoring": {},
+            "debug": False
+        }
         return config
 
-    def _parse_config_files(self, user_conf_path: str) -> Dict[str, any]:
+    def _parse_config_files(self, user_conf_path) :
         # build the configuration dictionary from system and user inputs
         current_config = {}
 
@@ -135,12 +188,14 @@ class Config:
 
         return current_config
 
-    def _read_env_variables(self) -> Dict[str, any]:
+    def _read_env_variables(self):
         config = {"cleaner": {}, "compactor": {}}
         if "AVISO_ADMIN_DEBUG" in os.environ:
             config["debug"] = os.environ["AVISO_ADMIN_DEBUG"]
         if "AVISO_ADMIN_CLEANER_URL" in os.environ:
             config["cleaner"]["url"] = os.environ["AVISO_ADMIN_CLEANER_URL"]
+        if "AVISO_ADMIN_CLEANER_ENABLED" in os.environ:
+            config["cleaner"]["enabled"] = os.environ["AVISO_ADMIN_CLEANER_ENABLED"]
         if "AVISO_ADMIN_CLEANER_RETENTION_PERIOD" in os.environ:
             config["cleaner"]["retention_period"] = os.environ["AVISO_ADMIN_CLEANER_RETENTION_PERIOD"]
         if "AVISO_ADMIN_CLEANER_SCHEDULED_TIME" in os.environ:
@@ -151,9 +206,11 @@ class Config:
             config["compactor"]["retention_period"] = os.environ["AVISO_ADMIN_COMPACTOR_RETENTION_PERIOD"]
         if "AVISO_ADMIN_COMPACTOR_SCHEDULED_TIME" in os.environ:
             config["compactor"]["scheduled_time"] = os.environ["AVISO_ADMIN_COMPACTOR_SCHEDULED_TIME"]
+        if "AVISO_ADMIN_COMPACTOR_ENABLED" in os.environ:
+            config["compactor"]["enabled"] = os.environ["AVISO_ADMIN_COMPACTOR_ENABLED"]
         return config
 
-    def logging_setup(self, logging_conf_path: str):
+    def logging_setup(self, logging_conf_path):
 
         if logging_conf_path is not None:
             try:
@@ -188,11 +245,11 @@ class Config:
             sys.exit(-1)
 
     @property
-    def compactor(self) -> Dict[str, any]:
+    def compactor(self):
         return self._compactor
 
     @compactor.setter
-    def compactor(self, compactor: Dict[str, any]):
+    def compactor(self, compactor):
         comp = self._config.get("compactor")
         if compactor is not None and comp is not None:
             Config.deep_update(comp, compactor)
@@ -205,14 +262,17 @@ class Config:
         assert comp.get("history_path") is not None, "compactor history_path has not been configured"
         assert comp.get("retention_period") is not None, "compactor retention_period has not been configured"
         assert comp.get("scheduled_time") is not None, "compactor scheduled_time has not been configured"
+        assert comp.get("enabled") is not None, "compactor enabled has not been configured"
+        if type(comp.get("enabled")) is str:
+           comp["enabled"] = comp.get("enabled").casefold() == "true".casefold()
         self._compactor = comp
 
     @property
-    def cleaner(self) -> Dict[str, any]:
+    def cleaner(self):
         return self._cleaner
 
     @cleaner.setter
-    def cleaner(self, cleaner: Dict[str, any]):
+    def cleaner(self, cleaner):
         cl = self._config.get("cleaner")
         if cleaner is not None and cl is not None:
             Config.deep_update(cl, cleaner)
@@ -226,14 +286,79 @@ class Config:
         assert cl.get("diss_path") is not None, "cleaner diss_path has not been configured"
         assert cl.get("mars_path") is not None, "cleaner mars_path has not been configured"
         assert cl.get("retention_period") is not None, "cleaner retention_period has not been configured"
+        assert cl.get("enabled") is not None, "cleaner enabled has not been configured"
+        if type(cl.get("enabled")) is str:
+           cl["enabled"] = cl.get("enabled").casefold() == "true".casefold()
         self._cleaner = cl
 
     @property
-    def debug(self) -> bool:
+    def monitor(self):
+        return self._monitor
+
+    @monitor.setter
+    def monitor(self, monitor):
+        m = self._config.get("monitor")
+        if monitor is not None and m is not None:
+            Config.deep_update(m, monitor)
+        elif monitor is not None:
+            m = monitor
+        # verify is valid
+        assert m is not None, "monitor has not been configured"
+        assert m.get("monitor_server") is not None, "monitor server have not been configured"
+        assert m.get("etcd_monitor") is not None, "etcd monitor have not been configured"
+        assert m.get("aviso_rest_monitor") is not None, "aviso rest monitor have not been configured"
+        # monitor server
+        assert m["monitor_server"].get("url") is not None, "monitor_server url has not been configured"
+        assert m["monitor_server"].get("service_host") is not None, "monitor_server service_host has not been configured"
+        assert m["monitor_server"].get("username") is not None, "monitor_server username has not been configured"
+        assert m["monitor_server"].get("password") is not None, "monitor_server password has not been configured"
+        assert m["monitor_server"].get("req_timeout") is not None, "monitor_server req_timeout has not been configured"
+        # etcd monitor
+        assert m["etcd_monitor"].get("member_urls") is not None, "etcd monitor member_urls have not been configured"
+        assert m["etcd_monitor"].get("metrics") is not None, "etcd monitor metrics have not been configured"
+        assert m["etcd_monitor"].get("frequency") is not None, "etcd monitor frequency has not been configured"
+        assert m["etcd_monitor"].get("enabled") is not None, "etcd monitor enabled has not been configured"
+        if type(m["etcd_monitor"].get("enabled")) is str:
+           m["etcd_monitor"]["enabled"] = m["etcd_monitor"].get("enabled").casefold() == "true".casefold()
+        # aviso-rest monitor
+        assert m["aviso_rest_monitor"].get("url") is not None, "aviso_rest monitor url have not been configured"
+        assert m["aviso_rest_monitor"].get("metrics") is not None, "aviso_rest monitor metrics have not been configured"
+        assert m["aviso_rest_monitor"].get("frequency") is not None, "aviso_rest monitor frequency has not been configured"
+        assert m["aviso_rest_monitor"].get("enabled") is not None, "aviso_rest enabled has not been configured"
+        if type(m["aviso_rest_monitor"].get("enabled")) is str:
+           m["aviso_rest_monitor"]["enabled"] = m["aviso_rest_monitor"].get("enabled").casefold() == "true".casefold()
+        # aviso-auth monitor
+        assert m["aviso_auth_monitor"].get("url") is not None, "aviso_auth monitor url have not been configured"
+        assert m["aviso_auth_monitor"].get("metrics") is not None, "aviso_auth monitor metrics have not been configured"
+        assert m["aviso_auth_monitor"].get("frequency") is not None, "aviso_auth monitor frequency has not been configured"
+        assert m["aviso_auth_monitor"].get("username") is not None, "aviso_auth monitor username has not been configured"
+        assert m["aviso_auth_monitor"].get("password") is not None, "aviso_auth monitor password has not been configured"
+        assert m["aviso_auth_monitor"].get("enabled") is not None, "aviso_auth enabled has not been configured"
+        if type(m["aviso_auth_monitor"].get("enabled")) is str:
+           m["aviso_auth_monitor"]["enabled"] = m["aviso_auth_monitor"].get("enabled").casefold() == "true".casefold()
+        self._monitor = m
+
+    @property
+    def monitoring(self) -> MonitoringConfig:
+        return self._monitoring
+
+    @monitoring.setter
+    def monitoring(self, monitoring: Dict):
+        m = self._config.get("monitoring")
+        if monitoring is not None and m is not None:
+            Config.deep_update(m, monitoring)
+        elif monitoring is not None:
+            m = monitoring
+        # verify is valid
+        assert m is not None, "monitoring has not been configured"
+        self._monitoring = MonitoringConfig(**m)
+
+    @property
+    def debug(self):
         return self._debug
 
     @debug.setter
-    def debug(self, debug: any):
+    def debug(self, debug):
         self._debug = self._configure_property(debug, "debug")
         if type(self._debug) is str:
             self._debug = self._debug.casefold() == "true".casefold()
@@ -253,6 +378,8 @@ class Config:
         config_string = (
                 f"compactor: {self.compactor}" +
                 f", cleaner: {self.cleaner}" +
+                f", monitor: {self.monitor}" +
+                f", monitoring: {self.monitoring}" +
                 f", debug: {self.debug}"
         )
         return config_string

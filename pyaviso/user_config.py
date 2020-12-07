@@ -94,9 +94,9 @@ class UserConfig:
                  username_file: Optional[str] = None,
                  key_file: Optional[str] = None,
                  auth_type: Optional[str] = None,
-                 frontend: Optional[Dict[str, any]] = None,
                  key_ttl: Optional[int] = None,
-                 listener_schema: Optional[Dict[str, any]] = None):
+                 listener_schema: Optional[Dict[str, any]] = None,
+                 listeners: Optional[Dict[str, any]] = None):
         """
         :param conf_path: path to the system configuration file. If not provided,
         the default location is HOME_FOLDER/user_config.yaml.
@@ -111,9 +111,9 @@ class UserConfig:
         :param username_file: file path containing the username required to authenticate the user
         :param key_file: file path to the key required to authenticate to the notification and configuration servers
         :param auth_type: Authentication type
-        :param frontend: configuration for the REST frontend
         :param key_ttl: Time to live of the keys submitted
         :param listener_schema: custom schema to add to the listener validation
+        :param listeners: listeners configuration
         """
         try:
             # we build the configuration in priority order from the lower to the higher
@@ -139,13 +139,10 @@ class UserConfig:
                 self.password = self._read_key()
                 if self.username_file:
                     self.username = self._read_username_file()
-            self.frontend = frontend
             self.key_ttl = key_ttl
             self.listener_schema = listener_schema
-            # set the listener
-            if self._config.get("listeners") is not None:
-                self.listeners = {"listeners": self._config.get("listeners")}
-
+            self.listeners = listeners
+      
             logger.debug(f"Loading configuration completed")
 
         except Exception as e:
@@ -175,13 +172,6 @@ class UserConfig:
         configuration_engine["max_file_size"] = 500  # KiB
         configuration_engine["timeout"] = 60  # seconds
 
-        # frontend
-        frontend = {}
-        frontend["host"] = "127.0.0.1"
-        frontend["port"] = 8080
-        frontend["server_type"] = "flask"
-        frontend["workers"] = "1"
-
         # main config
         config = {}
         config["notification_engine"] = notification_engine
@@ -193,7 +183,6 @@ class UserConfig:
         config["no_fail"] = False
         config["key_file"] = os.path.join(SYSTEM_FOLDER, KEY_FILE)
         config["auth_type"] = "ecmwf"
-        config["frontend"] = frontend
         config["key_ttl"] = -1  # not expiring
         config["listener_schema"] = {}
         return config
@@ -263,7 +252,7 @@ class UserConfig:
         return current_config
 
     def _read_env_variables(self) -> Dict[str, any]:
-        config = {"notification_engine": {}, "configuration_engine": {}, "frontend": {}}
+        config = {"notification_engine": {}, "configuration_engine": {}}
         if "AVISO_NOTIFICATION_HOST" in os.environ:
             config["notification_engine"]["host"] = os.environ["AVISO_NOTIFICATION_HOST"]
         if "AVISO_NOTIFICATION_PORT" in os.environ:
@@ -308,14 +297,6 @@ class UserConfig:
             timeout = None if os.environ["AVISO_TIMEOUT"] == "null" else int(os.environ["AVISO_TIMEOUT"])
             config["notification_engine"]["timeout"] = timeout
             config["configuration_engine"]["timeout"] = timeout
-        if "AVISO_FRONTEND_HOST" in os.environ:
-            config["frontend"]["host"] = os.environ["AVISO_FRONTEND_HOST"]
-        if "AVISO_FRONTEND_PORT" in os.environ:
-            config["frontend"]["port"] = int(os.environ["AVISO_FRONTEND_PORT"])
-        if "AVISO_FRONTEND_SERVER_TYPE" in os.environ:
-            config["frontend"]["server_type"] = os.environ["AVISO_FRONTEND_SERVER_TYPE"]
-        if "AVISO_FRONTEND_WORKERS" in os.environ:
-            config["frontend"]["workers"] = int(os.environ["AVISO_FRONTEND_WORKERS"])
         return config
 
     def logging_setup(self, logging_conf_path: str):
@@ -413,25 +394,6 @@ class UserConfig:
             timeout=ce["timeout"], https=ce["https"])
 
     @property
-    def frontend(self) -> Dict[str, any]:
-        return self._frontend
-
-    @frontend.setter
-    def frontend(self, frontend: Dict[str, any]):
-        fe = self._config.get("frontend")
-        if frontend is not None and fe is not None:
-            UserConfig.deep_update(fe, frontend)
-        elif frontend is not None:
-            fe = frontend
-        # verify is valid
-        assert fe is not None, "frontend has not been configured"
-        assert fe.get("host") is not None, "frontend host has not been configured"
-        assert fe.get("port") is not None, "frontend port has not been configured"
-        assert fe.get("server_type") is not None, "frontend server_type has not been configured"
-        assert fe.get("workers") is not None, "frontend workers has not been configured"
-        self._frontend = fe
-
-    @property
     def listener_schema(self):
         return self._listener_schema
 
@@ -478,6 +440,14 @@ class UserConfig:
     @auth_type.setter
     def auth_type(self, auth_type: str):
         self._auth_type = AuthType[self._configure_property(auth_type, "auth_type").upper()]
+
+    @property
+    def listeners(self) -> Dict:
+        return self._listeners
+
+    @listeners.setter
+    def listeners(self, listeners: Dict):
+        self._listeners = {"listeners":  self._configure_property(listeners, "listeners", nullable=True)}
 
     @property
     def no_fail(self) -> bool:
@@ -544,18 +514,21 @@ class UserConfig:
                 f", debug: {self.debug}" +
                 f", quiet: {self.quiet}" +
                 f", username: {self.username}" +
-                f", key_ttl: {self.key_ttl}" +
-                f", frontend: {self.frontend}"
+                f", key_ttl: {self.key_ttl}"
         )
         return config_string
 
     def _configure_default_log(self):
-        # creating default console handler
-        console_handler = logging.StreamHandler()
-        console_handler.name = "console"
-        console_handler.setLevel(logging.INFO)
-        console_handler.setFormatter(logging.Formatter('%(message)s'))
-        logging.getLogger().addHandler(console_handler)
+        try:
+            console = next(h for h in logging.getLogger().handlers if h.name == "console")
+            # don't do anything, we already have a console handler
+        except StopIteration:  # this is raised when the console logger could not be found
+            # creating default console handler
+            console_handler = logging.StreamHandler()
+            console_handler.name = "console"
+            console_handler.setLevel(logging.INFO)
+            console_handler.setFormatter(logging.Formatter('%(message)s'))
+            logging.getLogger().addHandler(console_handler)
 
     def _configure_property(self, param, name, nullable=False):
         value = None

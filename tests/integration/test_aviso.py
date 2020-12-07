@@ -13,6 +13,9 @@ import random
 import subprocess
 from datetime import datetime
 from shutil import rmtree
+from multiprocessing import Process
+from flask import Flask
+from flask import request
 
 import pytest
 import yaml
@@ -441,6 +444,86 @@ def test_command_json_listener(config: user_config.UserConfig, caplog, capsys):
         for record in caplog.records:
             assert record.levelname != "ERROR"
         assert "Command Trigger completed" in caplog.text
+
+@pytest.mark.parametrize("config", configs)
+def test_command_json_listener(config: user_config.UserConfig, caplog, capsys):
+    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    with caplog_for_logger(caplog):  # this allows to assert over the logging output
+        aviso._listen(config, ["tests/integration/fixtures/listeners/commandJsonListener.yaml"])
+
+        time.sleep(1)
+
+        # create independent client to trigger the notification
+        send_notification_as_cli(config)
+        time.sleep(3)
+
+        # check if the change has been logged
+        for record in caplog.records:
+            assert record.levelname != "ERROR"
+        assert "Command Trigger completed" in caplog.text
+
+# test frontend
+test_frontend = Flask("Test_Frontend")
+@test_frontend.route('/test',  methods=['POST'])
+def received():
+    return f"Received {request.json}"
+#test_frontend.run(host="127.0.0.1", port=8001)
+
+@pytest.mark.parametrize("config", configs)
+def test_post_basic_listener(config: user_config.UserConfig, caplog, capsys):
+    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    with caplog_for_logger(caplog):  # this allows to assert over the logging output
+
+        # start a test frontend to send the notification to
+        server = Process(target=test_frontend.run, kwargs={"host": "127.0.0.1", "port": 8001})
+        server.start()
+    
+        aviso._listen(config, ["tests/integration/fixtures/listeners/postBasicListener.yaml"])
+
+        time.sleep(1)
+
+        # create independent client to trigger the notification
+        send_notification_as_cli(config)
+        time.sleep(3)
+
+        # check if the change has been logged
+        for record in caplog.records:
+            assert record.levelname != "ERROR"
+        assert "Post Trigger completed" in caplog.text
+        assert "CloudEvent notification sent successfully" in caplog.text
+
+        # terminate frontend
+        server.terminate()
+        server.join()
+        time.sleep(1)
+
+
+@pytest.mark.parametrize("config", configs)
+def test_post_complete_listener(config: user_config.UserConfig, caplog, capsys):
+    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    with caplog_for_logger(caplog):  # this allows to assert over the logging output
+        aviso._listen(config, ["tests/integration/fixtures/listeners/postCompleteListener.yaml"])
+
+        # start a test frontend to send the notification to
+        server = Process(target=test_frontend.run, kwargs={"host": "127.0.0.1", "port": 8001})
+        server.start()
+
+        time.sleep(1)
+
+        # create independent client to trigger the notification
+        send_notification_as_cli(config)
+        time.sleep(3)
+
+        # check if the change has been logged
+        for record in caplog.records:
+            assert record.levelname != "ERROR"
+        assert "Post Trigger completed" in caplog.text
+        assert "CloudEvent notification sent successfully" in caplog.text
+
+        # terminate frontend
+        server.terminate()
+        server.join()
+        time.sleep(1)
 
 
 @pytest.mark.parametrize("config", configs)

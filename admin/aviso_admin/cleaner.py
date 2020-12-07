@@ -26,6 +26,7 @@ class Cleaner:
         self.diss_path = config["diss_path"]
         self.mars_path = config["mars_path"]
         self.retention_period = config["retention_period"]
+        self.enabled = config["enabled"]
 
     def get_destinations(self, date):
         """
@@ -146,10 +147,10 @@ class Cleaner:
         :return: True if successful
         """
 
-        logger.info("Running cleaner...")
+        logger.debug("Running cleaner...")
 
         # determine the retention period
-        now = datetime.datetime.now()
+        now = datetime.datetime.utcnow()
         retention_start_date = now - datetime.timedelta(days=self.retention_period)
 
         # Dissemination keys
@@ -157,19 +158,20 @@ class Cleaner:
         destinations = self.get_destinations(retention_start_date)
 
         # for each destination delete all the key that are for that day
+        t_del_key = 0
         for dest in destinations:
-            self.delete_keys(retention_start_date, dest)
-        logger.info(f"Dissemination keys deleted for {retention_start_date}")
+            t_del_key += self.delete_keys(retention_start_date, dest)
+        logger.debug(f"Dissemination keys deleted for {retention_start_date}")
 
         # delete destination keys for that day
-        self.delete_destination_keys(retention_start_date)
-        logger.info(f"Destination keys deleted for {retention_start_date}")
+        t_del_key += self.delete_destination_keys(retention_start_date)
+        logger.debug(f"Destination keys deleted for {retention_start_date}")
 
         # MARS keys
-        self.delete_keys(retention_start_date)
-        logger.info(f"MARS keys deleted for {retention_start_date}")
+        t_del_key += self.delete_keys(retention_start_date)
+        logger.debug(f"MARS keys deleted for {retention_start_date}")
 
-        logger.info("Cleaner execution completed.")
+        logger.info(f"Cleaner execution completed. Total keys deleted: {t_del_key}")
         return True
 
 

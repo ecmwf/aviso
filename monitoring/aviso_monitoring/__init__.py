@@ -6,3 +6,10 @@
 # granted to it by virtue of its status as an intergovernmental organisation
 # nor does it submit to any jurisdiction.
 
+import logging
+
+# version number for the application.
+__version__ = '0.1.0'
+
+logger = logging.getLogger("aviso-monitoring")
+logger.setLevel(logging.DEBUG)

@@ -12,11 +12,11 @@ import logging
 __version__ = '0.2.0'
 
 # setting application logger
-logger = logging.getLogger("aviso-admin")
+logger = logging.getLogger("aviso-rest")
 logger.setLevel(logging.DEBUG)
 
 # home folder for configuration, state and log
-HOME_FOLDER = "~/.aviso-admin"
+HOME_FOLDER = "~/.aviso-rest"
 
 # system folder for configuration
-SYSTEM_FOLDER = "/etc/aviso-admin"
+SYSTEM_FOLDER = "/etc/aviso-rest"

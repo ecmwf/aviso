@@ -9,16 +9,32 @@
 import os
 import random
 import time
+import pytest
 from datetime import datetime
+import requests
 
 from aviso_admin import config, logger
 from aviso_admin.compactor import Compactor
+from aviso_admin.utils import encode_to_str_base64, decode_to_bytes, incr_last_byte
 
 
 def conf() -> config.Config:  # this automatically configure the logging
     c = config.Config(conf_path="tests/config.yaml")
     return c
 
+@pytest.fixture(scope="module", autouse=True)
+def clear_history():
+    yield
+    url = conf().compactor["url"] + "/v3/kv/deleterange"
+    key = conf().compactor["history_path"]
+    encoded_key = encode_to_str_base64(key)
+    encoded_end_key = encode_to_str_base64(str(incr_last_byte(key), "utf-8"))
+    body = {
+        "key": encoded_key,
+        "range_end": encoded_end_key
+    }
+    # make the call
+    resp = requests.post(url, json=body)
 
 def test_get_current_server_rev():
     logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
@@ -46,11 +62,11 @@ def test_clean_history():
     compactor = Compactor(conf().compactor)
 
     # first save a revision
-    res = compactor.save_rev(1112, datetime.now())
+    res = compactor.save_rev(1112, datetime.now().replace(hour=0, minute=0, second=0, microsecond=0))
     assert res
 
     # now retrieve it back
-    old_rev = compactor.clean_history(datetime.now())
+    old_rev = compactor.clean_history(datetime.now().replace(hour=0, minute=0, second=0, microsecond=0))
     assert old_rev == 1112
 
 

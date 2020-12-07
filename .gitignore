@@ -9,8 +9,12 @@ etcd3/*
 dist/*
 aviso.egg-info/*
 admin/aviso_admin.egg-info/*
-frontend/aviso_rest.egg-info/*
+rest/aviso_rest.egg-info/*
 auth/aviso_auth.egg-info/*
+monitoring/aviso_monitoring.egg-info/*
 tests/stress/*
 studies/*
 auth/tests/*
+Dockerfile
+admin/Dockerfile
+auth/Dockerfile
