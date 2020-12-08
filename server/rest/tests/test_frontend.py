@@ -14,14 +14,14 @@ import pytest
 import requests
 import os
 
-from rest.aviso_rest import logger
-from rest.aviso_rest.config import Config
+from aviso_rest import logger
+from aviso_rest.config import Config
 from pyaviso.cli_aviso import _parse_inline_params
-from rest.aviso_rest.frontend import Frontend
+from aviso_rest.frontend import Frontend
 from pyaviso.notification_manager import NotificationManager
-from monitoring.aviso_monitoring.udp_server import UdpServer
+from aviso_monitoring.udp_server import UdpServer
 
-config = Config(conf_path="rest/tests/config.yaml")
+config = Config(conf_path="server/rest/tests/config.yaml")
 frontend_url_home = f"http://{config.host}:{config.port}"
 frontend_url_api = f"{frontend_url_home}/api/v1"
 
