@@ -85,7 +85,7 @@ class UserConfig:
 
         # authorisation_server
         authorisation_server = {}
-        authorisation_server["url"] = "https://apps.ecmwf.int/products/api/v1/aviso/user-destinations/"
+        authorisation_server["url"] = "https://127.0..0.1:8080"
         authorisation_server["req_timeout"] = 60  # seconds
         authorisation_server["cache_timeout"] = 86400  # 1 day in seconds
         authorisation_server["open_keys"] = ["/ec/mars", "/ec/config/aviso"]

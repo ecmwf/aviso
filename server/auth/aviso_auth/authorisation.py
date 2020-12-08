@@ -23,7 +23,6 @@ class Authoriser:
         self.open_keys = config["open_keys"]
         self.protected_keys = config["protected_keys"]
         self.cert = config["cert"]
-        self.cacert = config["cacert"]
         self.key = config["key"]
 
         # assign explicitly a decorator to provide cache for _allowed_destinations
