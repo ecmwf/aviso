@@ -22,6 +22,9 @@ class Authoriser:
         self.req_timeout = config["req_timeout"]
         self.open_keys = config["open_keys"]
         self.protected_keys = config["protected_keys"]
+        self.cert = config["cert"]
+        self.cacert = config["cacert"]
+        self.key = config["key"]
 
         # assign explicitly a decorator to provide cache for _allowed_destinations
         if cache:
@@ -41,7 +44,7 @@ class Authoriser:
         """
         logger.debug(f"Request allowed destinations for username {username}")
         try:
-            resp = requests.post(self.url, data=[("username", username)], timeout=self.req_timeout)
+            resp = requests.get(self.url, params={"id": username}, timeout=self.req_timeout, cert=(self.cert, self.key))
         except Exception as e:
             logger.exception(e)
             raise InternalSystemError(f'Error in retrieving destinations for {username}')
@@ -52,12 +55,17 @@ class Authoriser:
             raise InternalSystemError(f'Error in retrieving destinations for {username}')
 
         resp_body = resp.json()
-        if type(resp_body) != list:
-            logger.error(f"Wrong format of destinations returned, {type(resp_body)}")
-            raise InternalSystemError(f"Wrong format of destinations returned")
+        if resp_body.get("success") != "yes":
+            logger.error(f'Error in retrieving destinations for {username} from {self.url}, '
+                         f'error {resp_body.get("error")}')
+            raise InternalSystemError(f'Error in retrieving destinations for {username}')
 
-        logger.debug(f"Username {username} is allowed the destinations: {resp_body}")
-        return resp_body
+        destinations = []
+        if resp_body.get("destinationList"):
+            destinations = list(map(lambda x: x.get("name"), resp_body.get("destinationList")))
+
+        logger.debug(f"Username {username} is allowed to access: {destinations}")
+        return destinations
 
     def is_authorised(self, username: str, request):
         """
