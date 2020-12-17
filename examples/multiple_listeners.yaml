@@ -1,7 +1,7 @@
 listeners:
   - event: dissemination
     request:
-      destination: ZAG
+      destination: FOO
       stream: enfo
       date: 20190810
       step: [1]
@@ -10,7 +10,7 @@ listeners:
 
   - event: dissemination
     request:
-      destination: ZAG
+      destination: FOO
       stream: enfo
       time: '0000'
     triggers:
@@ -18,7 +18,7 @@ listeners:
 
   - event: dissemination
     request:
-      destination: ZAG
+      destination: FOO
       stream: enfo
     triggers:
       - type: echo

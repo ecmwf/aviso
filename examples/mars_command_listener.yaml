@@ -8,5 +8,5 @@ listeners:
       step: [0, 1]
     triggers:
       - type: command
-        working_dir: $HOME/PycharmProjects/aviso/examples
+        working_dir: examples
         command: ./mars_script.sh --stream ${request.stream} --date ${request.date} --time ${request.time} --step ${request.step}

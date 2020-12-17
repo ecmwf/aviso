@@ -1,7 +1,7 @@
 listeners:
   - event: dissemination
     request:
-      destination: ZAG
+      destination: FOO
       stream: enfo
     triggers:
       - type: echo

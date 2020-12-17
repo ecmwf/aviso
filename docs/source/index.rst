@@ -1,32 +1,45 @@
-.. aviso documentation master file, created by
-   sphinx-quickstart on Mon Dec  7 09:57:42 2020.
-
 Welcome to Aviso's documentation!
 =================================
 
-Another header
-======
-here some text.::
-   
-   print 'hello'
-   >> hello
+.. Warning::
+   This documentation is work in progress.
 
+Aviso is a service developed at ECMWF with the aim of notifying for **data availability** of the time-critical data
+produced at ECMWF, such as the real-time forecast and derived products.
 
-Guide
-^^^^^
+It allows users to:
+
+* Define which events to be notified of.
+* Define the triggers to be executed once a notification is received.
+
+This allows the creation of automatic workflows timely triggered as data become available
+
+See :ref:`overview` for more information.
+
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: User Guide:
 
-   licence
-   help
+   overview
+   getting_started
+   defining_my_listener
+   testing_my_listener
+   historical_notifications
+   python_api
+   running_service
+   examples
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Reference:
+
+   overview
 
 
+License 
+-------
 
-Indices and tables
-==================
+*Aviso* is available under the open source `Apache License`__.
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+__ http://www.apache.org/licenses/LICENSE-2.0.html

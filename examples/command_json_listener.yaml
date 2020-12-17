@@ -1,7 +1,7 @@
 listeners:
   - event: dissemination
     request:
-      destination: ZAG
+      destination: FOO
       class: od
       expver: 1
       domain: g

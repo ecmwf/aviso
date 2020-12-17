@@ -1,12 +1,12 @@
 listeners:
   - event: dissemination
     request:
-      destination: ZAG
+      destination: FOO
       stream: enfo
     triggers:
       - type: command
-        working_dir: $HOME/PycharmProjects/aviso/examples
-        command: ./script.sh --date ${request.date} -s ${request.stream}
+        command: python examples/pythonScript.py
         environment:
           STEP: ${request.step}
           TIME: "The time is ${request.time}"
+
