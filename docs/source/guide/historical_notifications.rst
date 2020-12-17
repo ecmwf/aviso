@@ -1,7 +1,7 @@
 .. _historical_notifications:
 
 Dealing with historical notifications
-=====================
+=====================================
 
 Before listening to new notifications, Aviso by default checks what was the last notification received and 
 it will then return all the notifications that have been missed since. It will then carry on by listening 

@@ -18,11 +18,13 @@ To install Aviso, simply run the following command:
 
    % python3 -m pip install --upgrade git+https://git.ecmwf.int/scm/aviso/aviso.git@{tag_name}
 
-TODO Once on PyPI
+.. note::
 
-.. code-block:: console
+   Once on PyPI
+   
+   .. code-block:: console
 
-   % pip install pyaviso
+      % pip install pyaviso
 
 
 Configuring
@@ -55,7 +57,7 @@ Configuring
    The username is the email associated to the user' ECMWF account. The email can be obtained by logging at https://api.ecmwf.int/v1/key/.
 
 2. Save the ECMWF key in `/etc/aviso/key`. The key can be obtained by logging at https://api.ecmwf.int/v1/key/ . A 
-different location can be defined in the configuration file above described. More information are available in the :ref:`reference`.
+different location can be defined in the configuration file above described. More information are available in the :ref:`configuration`.
 
 Launching
 -----------------

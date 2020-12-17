@@ -1,21 +1,14 @@
 # Aviso
 
-Aviso is a notification application developed in Python. It allows users to:
-* Define the events for which being notified.
+Aviso is a service developed at ECMWF with the aim of notifying for **data availability** of the time-critical data
+produced at ECMWF, such as the real-time forecast and derived products.
+
+It allows users to:
+
+* Define which events to be notified of.
 * Define the triggers to be executed once a notification is received.
-* Dispatch notifications to the notification server.
 
-Moreover, Aviso can also be used to store and retrieve configuration files for various distributed services. In this 
-case it acts as a configuration client application. 
+This enables the creation of automatic workflows timely triggered as data become available
+ 
 
-These two functionalities, notification and configuration, share the same server technology and architecture, and 
-therefore most of the user options. 
-This page gives a quick introduction on the notification functionality only. 
-
-For a detailed description of the notification functionality and of the configuration client application please 
-refer to the [user manual](user_manual.md).
-
-For information regarding the installation please refer to the [installation guide](install.md).
-
-For information on how to contribute to the development and to the architectural design please refer to the [development 
-guide](development.md).
+The documentation can be found at https://aviso.readthedocs.io/.

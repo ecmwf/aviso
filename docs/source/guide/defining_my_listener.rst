@@ -2,13 +2,8 @@
 
 Defining my listener
 ====================
-Aviso configuration file allows the definition of multiple listeners. Alternatively, the listeners configuration can be indicated as an independent file or multiple files:
-
-.. code-block:: console
-
-   % aviso listen listener1.yaml listener2.yaml
-
-
+Aviso configuration file allows the definition of multiple listeners. 
+Alternatively, the listeners configuration can be indicated as an independent file or multiple files.
 Regardless where is defined, each listener is composed of:
 
 * an ``event`` type
@@ -74,6 +69,6 @@ These are the triggers currently available:
 * **command** allows the user to define a shell command to work with the notification
 * **post** allows the user to send the notification received as HTTP POST message formatted accordingly to the CloudEvent_ specification
 
-More information are available in the :ref:`reference`.
+More information are available in the :ref:`triggers`.
 
 .. _CloudEvent: https://cloudevents.io/

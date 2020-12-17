@@ -1,4 +1,4 @@
-.. _python_api:
+.. _python_api_guide:
 
 Aviso as a Python API
 =====================

@@ -12,29 +12,42 @@ It allows users to:
 * Define which events to be notified of.
 * Define the triggers to be executed once a notification is received.
 
-This allows the creation of automatic workflows timely triggered as data become available
+This enables the creation of automatic workflows timely triggered as data become available
 
 See :ref:`overview` for more information.
 
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: User Guide:
 
-   overview
-   getting_started
-   defining_my_listener
-   testing_my_listener
-   historical_notifications
-   python_api
-   running_service
-   examples
+   guide/overview
+   guide/getting_started
+   guide/defining_my_listener
+   guide/testing_my_listener
+   guide/historical_notifications
+   guide/python_api
+   guide/running_service
+   guide/examples
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Reference:
 
-   overview
+   reference/configuration
+   reference/triggers
+   reference/notification_cli
+   reference/python_api
+   reference/configuration_cli
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Contributing:
+
+   contributing/how_to
+   contributing/aviso_client
+   contributing/aviso_server
+   
 
 
 License 

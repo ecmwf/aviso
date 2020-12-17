@@ -1,7 +1,7 @@
 .. _overview:
 
 Overview
-=======
+========
 
 Aviso is a scalable notification system designed for high-throughput. It is developed at ECMWF with the aim of:
 
@@ -17,7 +17,7 @@ Figure below shows ECMWF data flow; it starts from the data assimilation of obse
 This is a time critical step for users' workflows and therefore its completion is notified by Aviso. The data flow continues with the generation of the derived products that are then
 disseminated via ECMWF ECPDS system. The delivery of these products is also notified by Aviso as users depends on custom products for their downstream applications.  
 
-.. image:: _static/data_flow.png
+.. image:: ../_static/data_flow.png
    :align: center
 
 Aviso is a client-server application. We refer to the notification server as Aviso Service while to the client application as Aviso client or just Aviso. This guide is mostly focused on Aviso client.
@@ -30,7 +30,7 @@ Figure below represents the general workflow of the application:
 4. The subscriber is notified with a new event
 5. The event triggers user’s workflow
 
-.. image:: _static/workflow.png
+.. image:: ../_static/workflow.png
    :width: 50%
    :align: center
 

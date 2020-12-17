@@ -1,5 +1,0 @@
-.. _examples:
-
-Listener Examples
-=======
-
