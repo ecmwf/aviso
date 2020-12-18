@@ -1,6 +1,0 @@
-.. _aviso_client:
-
-Aviso Client Architecture
-=======
-
-TODO
