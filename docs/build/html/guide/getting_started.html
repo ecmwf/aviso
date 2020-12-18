@@ -1,0 +1,330 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Getting Started &mdash; Aviso 0.8.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/style.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Defining my listener" href="defining_my_listener.html" />
+    <link rel="prev" title="Overview" href="overview.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html">
+          
+
+          
+            
+            <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">User Guide:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Getting Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#installing">Installing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#configuring">Configuring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#launching">Launching</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="defining_my_listener.html">Defining my listener</a></li>
+<li class="toctree-l1"><a class="reference internal" href="testing_my_listener.html">Testing my listener</a></li>
+<li class="toctree-l1"><a class="reference internal" href="historical_notifications.html">Dealing with historical notifications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="python_api.html">Aviso as a Python API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running_service.html">Running as a service</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Listener Examples</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Reference:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/triggers.html">Triggers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/notification_cli.html">CLI for Notification System</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/python_api.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/configuration_cli.html">CLI for Configuration System</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Contributing:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/how_to.html">How to develop</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/aviso_client.html">Aviso Client Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/aviso_server.html">Aviso Server Architecture</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Aviso</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Getting Started</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/guide/getting_started.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="getting-started">
+<span id="id1"></span><h1>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
+<p>Aviso can be used as a Python API or as Command-Line Interface (CLI) application. Here a few steps to quickly get a working configuration listening to notifications.
+Note that Aviso is a client application, this assumes that a notification server is up and running.</p>
+<div class="section" id="installing">
+<h2>Installing<a class="headerlink" href="#installing" title="Permalink to this headline">¶</a></h2>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Aviso requires Python 3.6 or above.</p>
+</div>
+<p>To install Aviso, simply run the following command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">%</span> python3 -m pip install --upgrade git+https://git.ecmwf.int/scm/aviso/aviso.git@<span class="o">{</span>tag_name<span class="o">}</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Once on PyPI</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">%</span> pip install pyaviso
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="configuring">
+<h2>Configuring<a class="headerlink" href="#configuring" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic">
+<li><p>Create a configuration file in the default location <cite>~/.aviso/config.yaml</cite> with the following settings:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">username</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">&lt;ECMWF user email&gt;</span>
+<span class="nt">listeners</span><span class="p">:</span>
+   <span class="p p-Indicator">-</span> <span class="nt">event</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">mars</span>
+   <span class="nt">request</span><span class="p">:</span>
+      <span class="nt">class</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">od</span>
+      <span class="nt">expver</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>
+      <span class="nt">domain</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">g</span>
+      <span class="nt">stream</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">enfo</span>
+      <span class="nt">step</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">1</span><span class="p p-Indicator">,</span><span class="nv">2</span><span class="p p-Indicator">,</span><span class="nv">3</span><span class="p p-Indicator">]</span>
+   <span class="nt">triggers</span><span class="p">:</span>
+      <span class="p p-Indicator">-</span> <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">echo</span>
+</pre></div>
+</div>
+<p>This file defines who is running Aviso, the event to listen to and the triggers to execute in case of notifications.
+This is a basic example of a listener to real-time forecast events, this is identified by the keyword <code class="docutils literal notranslate"><span class="pre">mars</span></code>.
+The block <code class="docutils literal notranslate"><span class="pre">request</span></code> describes for which events the user wants to execute the triggers. It is made by a list of attributes. The users
+have to specify only the attributes that they wants to use as filters. Only the notifications complying with all the
+attributes defined will execute the triggers.</p>
+<p>The trigger in this example is <code class="docutils literal notranslate"><span class="pre">echo</span></code>. This will simply print out the notification to the console output.</p>
+<p>The username is the email associated to the user’ ECMWF account. The email can be obtained by logging at <a class="reference external" href="https://api.ecmwf.int/v1/key/">https://api.ecmwf.int/v1/key/</a>.</p>
+</li>
+</ol>
+<p>2. Save the ECMWF key in <cite>/etc/aviso/key</cite>. The key can be obtained by logging at <a class="reference external" href="https://api.ecmwf.int/v1/key/">https://api.ecmwf.int/v1/key/</a> . A
+different location can be defined in the configuration file above described. More information are available in the <a class="reference internal" href="../reference/configuration.html#configuration"><span class="std std-ref">Configuration</span></a>.</p>
+</div>
+<div class="section" id="launching">
+<h2>Launching<a class="headerlink" href="#launching" title="Permalink to this headline">¶</a></h2>
+<p>Launch Aviso application by running the following:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">%</span> aviso listen
+</pre></div>
+</div>
+<p>Once in execution this command will create a process waiting for notifications compliant with the listener defined above.</p>
+<p>The user can terminate the application by pressing the key combination <code class="docutils literal notranslate"><span class="pre">CTRL</span></code> + <code class="docutils literal notranslate"><span class="pre">C</span></code></p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The configuration file is only read at start time, therefore every time users make changes to it they need to restart the listening process.</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="defining_my_listener.html" class="btn btn-neutral float-right" title="Defining my listener" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="overview.html" class="btn btn-neutral float-left" title="Overview" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, ECMWF
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

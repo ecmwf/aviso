@@ -1,0 +1,26 @@
+.. _examples:
+
+Listener Examples
+=======
+
+.. Warning::
+   This documentation is work in progress.
+
+
+Command Listener
+----------------
+
+.. code-block:: yaml
+
+    listeners:
+    - event: dissemination
+        request:
+        destination: FOO
+        stream: enfo
+        triggers:
+        - type: command
+            working_dir: examples
+            command: ./script.sh --date ${request.date} -s ${request.stream}
+            environment:
+            STEP: ${request.step}
+            TIME: "The time is ${request.time}"

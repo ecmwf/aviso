@@ -1,0 +1,275 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Dealing with past notifications &mdash; Aviso 0.8.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/style.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html">
+          
+
+          
+            
+            <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">User Guide:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="defining_my_listener.html">Defining my listener</a></li>
+<li class="toctree-l1"><a class="reference internal" href="testing_my_listener.html">Testing my listener</a></li>
+<li class="toctree-l1"><a class="reference internal" href="python_api.html">Aviso as a Python API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running_service.html">Running as a service</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Listener Examples</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Reference:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/configuration.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/triggers.html">Triggers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/notification_cli.html">CLI for Notification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/python_api.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/configuration_cli.html">CLI for Configuration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Contributing:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/how_to.html">How to develop</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/aviso_client.html">Aviso Client Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/aviso_server.html">Aviso Server Architecture</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Aviso</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Dealing with past notifications</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/guide/past_notifications.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="dealing-with-past-notifications">
+<span id="past-notifications"></span><h1>Dealing with past notifications<a class="headerlink" href="#dealing-with-past-notifications" title="Permalink to this headline">¶</a></h1>
+<p>Before listening to new notifications, Aviso by default checks what was the last notification received and
+it will then return all the notifications that have been missed since. It will then carry on by listening
+to new ones. The first ever time the application runs however no previous notification will be returned.
+This behaviour allows users not to miss any notifications in case of machine reboots.</p>
+<p>To override this behaviour by ignoring the missed notifications while listening only to the new ones,
+run the following:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">%</span> aviso listen --now
+</pre></div>
+</div>
+<p>This command will also reset the notification history.</p>
+<p>Users can also explicitly replay past notifications. Aviso can deliver notifications from the ECMWF server
+up to 14 days in the past. This can also be used to test the listener configuration with real notifications.​
+Here an example, launch Aviso with the following options:​</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">%</span> aviso listen --from <span class="m">2020</span>-01-20T00:00:00.0Z --to <span class="m">2020</span>-01-21T00:00:00.0Z
+</pre></div>
+</div>
+<p>It will replay all the notifications sent from 20 January to 21 January and the ones complying with the listener request will execute the triggers.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Dates must be in the past and <code class="docutils literal notranslate"><span class="pre">--to</span></code> can only be defined together with <code class="docutils literal notranslate"><span class="pre">--from</span></code>.
+Dates are defined in ISO format and they are in UTC.</p>
+</div>
+<p>In absence of <code class="docutils literal notranslate"><span class="pre">--to</span></code>, the system after having retrieved the past notifications, it ​will continue listening
+to future notifications. If <code class="docutils literal notranslate"><span class="pre">--to</span></code> is defined Aviso will terminate once retrieved all the past notifications.</p>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, ECMWF
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

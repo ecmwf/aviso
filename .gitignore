@@ -14,4 +14,4 @@ server/auth/tests/*
 Dockerfile
 server/admin/Dockerfile
 server/auth/Dockerfile
-docs/build/*
+

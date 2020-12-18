@@ -1,0 +1,423 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Triggers &mdash; Aviso 0.8.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/style.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="CLI for Notification" href="notification_cli.html" />
+    <link rel="prev" title="Configuration" href="configuration.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html">
+          
+
+          
+            
+            <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">User Guide:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../guide/overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guide/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guide/defining_my_listener.html">Defining my listener</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guide/testing_my_listener.html">Testing my listener</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guide/historical_notifications.html">Dealing with historical notifications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guide/python_api.html">Aviso as a Python API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guide/running_service.html">Running as a service</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guide/examples.html">Listener Examples</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Reference:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Triggers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#echo">Echo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#log">Log</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#command">Command</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#post">Post</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#function">Function</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="notification_cli.html">CLI for Notification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="python_api.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration_cli.html">CLI for Configuration</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Contributing:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/how_to.html">How to develop</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/aviso_client.html">Aviso Client Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing/aviso_server.html">Aviso Server Architecture</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Aviso</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Triggers</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/reference/triggers.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="triggers">
+<span id="id1"></span><h1>Triggers<a class="headerlink" href="#triggers" title="Permalink to this headline">¶</a></h1>
+<p>This section lists the various triggers currently available.
+Each trigger will result in an independent process executed every time a notification is received.</p>
+<div class="section" id="echo">
+<h2>Echo<a class="headerlink" href="#echo" title="Permalink to this headline">¶</a></h2>
+<p>This is the simplest trigger as it prints the notification to the console output.
+It is used for testing and it does not accept any extra parameters.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">triggers</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">echo</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="log">
+<h2>Log<a class="headerlink" href="#log" title="Permalink to this headline">¶</a></h2>
+<p>This trigger logs the event to a log file. It is useful for recording the received event.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">triggers</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">log</span>
+    <span class="nt">path</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">testLog.log</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The trigger process will fail if the directory does not exist.</p>
+</div>
+</div>
+<div class="section" id="command">
+<h2>Command<a class="headerlink" href="#command" title="Permalink to this headline">¶</a></h2>
+<p>This trigger allows the user to define a shell command to work with the notification.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">triggers</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">command</span>
+    <span class="nt">working_dir</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">$HOME/aviso/examples</span>
+    <span class="nt">command</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">./script.sh --date ${request.date} -s ${request.stream}</span>
+    <span class="nt">environment</span><span class="p">:</span>
+      <span class="nt">STEP</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">${request.step}</span>
+      <span class="nt">TIME</span><span class="p">:</span> <span class="s">&quot;The</span><span class="nv"> </span><span class="s">time</span><span class="nv"> </span><span class="s">is</span><span class="nv"> </span><span class="s">${request.time}&quot;</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">command</span></code> is the command that will be executed for each notification received. This is a mandatory field.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">environment</span></code> is a user defined list of local variables that will be passed to the command shell. This is an optional field.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">working_dir</span></code> defines the working directory that will be set before executing the command. This is an optional field.</p></li>
+</ul>
+<p>Moreover, the system performs a parameter substitution in the command and environment fields, for every sequence of the pattern:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">${name}</span></code>, it replaces it with the value associated to the corresponding key found in the notification received.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">${json}</span></code>, it replaces it with the whole notification formatted as a JSON inline string.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">${jsonpath}</span></code>, it replaces it with the file name of a JSON file containing the notification.</p></li>
+</ul>
+<p>A notification is a dictionary whose keys can be used in the parameter substitution mechanism described above.
+Here an example of a notification:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;event&quot;</span><span class="p">:</span> <span class="s2">&quot;dissemination&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;request&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;class&quot;</span><span class="p">:</span> <span class="s2">&quot;od&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;date&quot;</span><span class="p">:</span> <span class="s2">&quot;20191112&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;destination&quot;</span><span class="p">:</span> <span class="s2">&quot;FOO&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;domain&quot;</span><span class="p">:</span> <span class="s2">&quot;g&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;expver&quot;</span><span class="p">:</span> <span class="s2">&quot;0001&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;step&quot;</span><span class="p">:</span> <span class="s2">&quot;001&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;stream&quot;</span><span class="p">:</span> <span class="s2">&quot;enfo&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;time&quot;</span><span class="p">:</span> <span class="s2">&quot;18&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;target&quot;</span><span class="p">:</span> <span class="s2">&quot;E1&quot;</span>
+    <span class="p">},</span>
+    <span class="nt">&quot;location&quot;</span><span class="p">:</span> <span class="s2">&quot;s3://storage.ecmwf.europeanweather.cloud/ecpds/xxx.xx&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="post">
+<h2>Post<a class="headerlink" href="#post" title="Permalink to this headline">¶</a></h2>
+<p>This trigger allows the user to send as HTTP POST message the notification received and
+formatted accordingly to protocol indicated. Currently the only protocol implemented is the <a class="reference external" href="https://cloudevents.io/">CloudEvent</a> specification.
+This trigger basically turns Aviso client in a proxy
+forwarding the notification to the user’s notification system compatible with <a class="reference external" href="https://cloudevents.io/">CloudEvent</a> specification, as shown
+by the figure below:</p>
+<img alt="../_images/cloudEvent.png" src="../_images/cloudEvent.png" />
+<p>Here a basic example of a Post trigger:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">triggers</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">post</span>
+    <span class="nt">protocol</span><span class="p">:</span>
+      <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">cloudevent</span>
+      <span class="nt">url</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">http://my.notification.system/api</span>
+</pre></div>
+</div>
+<p>This is the basic configuration. More parameters can be specified to customise the CloudEvent message. More info the reference documentation.</p>
+<p>The CloudEvent message sent would look like the following:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span>{
+  &quot;type&quot; : &quot;aviso&quot;,                              # this is customisable by the user
+  &quot;data&quot;: {                                      # this is aviso specific
+    &quot;event&quot;: &quot;dissemination&quot;,
+    &quot;request&quot;: {
+      &quot;target&quot;: &quot;E1&quot;,
+      &quot;class&quot;: &quot;od&quot;,
+      &quot;date&quot;: &quot;20190810&quot;,
+      &quot;destination&quot;: &quot;FOO&quot;,
+      &quot;domain&quot;: &quot;g&quot;,
+      &quot;expver&quot;: &quot;1&quot;,
+      &quot;step&quot;: &quot;1&quot;,
+      &quot;stream&quot;: &quot;enfo&quot;,
+      &quot;time&quot;: &quot;0&quot;,
+    },
+  &quot;location&quot;: &quot;s3://data.ecmwf.int/diss/foo/bar/20190810/xyz&quot;, # location on ceph or s3
+  },
+  &quot;datacontenttype&quot;: &quot;application/json&quot;,
+  &quot;id&quot;: &quot;0c02fdc5-148c-43b5-b2fa-cb1f590369ff&quot;,  # UUID random generated by aviso
+  &quot;source&quot;: &quot;https://aviso.ecmwf.int&quot;,           # this is customisable by the user
+  &quot;specversion&quot;: &quot;1.0&quot;,
+  &quot;time&quot;: &quot;2020-03-02T13:34:40.245Z&quot;,            # Timestamp of when this message is created
+}
+</pre></div>
+</div>
+<p>Here a complete example showing how to customise the CloudEvent fields as well as the HTTP headers:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">triggers</span><span class="p">:</span>
+  <span class="p p-Indicator">-</span> <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">post</span>
+    <span class="nt">protocol</span><span class="p">:</span>
+      <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">cloudevent</span>
+      <span class="nt">url</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">http://my.notification.system/api</span>
+      <span class="nt">headers</span><span class="p">:</span>
+        <span class="nt">HTTP_TEST</span><span class="p">:</span> <span class="s">&quot;test&quot;</span>
+      <span class="nt">timeout</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">30</span>
+      <span class="nt">cloudevent</span><span class="p">:</span>
+        <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">test_cloudevent</span>
+        <span class="nt">source</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">my_test</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="function">
+<h2>Function<a class="headerlink" href="#function" title="Permalink to this headline">¶</a></h2>
+<p>Differently from the previous triggers, this trigger is not file based. It allows the user to define a Python function
+to be executed directly by Aviso. This is intended for users that want to integrate Aviso Python API into a workflow
+or application written in Python.</p>
+<p>Below an example of a python script that defines a function to be executed once a notification is received,
+creates a listener that references to this function trigger and finally passes it to aviso to execute.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyaviso</span> <span class="kn">import</span> <span class="n">NotificationManager</span>
+
+<span class="c1"># define function to be called</span>
+<span class="k">def</span> <span class="nf">do_something</span><span class="p">(</span><span class="n">notification</span><span class="p">):</span>
+   <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Notification for step </span><span class="si">{</span><span class="n">notification</span><span class="p">[</span><span class="s1">&#39;request&#39;</span><span class="p">][</span><span class="s1">&#39;step&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> received&quot;</span><span class="p">)</span>
+   <span class="c1"># now do something useful with it ...</span>
+
+<span class="c1"># define the trigger</span>
+<span class="n">trigger</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;function&quot;</span><span class="p">,</span> <span class="s2">&quot;function&quot;</span><span class="p">:</span> <span class="n">do_something</span><span class="p">}</span>
+
+<span class="c1"># create a event listener request that uses that trigger</span>
+<span class="n">request</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;class&quot;</span><span class="p">:</span> <span class="s2">&quot;od&quot;</span><span class="p">,</span> <span class="s2">&quot;stream&quot;</span><span class="p">:</span> <span class="s2">&quot;oper&quot;</span><span class="p">,</span> <span class="s2">&quot;expver&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;domain&quot;</span><span class="p">:</span> <span class="s2">&quot;g&quot;</span><span class="p">,</span> <span class="s2">&quot;step&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}</span>
+<span class="n">listeners</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;listeners&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;event&quot;</span><span class="p">:</span> <span class="s2">&quot;mars&quot;</span><span class="p">,</span> <span class="s2">&quot;request&quot;</span><span class="p">:</span> <span class="n">request</span><span class="p">,</span> <span class="s2">&quot;triggers&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">trigger</span><span class="p">]}]}</span>
+
+<span class="c1"># run it</span>
+<span class="n">aviso</span> <span class="o">=</span> <span class="n">NotificationManager</span><span class="p">()</span>
+<span class="n">aviso</span><span class="o">.</span><span class="n">listen</span><span class="p">(</span><span class="n">listeners</span><span class="o">=</span><span class="n">listeners</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>See <a class="reference internal" href="python_api.html#python-api-ref"><span class="std std-ref">Python API</span></a> for more info on how to use Aviso API.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="notification_cli.html" class="btn btn-neutral float-right" title="CLI for Notification" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="configuration.html" class="btn btn-neutral float-left" title="Configuration" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, ECMWF
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
