@@ -2,7 +2,7 @@
 
 Getting Started
 ===============
-Aviso can be used as a Python API or as Command-Line Interface (CLI) application. Here a few steps to quickly get a working configuration listening to notifications.
+Aviso can be used as a Python API or as Command-Line Interface (CLI) application. Below find a few steps to quickly get a working configuration, able to listen to notifications.
 Note that Aviso is a client application, this assumes that a notification server is up and running.
 
 Installing
@@ -49,15 +49,15 @@ Configuring
    This file defines who is running Aviso, the event to listen to and the triggers to execute in case of notifications. 
    This is a basic example of a listener to real-time forecast events, this is identified by the keyword ``mars``. 
    The block ``request`` describes for which events the user wants to execute the triggers. It is made by a list of attributes. The users 
-   have to specify only the attributes that they wants to use as filters. Only the notifications complying with all the 
+   have to specify only the attributes that they want to use as filters. Only the notifications complying with all the 
    attributes defined will execute the triggers. 
 
    The trigger in this example is ``echo``. This will simply print out the notification to the console output.
 
-   The username is the email associated to the user' ECMWF account. The email can be obtained by logging at https://api.ecmwf.int/v1/key/.
+   The username is the email associated to the user's ECMWF account. The email can be obtained by logging on to https://api.ecmwf.int/v1/key/
 
-2. Save the ECMWF key in `/etc/aviso/key`. The key can be obtained by logging at https://api.ecmwf.int/v1/key/ . A 
-different location can be defined in the configuration file above described. More information are available in the :ref:`configuration`.
+2. Save the ECMWF key in `/etc/aviso/key`. The key can be obtained by logging on to https://api.ecmwf.int/v1/key/ A 
+different location can be defined in the configuration file above described. More information is available in the :ref:`configuration`.
 
 Launching
 -----------------

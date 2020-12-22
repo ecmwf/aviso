@@ -1,7 +1,7 @@
 .. _triggers:
 
 Triggers
-=======
+========
 This section lists the various triggers currently available. 
 Each trigger will result in an independent process executed every time a notification is received. 
 
@@ -56,11 +56,11 @@ Moreover, the system performs a parameter substitution in the command and enviro
 * ``${jsonpath}``, it replaces it with the file name of a JSON file containing the notification.
 
 A notification is a dictionary whose keys can be used in the parameter substitution mechanism described above. 
-Here an example of a notification:
+Here is an example of a notification:
 
 .. code-block:: json
 
-  {
+    {
       "event": "dissemination",
       "request": {
           "class": "od",
@@ -74,7 +74,7 @@ Here an example of a notification:
           "target": "E1"
       },
       "location": "s3://storage.ecmwf.europeanweather.cloud/ecpds/xxx.xx"
-  }
+    }
 
 
 Post
@@ -87,7 +87,7 @@ by the figure below:
 
 .. image:: ../_static/cloudEvent.png
 
-Here a basic example of a Post trigger:
+Here is a basic example of a Post trigger:
 
 .. code-block:: yaml
 
@@ -127,7 +127,7 @@ The CloudEvent message sent would look like the following:
     "time": "2020-03-02T13:34:40.245Z",            # Timestamp of when this message is created
   }
 
-Here a complete example showing how to customise the CloudEvent fields as well as the HTTP headers:
+Here is a complete example showing how to customise the CloudEvent fields as well as the HTTP headers:
 
 .. code-block:: yaml
 
@@ -152,7 +152,7 @@ Differently from the previous triggers, this trigger is not file based. It allow
 to be executed directly by Aviso. This is intended for users that want to integrate Aviso Python API into a workflow 
 or application written in Python. 
 
-Below an example of a python script that defines a function to be executed once a notification is received, 
+Below find an example of a python script that defines a function to be executed once a notification is received, 
 creates a listener that references to this function trigger and finally passes it to aviso to execute.
 
 .. code-block:: python

@@ -11,4 +11,3 @@ listeners:
       step: 0
     triggers:
       - type: echo
-

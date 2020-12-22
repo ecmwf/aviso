@@ -19,7 +19,7 @@ This command will also reset the notification history.
 
 Users can also explicitly replay past notifications. Aviso can deliver notifications from the ECMWF server 
 up to 14 days in the past. This can also be used to test the listener configuration with real notifications.​
-Here an example, launch Aviso with the following options:​
+Here is an example, launch Aviso with the following options:​
 
 .. code-block:: console
 
@@ -31,5 +31,5 @@ It will replay all the notifications sent from 20 January to 21 January and the 
    Dates must be in the past and ``--to`` can only be defined together with ``--from``. 
    Dates are defined in ISO format and they are in UTC.
 
-In absence of ``--to``, the system after having retrieved the past notifications, it ​will continue listening 
-to future notifications. If ``--to`` is defined Aviso will terminate once retrieved all the past notifications.
+In absence of ``--to``, the system, after having retrieved the past notifications, ​will continue listening 
+to future notifications. If ``--to`` is defined Aviso will terminate once it has retrieved all the past notifications.

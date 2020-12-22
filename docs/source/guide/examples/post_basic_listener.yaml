@@ -7,5 +7,4 @@ listeners:
       - type: post
         protocol: 
           type: cloudevent
-          url: http://127.0.0.1:8001/test
-          
+          url: http://my.endpoint/

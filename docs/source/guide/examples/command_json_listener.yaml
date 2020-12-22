@@ -7,4 +7,4 @@ listeners:
       domain: g
     triggers:
       - type: command
-        command: examples/script.sh --json ${json}
+        command: ./script.sh --json ${json}

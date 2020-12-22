@@ -4,4 +4,4 @@ listeners:
       destination: FOO
     triggers:
       - type: command
-        command: examples/script.sh --jsonpath ${jsonpath}
+        command: ./script.sh --jsonpath ${jsonpath}

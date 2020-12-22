@@ -1,12 +1,25 @@
-.. _notification_cli:
-
 .. highlight:: console
+
+.. _notification_cli:
 
 CLI for Notification
 ====================
 
 Aviso provides a Command Line Interface (CLI) for listening to notifications from the server system described in :ref:`aviso_server`. 
-This section describes in details the various commands associated with this functionality.
+This section describes in detail the various commands associated with this functionality.
+
+.. code-block:: console
+
+   % aviso -h
+   Options:
+    --version   Show the version and exit.
+    -h, --help  Show this message and exit.
+
+   Commands:
+    key     Generate the key to send to the notification server according to...
+    listen  This method allows the user to execute the listeners defined in...
+    notify  Create a notification with the parameters passed and submit it to...
+    value   Return the value on the server corresponding to the key which is...
 
 
 .. _notification_cli_listen:
@@ -17,6 +30,7 @@ This command allows to listen to notifications compliant with the listeners defi
 
 .. code-block:: console
 
+    % aviso listen -h
     Usage: aviso listen [OPTIONS] [LISTENER_FILES]...
 
     This method allows the user to execute the listeners defined in the YAML
@@ -44,7 +58,7 @@ This command allows to listen to notifications compliant with the listeners defi
 
 The parameter ``listener_files`` is used to define the event listeners and the triggers to execute in case 
 of notifications. If not present the system will look for the default listeners which can be 
-defined in the configuration files. Here an example of invoking this command with one listener file::
+defined in the configuration files. Here is an example of invoking this command with one listener file::
 
     % aviso listen examples/echoListener.yaml
 
@@ -58,20 +72,20 @@ that are not covered by the :ref:`configuration` section.
 
 No fail
 ^^^^^^^
-If the option ``--no-fail`` is present the application will always exit with error code 0, even in case of errors. This can be
-useful when used in a automated workflow that is required not to stop even if Aviso exit because of errors.
+If the option ``--no-fail`` is present, the application will always exit with error code 0, even in case of errors. This can be
+useful when used in a automated workflow that is required not to stop even if Aviso exits because of errors.
 
 Test
-^^^^^^^
-If the option ``--test`` is present the application will run in `TestMode`. See :ref:`testing_my_listener` for more information.
+^^^^
+If the option ``--test`` is present, the application will run in `TestMode`. See :ref:`testing_my_listener` for more information.
 
 Now
-^^^^^^^
-If the option ``--now`` is present the application will start ignoring the missed notifications while listening only to the new ones. See :ref:`past_notifications` for more information.
+^^^
+If the option ``--now`` is present, the application will start ignoring the missed notifications while listening only to the new ones. See :ref:`past_notifications` for more information.
 
 Catchup
 ^^^^^^^
-If the option ``--catchup`` is present the application will start retrieving first the missed notifications and then listening to the new ones. See :ref:`past_notifications` for more information.
+If the option ``--catchup`` is present, the application will start retrieving first the missed notifications and then listening to the new ones. See :ref:`past_notifications` for more information.
 This option is enabled by default. See :ref:`configuration` for more information.
 
 
@@ -82,6 +96,7 @@ pair. This command is mostly used for debugging.
 
 .. code-block:: console
 
+    % aviso key -h
     Usage: aviso key [OPTIONS] PARAMETERS
 
     Generate the key to send to the notification server according to the
@@ -103,7 +118,7 @@ pair. This command is mostly used for debugging.
     --test               Activate TestMode.
     -h, --help           Show this message and exit.
 
-Here an example of this command::
+Here is an example of this command::
 
     % aviso key event=dissemination,target=E1,class=od,date=20190810,destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=0
 
@@ -122,6 +137,7 @@ of the command ``key``.
 
 .. code-block:: console
 
+    % aviso value -h
     Usage: aviso value [OPTIONS] PARAMETERS
 
     Return the value on the server corresponding to the key which is generated
@@ -143,11 +159,11 @@ of the command ``key``.
     --test               Activate TestMode.
     -h, --help           Show this message and exit.
 
-Here an example of this command::
+Here is  an example of this command::
 
     % aviso value event=dissemination,target=E1,class=od,date=20190810,destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=0
 
-Note the list of parameters required, it is the same list required by the ``key`` command.
+Note the list of parameters required, this is the same list required by the ``key`` command.
 
 All the options accepted by this command are covered in :ref:`notification_cli_listen` and in :ref:`configuration`.
 
@@ -157,6 +173,7 @@ This command is used to directly send a notification to the server using the sam
 
 .. code-block:: console
 
+    % aviso notify -h
     Usage: aviso notify [OPTIONS] PARAMETERS
 
     Create a notification with the parameters passed and submit it to the
@@ -176,11 +193,11 @@ This command is used to directly send a notification to the server using the sam
     --test               Activate TestMode.
     -h, --help           Show this message and exit.
 
-Here an example of this command::
+Here is an example of this command::
 
     % aviso notify event=dissemination,target=E1,class=od,date=20190810,destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=0,location=xxxxxxxx
 
-Note the list of parameters required, it is the same list required by the ``key`` command with the addition of the ``location``
+Note the list of parameters required, this is the same list required by the ``key`` command with the addition of the ``location``
 pair. This is needed only for the ``dissemination`` event. 
 
 In the case of a ``mars`` event the command looks like this::

@@ -4,13 +4,13 @@ Defining my listener
 ====================
 Aviso configuration file allows the definition of multiple listeners. 
 Alternatively, the listeners configuration can be indicated as an independent file or multiple files.
-Regardless where is defined, each listener is composed of:
+Regardless of where is defined, each listener is composed of:
 
 * an ``event`` type
 * a ``request`` block
 * a ``triggers`` block
 
-Here a basic example:
+Here is a basic example:
    .. code-block:: yaml
 
       listeners:
@@ -36,7 +36,7 @@ Aviso offers notifications for the following types of events:
 
 Request
 -------
-The table below shows the full list of fields accepted in a ``request`` block. These fields represent a subset on the MARS language.
+The table below shows the full list of fields accepted in a ``request`` block. These fields represent a subset of the MARS language.
 
 +------------+----------------------+--------------+--------------------+
 |Field       |Type                  | Event        | Optional/Mandatory |

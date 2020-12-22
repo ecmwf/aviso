@@ -2,23 +2,23 @@ listeners:
   - event: dissemination
     request:
       destination: FOO
+      target: E1
+      class: od
+      expver: 1
+      domain: g
+      date: 20200810
       stream: enfo
+      step: 0
+    triggers:
+      - type: echo
+  - event: mars
+    request:
+      class: od
+      expver: 1
+      domain: g
       date: 20190810
-      step: [1]
-    triggers:
-      - type: echo
-
-  - event: dissemination
-    request:
-      destination: FOO
-      stream: enfo
-      time: '0000'
-    triggers:
-      - type: echo
-
-  - event: dissemination
-    request:
-      destination: FOO
-      stream: enfo
+      time: [0, 12]
+      stream: [enfo, oper]
+      step: [0,1,2,3]
     triggers:
       - type: echo
