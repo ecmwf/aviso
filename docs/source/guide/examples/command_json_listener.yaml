@@ -1,0 +1,10 @@
+listeners:
+  - event: dissemination
+    request:
+      destination: FOO
+      class: od
+      expver: 1
+      domain: g
+    triggers:
+      - type: command
+        command: ./script.sh --json ${json}

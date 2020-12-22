@@ -1,0 +1,10 @@
+listeners:
+  - event: dissemination
+    request:
+      destination: FOO
+      stream: enfo
+    triggers:
+      - type: post
+        protocol: 
+          type: cloudevent
+          url: http://my.endpoint/

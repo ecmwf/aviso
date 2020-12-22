@@ -206,8 +206,8 @@ def cli(): pass
               help="Replay notification from this date.")
 @click.option("--to", "to_date", type=click.DateTime(formats=["%Y-%m-%dT%H:%M:%S.%fZ"]),
               help="Replay notification to this date.")
-@click.option("--now", "now", is_flag=True, default=False, help="Ignore missed notifications, only listen to new ones")
-@click.option("--catchup", "catchup", is_flag=True, default=False, help="Retrieve first the missed notifications")
+@click.option("--now", "now", is_flag=True, default=False, help="Ignore missed notifications, only listen to new ones.")
+@click.option("--catchup", "catchup", is_flag=True, default=False, help="Retrieve first the missed notifications.")
 def listen(listener_files: List[str], configuration: conf.UserConfig, from_date, to_date, now, catchup):
     """
     This method allows the user to execute the listeners defined in the YAML listener file
