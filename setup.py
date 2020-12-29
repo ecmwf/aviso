@@ -33,7 +33,8 @@ setup(
         'python-json-logger>=0.1.11',
         'requests>=2.23.0',
         'parse>=1.12.1',
-        'pyinotify>=0.9.6'
+        'pyinotify>=0.9.6',
+        'cloudevents>=1.2.0'
     ],
     entry_points={
         'console_scripts': [

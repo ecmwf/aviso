@@ -13,6 +13,7 @@ import uuid
 import datetime
 import importlib
 from enum import Enum
+from cloudevents.http import CloudEvent, to_structured
 
 from . import trigger
 from .trigger import TriggerType
@@ -81,20 +82,24 @@ class PostCloudEvent():
     def execute(self):
         
         # prepare the CloudEvent message
-        data = {
+
+        attributes = {
             "type": self.type,
-            "data": self.notification,
-            "datacontenttype": "application/json",
-            "id": str(uuid.uuid4()),
-            "source": self.source,                    
-            "specversion": "1.0",
-            "time": datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+            "source": self.source,
+            "time": datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")     
         }
+        data = self.notification
+        event = CloudEvent(attributes, data)
+
+        # Creates the HTTP request representation of the CloudEvent in structured content mode
+        headers, body = to_structured(event)
+        self.headers.update(headers)
+
         logger.debug(f"Sending CloudEvent notification {data}")
 
         # send the message
         try:
-            resp = requests.post(self.url, json=data, headers=self.headers, verify=False, timeout=self.timeout)
+            resp = requests.post(self.url, data=body, headers=self.headers, verify=False, timeout=self.timeout)
         except Exception as e:
             logger.error("Not able to POST CloudEvent notification")
             raise TriggerException(e) 
