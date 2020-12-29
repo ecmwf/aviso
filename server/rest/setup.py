@@ -29,7 +29,8 @@ setup(
         'parse>=1.12.1',
         'gunicorn>=20.0.4',
         'flask>=1.1.2',
-        'pyinotify>=0.9.6'
+        'pyinotify>=0.9.6',
+        'cloudevents>=1.2.0'
     ],
     entry_points={
         'console_scripts': [

@@ -146,7 +146,7 @@ def test_bad_request_no_id():
     assert resp.status_code == 400
     assert resp.text
     message = json.loads(resp.text)
-    assert message.get("message") == "Invalid notification, 'id' could not be located"
+    assert message.get("message") == 'Missing required attributes: {\'id\'}'
 
 
 def test_bad_request_no_source():
@@ -177,7 +177,7 @@ def test_bad_request_no_source():
     assert resp.status_code == 400
     assert resp.text
     message = json.loads(resp.text)
-    assert message.get("message") == "Invalid notification, 'source' could not be located"
+    assert message.get("message") == 'Missing required attributes: {\'source\'}'
 
 
 def test_bad_request_no_spec():
@@ -208,7 +208,7 @@ def test_bad_request_no_spec():
     assert resp.status_code == 400
     assert resp.text
     message = json.loads(resp.text)
-    assert message.get("message") == "Invalid notification, 'specversion' could not be located"
+    assert message.get("message") == "Failed to find specversion in HTTP request"
 
 
 def test_bad_request_no_type():
@@ -225,7 +225,7 @@ def test_bad_request_no_type():
     assert resp.status_code == 400
     assert resp.text
     message = json.loads(resp.text)
-    assert message.get("message") == "Invalid notification, 'data' could not be located"
+    assert message.get("message") == 'Invalid notification, \'data\' could not be located'
 
 
 def test_bad_request_no_data():
@@ -256,7 +256,7 @@ def test_bad_request_no_data():
     assert resp.status_code == 400
     assert resp.text
     message = json.loads(resp.text)
-    assert message.get("message") == "Invalid notification, 'type' could not be located"
+    assert message.get("message") == 'Missing required attributes: {\'type\'}'
 
 
 def test_bad_request_no_event():
@@ -287,7 +287,7 @@ def test_bad_request_no_event():
     assert resp.status_code == 400
     assert resp.text
     message = json.loads(resp.text)
-    assert message.get("message") == "Invalid notification, 'event' could not be located"
+    assert message.get("message") == 'Invalid notification, \'event\' could not be located'
 
 
 def test_bad_request_no_location():

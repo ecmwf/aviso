@@ -15,7 +15,7 @@ from flask import Flask
 from flask import request
 from gunicorn import glogging
 from six import iteritems
-
+from cloudevents.http import from_http
 from aviso_rest import logger, __version__
 from pyaviso.custom_exceptions import InvalidInputError
 # from flask_swagger_ui import get_swaggerui_blueprint
@@ -90,7 +90,7 @@ class Frontend:
             logger.debug(body)
             try:
                 # parse the body as cloud event
-                notification = self._parse_cloud_event(body)
+                notification = self._parse_cloud_event(request)
                 logger.info(f"New event received: {notification}")
 
                 # send the notification and time it
@@ -119,32 +119,24 @@ class Frontend:
             logging.error(f"server_type {self.config.server_type} not supported")
             raise NotImplementedError
 
-    def _parse_cloud_event(self, message) -> Dict:
+    def _parse_cloud_event(self, request) -> Dict:
         """
         This helper method parses cloud event message, validate it and return the notification associated to it
-        :param message: cloud event
+        :param request: cloud event request
         :return: notification as dictionary
         """
         try:
-            # validate all mandatory fields
-            assert "id" in message and message.get("id") is not None, "Invalid notification, 'id' could not be located"
-            assert "source" in message and message.get("source") is not None, \
-                "Invalid notification, 'source' could not be located"
-            assert "specversion" in message and message.get("specversion") is not None, \
-                "Invalid notification, 'specversion' could not be located"
-            assert "type" in message and message.get("type") is not None, \
-                "Invalid notification, 'type' could not be located"
+            cloudevent = from_http(request.headers, request.get_data())
+
             # extract the notification
-            assert "data" in message and message.get("data") is not None, \
-                "Invalid notification, 'data' could not be located"
-            notification = message.get("data")
-            assert "request" in notification and notification.get("request") is not None, \
-                "Invalid notification, 'request' could not be located"
+            assert cloudevent.data is not None, "Invalid notification, 'data' could not be located"
+            notification = cloudevent.data
+            assert notification.get("event") is not None, "Invalid notification, 'event' could not be located"
+            assert notification.get("request") is not None, "Invalid notification, 'request' could not be located"
             req = notification.pop("request")
-            for k, v in req.items():
-                notification[k] = v
+            notification.update(req)
             return notification
-        except AssertionError as e:
+        except Exception as e:
             raise InvalidInputError(e)
 
     def post_worker_init(self, worker):
