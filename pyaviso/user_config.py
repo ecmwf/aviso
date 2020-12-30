@@ -84,6 +84,7 @@ class UserConfig:
 
     def __init__(self,
                  conf_path: Optional[str] = None,
+                 conf_from_file: Optional[Dict[str, any]] = None,
                  logging_path: Optional[str] = None,
                  notification_engine: Optional[Dict[str, any]] = None,
                  configuration_engine: Optional[Dict[str, any]] = None,
@@ -99,9 +100,10 @@ class UserConfig:
                  listeners: Optional[Dict[str, any]] = None):
         """
         :param conf_path: path to the system configuration file. If not provided,
-        the default location is HOME_FOLDER/user_config.yaml.
+        the default location is HOME_FOLDER/config.yaml.
+        :param conf_from_file: system configuration dictionary. This will be treated as if read from file, in the same priority order.
         :param logging_path: path to the logging configuration file. If not provided,
-        the default location is the logging section of the HOME_FOLDER/user_config.yaml.
+        the default location is the logging section of the HOME_FOLDER/config.yaml.
         :param notification_engine: configuration object for the notification server
         :param configuration_engine: configuration object for the configuration server
         :param debug: flag to activate the debug log to the console output
@@ -119,12 +121,19 @@ class UserConfig:
             # we build the configuration in priority order from the lower to the higher
             # start from the defaults
             self._config = self._create_default_config()
+
             # add the configuration files
-            UserConfig.deep_update(self._config, self._parse_config_files(conf_path))
+            if conf_from_file: # only one method is allowed
+                UserConfig.deep_update(self._config, conf_from_file)
+            else:
+                UserConfig.deep_update(self._config, self._parse_config_files(conf_path))
+
             # initialise logger, this needs to be done ASAP
             self.logging_setup(logging_path)
+
             # add environment variables
             UserConfig.deep_update(self._config, self._read_env_variables())
+
             # add constructor parameters
             self.notification_engine = notification_engine
             self.configuration_engine = configuration_engine

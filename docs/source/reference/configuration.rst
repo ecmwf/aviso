@@ -100,7 +100,7 @@ username, username_file or key will be ignored.
 Type                   Enum [ecmwf, etcd, none]
 Defaults               ecmwf
 Command Line options   N/A
-Environment variable   AVISO_KEY_FILE
+Environment variable   AVISO_AUTH_TYPE
 Configuration file     .. code-block:: yaml
                         
                           auth_type: ecmwf

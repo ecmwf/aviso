@@ -82,7 +82,7 @@ class Config:
         # main config
         config = {}
         config["monitoring"] = {}
-        config["aviso"] = {}
+        config["aviso"] = AvisoConfig()
         config["debug"] = False
         config["host"] = "127.0.0.1"
         config["port"] = 8080
@@ -129,6 +129,10 @@ class Config:
         # Finally the user config option
         if user_conf_path:
             parse_config(user_conf_path)
+
+        # instantiate Aviso Config
+        if "aviso" in current_config:
+            current_config["aviso"] = AvisoConfig(conf_from_file=current_config["aviso"])
 
         return current_config
 
@@ -203,12 +207,10 @@ class Config:
     def aviso(self, aviso: Dict):
         av = self._config.get("aviso")
         if aviso is not None and av is not None:
-            Config.deep_update(av, aviso)
-        elif aviso is not None:
-            av = aviso
+            av = AvisoConfig(**aviso)
         # verify is valid
         assert av is not None, "aviso has not been configured"
-        self._aviso = AvisoConfig(**av)
+        self._aviso = av
 
     @property
     def host(self):
