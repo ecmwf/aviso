@@ -82,7 +82,7 @@ class Config:
         # main config
         config = {}
         config["monitoring"] = {}
-        config["aviso"] = AvisoConfig()
+        config["aviso"] = None
         config["debug"] = False
         config["host"] = "127.0.0.1"
         config["port"] = 8080
@@ -206,7 +206,7 @@ class Config:
     @aviso.setter
     def aviso(self, aviso: Dict):
         av = self._config.get("aviso")
-        if aviso is not None and av is not None:
+        if aviso is not None:
             av = AvisoConfig(**aviso)
         # verify is valid
         assert av is not None, "aviso has not been configured"
