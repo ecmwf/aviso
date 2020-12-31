@@ -50,7 +50,7 @@ manager object will instantiate a config object that follows the criteria explai
 
 Notify
 ------
-This method is used to submit notification. End-users are not currently allowed to submit to ECMWF notification server but 
+This method is used to submit notification. End-users are not currently allowed to submit to the ECMWF Aviso service but 
 they can submit notification in test mode, see :ref:`testing_my_listener`, or to local instances of the store.
 The example belows shows how to send a ``mars`` notification.
 

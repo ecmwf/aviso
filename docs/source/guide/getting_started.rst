@@ -3,7 +3,8 @@
 Getting Started
 ===============
 Aviso can be used as a Python API or as Command-Line Interface (CLI) application. Below find a few steps to quickly get a working configuration, able to listen to notifications.
-Note that Aviso is a client application, this assumes that a notification server is up and running.
+Note that Aviso is a client application, the following quick start shows how to connect to the ECMWF notification service, that is the current default configuration. For alternative configurations 
+see :ref:`configuration`.
 
 Installing
 ----------
@@ -34,7 +35,7 @@ Configuring
 
    .. code-block:: yaml
 
-      username: <ECMWF user email>
+      username: <...>
       listeners:
          - event: mars
          request:
@@ -50,11 +51,15 @@ Configuring
    This is a basic example of a listener to real-time forecast events, this is identified by the keyword ``mars``. 
    The block ``request`` describes for which events the user wants to execute the triggers. It is made by a list of attributes. The users 
    have to specify only the attributes that they want to use as filters. Only the notifications complying with all the 
-   attributes defined will execute the triggers. 
+   attributes defined will execute the triggers. These attributes are a subset of the ECMWF MARS_ language.
+
+   .. _MARS: https://www.ecmwf.int/en/forecasts/datasets/archive-datasets
 
    The trigger in this example is ``echo``. This will simply print out the notification to the console output.
 
-   The username is the email associated to the user's ECMWF account. The email can be obtained by logging on to https://api.ecmwf.int/v1/key/
+   In the default configuration, the authentication have to comply with ECMWF authentication requirements. In this case, the username is the 
+   email associated to the user's ECMWF account. The email can be obtained by logging on to https://api.ecmwf.int/v1/key/. Similarly a key 
+   is required as shown by next step.
 
 2. Save the ECMWF key in `/etc/aviso/key`. The key can be obtained by logging on to https://api.ecmwf.int/v1/key/ A 
 different location can be defined in the configuration file above described. More information is available in the :ref:`configuration`.

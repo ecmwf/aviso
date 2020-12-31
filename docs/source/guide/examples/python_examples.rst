@@ -10,7 +10,7 @@ in case of notifications.
    :language: python
 
 Below find a real-life Python example of an event listener for ``mars`` events that will execute a MARS_ request in
-case of notifications. Note how easy is to construct the `MARS` request from the notification. This is because they 
+case of notifications. Note how easy is to construct the `MARS` request from the notification, they 
 both speak the `MARS` language.
 
 .. _MARS: https://www.ecmwf.int/en/forecasts/datasets/archive-datasets

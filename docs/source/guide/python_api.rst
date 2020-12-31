@@ -28,4 +28,4 @@ creates a listener that references this function trigger and finally passes it t
    aviso.listen(listeners=listeners)
 
 .. note::
-   The example is assuming the default configuration file ~/aviso/config.yaml is defined for authentication purposes as in :ref:`getting_started`.
+   The example is assuming the default configuration file ~/aviso/config.yaml is defined for authentication purposes as explained in :ref:`getting_started`.

@@ -50,6 +50,7 @@ See :ref:`overview` for more information.
 License 
 -------
 
-*Aviso* is available under the open source `Apache License`__.
+*Aviso* is available under the open source `Apache License`__. In applying this licence, ECMWF does not waive the privileges and immunities 
+granted to it by virtue of its status as an intergovernmental organisation nor does it submit to any jurisdiction.
 
 __ http://www.apache.org/licenses/LICENSE-2.0.html

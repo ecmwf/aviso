@@ -3,7 +3,7 @@
 MARS Request
 =================
 
-Below find a real-life example of an event listener for ``mars`` events that will execute a ``MARS`` request 
+Below find a real-life example of an event listener for ``mars`` events that will execute a MARS_ request 
 in case of notifications.
 
 .. literalinclude:: mars_command_listener.yaml
@@ -14,3 +14,5 @@ from the trigger to the script.
 
 .. literalinclude:: mars_script.sh
    :language: sh
+
+.. _MARS: https://www.ecmwf.int/en/forecasts/datasets/archive-datasets

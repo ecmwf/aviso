@@ -150,7 +150,7 @@ Configuration file     .. code-block:: yaml
 
 Notification Engine
 -------------------
-This group of settings defines the connection to the notification server.
+This group of settings defines the connection to the notification server. The current defaults allow the connection to the ECMWF Aviso service.
 
 Host
 ^^^^
@@ -274,7 +274,7 @@ Configuration file     .. code-block:: yaml
 Configuration Engine
 --------------------
 
-This group of settings defines the connection to the configuration management server. The current defaults show  ECMWF notification server working also as configuration server. 
+This group of settings defines the connection to the configuration management server. The current defaults allows connecting to the ECMWF Aviso service also as configuration server. 
 This is however not a requirement and different servers can be used. See :ref:`configuration_cli` for more information.
 
 Host

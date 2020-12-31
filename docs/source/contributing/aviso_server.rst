@@ -5,7 +5,10 @@
 Aviso Server Architecture
 =========================
 
-Figure below shows the high-level architecture of Aviso server.
+This section presents the general architecture for Aviso server. It shows components that are ECMWF specific such as Aviso Auth while others that are generic such as the key-value store.
+This architecture can therefore evolve and adapt to different infrastructures that are available to the users.
+
+Figure below shows the current high-level architecture of Aviso server.
 
 .. image:: ../_static/server_architecture.png
 

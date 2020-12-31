@@ -27,16 +27,19 @@ Here is a basic example:
 Event
 -----
 
-Aviso offers notifications for the following types of events:
+Aviso is currently offering notifications for the following types of events:
 
-* **dissemination** event is submitted by the product dissemination system ECPDS. The related listener configuration must define the ``destination`` field. A notification related to a dissemination event will have the field ``location`` containing the URL to the product notified
-* **mars** event is designed for real-time data from the ECMWF model output. The related listener configuration does not have any mandatory fields. Moreover the related notification will not contain the location field because users will have to access to it by the conventional MARS_ API
+* **dissemination** event is submitted by the ECMWF product dissemination system. The related listener configuration must define the ``destination`` field. A notification related to a dissemination event will have the field ``location`` containing the URL to the product notified
+* **mars** event is designed for real-time data from the ECMWF model output. The related listener configuration does not have any mandatory fields. Moreover the related notification will not contain the location field because users will have to access to it by the conventional ECMWF MARS_ API
 
 .. _MARS: https://www.ecmwf.int/en/forecasts/datasets/archive-datasets
 
+These events are ECMWF specific. However, Aviso can be extended to handle different kind of events. The event type defines the translation to go from the event's metadata to the key that will be used as 
+key-value pair to store the event in Aviso server. The various translations are defined in a schema file.
+
 Request
 -------
-The table below shows the full list of fields accepted in a ``request`` block. These fields represent a subset of the MARS language.
+The table below shows the full list of fields accepted in a ``request`` block. These fields represent a subset of the ECMWF MARS_ language.
 
 +------------+----------------------+--------------+--------------------+
 |Field       |Type                  | Event        | Optional/Mandatory |
