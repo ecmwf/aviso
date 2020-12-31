@@ -16,7 +16,7 @@ from aviso_admin.utils import encode_to_str_base64
 
 
 def conf() -> config.Config:  # this automatically configure the logging
-    c = config.Config(conf_path="server/admin/tests/config.yaml")
+    c = config.Config(conf_path="aviso-server/admin/tests/config.yaml")
     return c
 
 

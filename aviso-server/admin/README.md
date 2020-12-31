@@ -10,11 +10,13 @@ components on the server. It runs a periodic aggregation and evaluation of these
 then communicates the status of the components to the ECMWF monitoring server.
 
 
-Install it by 
+Install it by, from the main project directory: 
 
 ```
- % pip install -e server/admin
+ % pip install -e aviso-server/monitoring
+ % pip install -e aviso-server/admin
 ```
+The aviso-monitoring package is required by aviso-admin.
 
 Launch it by:
 

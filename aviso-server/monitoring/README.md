@@ -7,3 +7,9 @@ It is a library that any other components can use either for:
 
 The first capability is currently used by the components Aviso Rest and Aviso Auth.
 The second capability is used by the Aviso Admin component.
+
+Install it by, from the main project directory: 
+
+```
+ % pip install -e aviso-server/monitoring
+```

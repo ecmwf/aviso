@@ -10,11 +10,13 @@ If both steps are successful the request is forwarded to the store.
 
 Note that currently only the _listen_ command is allowed by this component. Any other operation is not authorised.
 
-Install it by 
+Install it by, from the main project directory: 
 
 ```
- % pip install -e server/auth 
+ % pip install -e aviso-server/monitoring
+ % pip install -e aviso-server/auth
 ```
+The aviso-monitoring package is required by aviso-auth.
 
 Launch it by:
 

@@ -9,7 +9,7 @@ Figure below shows the high-level architecture of Aviso server.
 
 .. image:: ../_static/server_architecture.png
 
-The source of the components presented here is available in the ``server`` folder of the project. The remaining part of this section, briefly introduces each component. 
+The source of the components presented here is available in the ``aviso-server`` folder of the project. The remaining part of this section, briefly introduces each component. 
 
 
 Key-Value store
@@ -35,9 +35,13 @@ Aviso REST
 This component is a REST frontend that allows notification providers to submit notifications to the Aviso service 
 via REST. Internally it uses Aviso API as if it was a client towards the store.
 
-Install it by:: 
+Install it by, from the main project directory:: 
    
-   % pip install -e server/rest 
+   % pip install -e .
+   % pip install -e aviso-server/monitoring
+   % pip install -e aviso-server/rest
+
+The `aviso` and `aviso-monitoring` packages are required by `aviso-rest`.
 
 
 Launch it by::
@@ -62,10 +66,12 @@ If both steps are successful the request is forwarded to the store.
  
    Currently only the ``listen`` command is allowed by this component. Any other operation is not authorised.
 
-Install it by:: 
+Install it by, from the main project directory:: 
    
-   % pip install -e server/auth 
+   % pip install -e aviso-server/monitoring
+   % pip install -e aviso-server/auth 
 
+The `aviso-monitoring` package is required by `aviso-auth`.
 
 Launch it by::
 
@@ -85,10 +91,12 @@ This component also uses the _monitoring_ package to run a UDP server to receive
 components on the server. It runs a periodic aggregation and evaluation of these telemetries and it 
 then communicates the status of the components to the ECMWF monitoring server.
 
-Install it by:: 
+Install it by, from the main project directory:: 
    
-   % pip install -e server/admin 
+   % pip install -e aviso-server/monitoring
+   % pip install -e aviso-server/admin 
 
+The `aviso-monitoring` package is required by `aviso-admin`.
 
 Launch it by::
 
@@ -107,6 +115,6 @@ It is a library that any other components can use either for:
 The first capability is currently used by the components Aviso Rest and Aviso Auth.
 The second capability is used by the Aviso Admin component.
 
-Install it by:: 
+Install it by, from the main project directory:: 
    
-   % pip install -e server/monitoring 
+   % pip install -e aviso-server/monitoring 

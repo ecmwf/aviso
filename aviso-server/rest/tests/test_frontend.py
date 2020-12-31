@@ -21,7 +21,7 @@ from aviso_rest.frontend import Frontend
 from pyaviso.notification_manager import NotificationManager
 from aviso_monitoring.udp_server import UdpServer
 
-config = Config(conf_path="server/rest/tests/config.yaml")
+config = Config(conf_path="aviso-server/rest/tests/config.yaml")
 frontend_url_home = f"http://{config.host}:{config.port}"
 frontend_url_api = f"{frontend_url_home}/api/v1"
 
