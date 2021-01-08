@@ -111,20 +111,25 @@ class Reporter(ABC):
             tlms (List): List of measurements to aggregates
         """
         # read only the telemetry field of the tlm
-        r_tlms = map(lambda t: t.get("telemetry"), tlms)
+        r_tlms = list(map(lambda t: t.get("telemetry"), tlms))
+
+        # determine tlm_type
+        first_key=list(r_tlms[0].keys())[0]
+        tlm_type = first_key[:first_key.rfind("_")]
+
         # setup the aggregated tlm to return 
         agg_tlm = {
-            self.tlm_type+"_counter": 0,
-            self.tlm_type+"_avg": 0,
-            self.tlm_type+"_max": -math.inf,
-            self.tlm_type+"_min": math.inf
+            tlm_type+"_counter": 0,
+            tlm_type+"_avg": 0,
+            tlm_type+"_max": -math.inf,
+            tlm_type+"_min": math.inf
             }
         sum = 0
         for tlm in r_tlms:
-            agg_tlm[self.tlm_type+"_counter"] += tlm[self.tlm_type+"_counter"]
-            agg_tlm[self.tlm_type+"_max"] = tlm[self.tlm_type+"_max"] if tlm[self.tlm_type+"_max"] > agg_tlm[self.tlm_type+"_max"] else agg_tlm[self.tlm_type+"_max"]
-            agg_tlm[self.tlm_type+"_min"] = tlm[self.tlm_type+"_min"] if tlm[self.tlm_type+"_min"] < agg_tlm[self.tlm_type+"_min"] else agg_tlm[self.tlm_type+"_min"]
-            sum += tlm[self.tlm_type+"_counter"] * tlm[self.tlm_type+"_avg"]
-        agg_tlm[self.tlm_type+"_avg"] = sum / agg_tlm[self.tlm_type+"_counter"]
+            agg_tlm[tlm_type+"_counter"] += tlm[tlm_type+"_counter"]
+            agg_tlm[tlm_type+"_max"] = tlm[tlm_type+"_max"] if tlm[tlm_type+"_max"] > agg_tlm[tlm_type+"_max"] else agg_tlm[tlm_type+"_max"]
+            agg_tlm[tlm_type+"_min"] = tlm[tlm_type+"_min"] if tlm[tlm_type+"_min"] < agg_tlm[tlm_type+"_min"] else agg_tlm[tlm_type+"_min"]
+            sum += tlm[tlm_type+"_counter"] * tlm[tlm_type+"_avg"]
+        agg_tlm[tlm_type+"_avg"] = sum / agg_tlm[tlm_type+"_counter"]
         
         return agg_tlm

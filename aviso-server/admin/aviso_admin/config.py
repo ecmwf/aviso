@@ -109,7 +109,7 @@ class Config:
             "username": "TBD",
             "password":"TBD",
             "metrics": ["auth_resp_time"],
-            "enabled": True,
+            "enabled": False,
             "frequency": 2,  # in minutes
             "req_timeout": 60,  # seconds
         }

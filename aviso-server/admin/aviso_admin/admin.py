@@ -15,6 +15,7 @@ from aviso_admin.compactor import Compactor
 from aviso_admin.monitoring.monitor_factory import MonitorFactory
 from aviso_admin.config import Config
 from aviso_monitoring.reporter.aviso_rest_reporter import AvisoRestReporter
+from aviso_monitoring.reporter.aviso_auth_reporter import AvisoAuthReporter
 from aviso_monitoring.receiver import Receiver
 from aviso_monitoring.udp_server import UdpServer
 
@@ -50,10 +51,13 @@ def main():
     udp_server = UdpServer(config.monitoring.udp_server, receiver)
     udp_server.start()
 
-    # schedule reporter
-    reporter = AvisoRestReporter(config.monitoring, receiver)
-    if reporter.enabled:
-        schedule.every(reporter.frequency).minutes.do(reporter.run)
+    # schedule reporters
+    rest_reporter = AvisoRestReporter(config.monitoring, receiver)
+    if rest_reporter.enabled:
+        schedule.every(rest_reporter.frequency).minutes.do(rest_reporter.run)
+    auth_reporter = AvisoAuthReporter(config.monitoring, receiver)
+    if auth_reporter.enabled:
+        schedule.every(auth_reporter.frequency).minutes.do(auth_reporter.run)
 
     # Loop so that the scheduling task keeps on running all time.
     while True:

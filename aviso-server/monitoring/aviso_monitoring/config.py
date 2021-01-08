@@ -26,6 +26,7 @@ class Config:
                  udp_server=None,
                  monitor_server=None,
                  aviso_rest_reporter=None,
+                 aviso_auth_reporter=None,
                  test=None):
 
         try:
@@ -38,6 +39,7 @@ class Config:
             self.udp_server = udp_server
             self.monitor_server = monitor_server
             self.aviso_rest_reporter = aviso_rest_reporter
+            self.aviso_auth_reporter = aviso_auth_reporter
 
             logger.debug(f"Loading configuration completed")
 
@@ -71,11 +73,21 @@ class Config:
             "critical_t": 20, # s
         }
 
+        aviso_auth_reporter = {
+            "tlm_type": "auth_resp_time",
+            "enabled": False,
+            "frequency": 1,  # in minutes
+            "warning_t": 10,  # s
+            "critical_t": 20, # s
+            "sub_tlms": []
+        }
+
         # main config
         config = {}
         config["udp_server"] = udp_server
         config["monitor_server"] = monitor_server
         config["aviso_rest_reporter"] = aviso_rest_reporter
+        config["aviso_auth_reporter"] = aviso_auth_reporter
         return config
 
     def _read_env_variables(self) -> Dict:
@@ -142,11 +154,32 @@ class Config:
         assert ar.get("critical_t") is not None, "aviso_rest_reporter critical_t has not been configured"
         self._aviso_rest_reporter = ar
 
+    @property
+    def aviso_auth_reporter(self):
+        return self._aviso_auth_reporter
+
+    @aviso_auth_reporter.setter
+    def aviso_auth_reporter(self, aviso_auth_reporter):
+        aa = self._config.get("aviso_auth_reporter")
+        if aviso_auth_reporter is not None and aa is not None:
+            Config.deep_update(aa, aviso_auth_reporter)
+        elif aviso_auth_reporter is not None:
+            aa = aviso_auth_reporter
+        # verify is valid
+        assert aa is not None, "aviso_auth_reporter has not been configured"
+        assert aa.get("tlm_type") is not None, "aviso_auth_reporter tlm_type has not been configured"
+        assert aa.get("enabled") is not None, "aviso_auth_reporter enabled has not been configured"
+        assert aa.get("frequency") is not None, "aviso_auth_reporter frequency has not been configured"
+        assert aa.get("warning_t") is not None, "aviso_auth_reporter warning_t has not been configured"
+        assert aa.get("critical_t") is not None, "aviso_auth_reporter critical_t has not been configured"
+        self._aviso_auth_reporter = aa
+
     def __str__(self):
         config_string = (
             f"udp_server: {self.udp_server}" +
             f", monitor_server: {self.monitor_server}" +
-            f", aviso_rest_reporter: {self.aviso_rest_reporter}"
+            f", aviso_rest_reporter: {self.aviso_rest_reporter}" +
+            f", aviso_auth_reporter: {self.aviso_auth_reporter}"
         )
         return config_string
 
