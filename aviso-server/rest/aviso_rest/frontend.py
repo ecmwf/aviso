@@ -26,8 +26,6 @@ from aviso_monitoring.collector.time_collector import TimeCollector
 SWAGGER_URL = '/openapi'
 API_URL = 'frontend/web/openapi.yaml'
 
-timer = None
-
 class Frontend:
 
     def __init__(self, config):
@@ -35,6 +33,14 @@ class Frontend:
         # initialise the handler
         self.handler = self.create_handler()
         self.notification_manager = NotificationManager()
+        # we need to create the timer object here if this app runs in Flask, 
+        # if instead it runs in Gunicorn the hook post_worker_init will take over, and this timer will not be used
+        self.init_timer()
+
+    def init_timer(self):
+        """
+        This method initialise the timer that is valid globally at application level or per worker
+        """
         self.timer = TimeCollector(self.config.monitoring)   
 
     def create_handler(self) -> Flask:
@@ -94,13 +100,19 @@ class Frontend:
                 logger.info(f"New event received: {notification}")
 
                 # send the notification and time it
-                self.timer(self.notification_manager.notify, args=(notification, self.config.aviso))
+                self.timed_notify(notification, config=self.config.aviso)
             except InvalidInputError as e:
                 return bad_request(e)
             logger.debug("Notification successfully submitted")
             return ok("Notification successfully submitted")
 
         return handler
+
+    def timed_notify(self, notification, config):
+        """
+        This method allows to submit a notification to the store and to time it
+        """
+        return self.timer(self.notification_manager.notify, args=(notification, config))
 
     def run_server(self):
         logger.info(f"Running AVISO Frontend - version { __version__} on server {self.config.server_type}")
@@ -141,10 +153,14 @@ class Frontend:
 
     def post_worker_init(self, worker):
         """
-        This method is a Gunicorn server hooked needed as Gunicorn spawn the app over multiple workers as processes
+        This method is called just after a worker has initialized the application.
+        This method is a Gunicorn server hook. Gunicorn spawns this app over multiple workers as processes.
+        This method ensures that there is only one timer and one transmitter thread running per worker. Without this hook a transmitter thread is created at 
+        application level but not at worker level and then at every request a timer will be created detached from the transmitter thread.
+        This would result in no teletry collected.
         """
         logger.debug("Initialising a tlm collector per worker")
-        self.timer = TimeCollector(self.config.monitoring)
+        self.init_timer()
 
 def main():
     # initialising the user configuration configuration

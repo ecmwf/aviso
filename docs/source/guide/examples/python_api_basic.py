@@ -20,8 +20,7 @@ trigger = {"type": "function", "function": do_something}
 
 # create a event listener request that uses that trigger
 request = {"stream": "enfo", "date": 20190810, "time": 0}
-listener = {"event": "mars", "request": request, "triggers": [trigger]}
-listeners = {"listeners": [listener]}
+listeners = {"listeners": [{"event": "mars", "request": request, "triggers": [trigger]}]}
 
 # run it
 aviso = NotificationManager()
