@@ -8,32 +8,42 @@
 
 import json
 import logging
-
-import gunicorn.app.base
-from aviso_auth import logger, __version__
-from aviso_auth.authentication import Authenticator
-from aviso_auth.authorisation import Authoriser
-from aviso_auth.backend_adapter import BackendAdapter
-from aviso_auth.config import UserConfig
-from aviso_auth.custom_exceptions import InvalidInputError, NotFoundException, InternalSystemError, \
-    AuthenticationException, ForbiddenRequestException
 from flask import Flask
 from flask import Response
 from flask import request
 from flask_caching import Cache
 from gunicorn import glogging
 from six import iteritems
+import gunicorn.app.base
+from aviso_auth import logger, __version__
+from aviso_auth.authentication import Authenticator
+from aviso_auth.authorisation import Authoriser
+from aviso_auth.backend_adapter import BackendAdapter
+from aviso_auth.config import Config
+from aviso_auth.custom_exceptions import InvalidInputError, NotFoundException, InternalSystemError, \
+    AuthenticationException, ForbiddenRequestException
+from aviso_monitoring.collector.time_collector import TimeCollector
 
 
 class Frontend:
 
-    def __init__(self, config: UserConfig):
+    def __init__(self, config: Config):
         self.config = config
         self.handler = self.create_handler()
         self.handler.cache = Cache(self.handler, config=config.cache)
-        self.authenticator = Authenticator(config.authentication_server, self.handler.cache)
-        self.authoriser = Authoriser(config.authorisation_server, self.handler.cache)
-        self.backend = BackendAdapter(config.backend)
+        # we need to initialise our components and timer here if this app runs in Flask, 
+        # if instead it runs in Gunicorn the hook post_worker_init will take over, and these components will not be used
+        self.init_components()
+
+    def init_components(self):
+        """
+        This method initialise a set of components and timers that are valid globally at application level or per worker
+        """
+        self.authenticator = Authenticator(self.config, self.handler.cache)
+        self.authoriser = Authoriser(self.config, self.handler.cache)
+        self.backend = BackendAdapter(self.config)
+        # this is a time collector for the whole request
+        self.timer = TimeCollector(self.config.monitoring)
 
     def create_handler(self) -> Flask:
         handler = Flask(__name__)
@@ -79,6 +89,12 @@ class Frontend:
         def root():
             logger.debug("New request received")
 
+            resp_content = timed_process_request()
+
+            # forward back the response
+            return Response(resp_content)
+
+        def process_request():
             # authenticate request
             username = self.authenticator.authenticate(request)
             logger.debug("Request successfully authenticated")
@@ -93,10 +109,16 @@ class Frontend:
             resp_content = self.backend.forward(request)
             logger.debug("Request successfully forwarded to Aviso server")
 
-            # forward back the response
-            return Response(resp_content)
+            return resp_content
+
+        def timed_process_request():
+            """
+            This method allows time the process_request function
+            """
+            return self.timer(process_request)
 
         return handler
+        
 
     def run_server(self):
         logger.info(f"Running aviso-auth - version { __version__} on server {self.config.frontend['server_type']}")
@@ -109,16 +131,26 @@ class Frontend:
                              port=self.config.frontend["port"], use_reloader=False)
         elif self.config.frontend["server_type"] == "gunicorn":
             options = {"bind": f"{self.config.frontend['host']}:{self.config.frontend['port']}",
-                       "workers": self.config.frontend['workers']}
+                       "workers": self.config.frontend['workers'], "post_worker_init": self.post_worker_init}
             GunicornServer(self.handler, options).run()
         else:
             logging.error(f"server_type {self.config.frontend['server_type']} not supported")
             raise NotImplementedError
 
+    def post_worker_init(self, worker):
+        """
+        This method is called just after a worker has initialized the application.
+        It is a Gunicorn server hook. Gunicorn spawns this app over multiple workers as processes.
+        This method ensures that there is only one set of components and timer running per worker. Without this hook the components and timers are created at 
+        application level but not at worker level and then at every request a timers will be created detached from the main transmitter threads.
+        This would result in no teletry collected.
+        """
+        logger.debug("Initialising compmentents per worker")
+        self.init_components()
 
 def main():
     # initialising the user configuration configuration
-    config = UserConfig()
+    config = Config()
 
     # create the frontend class and run it
     frontend = Frontend(config)

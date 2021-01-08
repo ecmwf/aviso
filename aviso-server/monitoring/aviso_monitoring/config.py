@@ -65,10 +65,10 @@ class Config:
         }
         aviso_rest_reporter = {
             "tlm_type": "rest_resp_time",
-            "enabled": True,
+            "enabled": False,
             "frequency": 1,  # in minutes
-            "warning_t": 5,  # s
-            "critical_t": 10, # s
+            "warning_t": 10,  # s
+            "critical_t": 20, # s
         }
 
         # main config

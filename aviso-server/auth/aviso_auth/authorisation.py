@@ -8,8 +8,8 @@
 
 import base64
 import json
-
 import requests
+from aviso_monitoring.collector.time_collector import TimeCollector
 
 from . import logger
 from .custom_exceptions import InternalSystemError, InvalidInputError
@@ -18,19 +18,33 @@ from .custom_exceptions import InternalSystemError, InvalidInputError
 class Authoriser:
 
     def __init__(self, config, cache=None):
-        self.url = config["url"]
-        self.req_timeout = config["req_timeout"]
-        self.open_keys = config["open_keys"]
-        self.protected_keys = config["protected_keys"]
-        self.cert = config["cert"]
-        self.key = config["key"]
+        auth_conf = config.authorisation_server
+        self.url = auth_conf["url"]
+        self.req_timeout = auth_conf["req_timeout"]
+        self.open_keys = auth_conf["open_keys"]
+        self.protected_keys = auth_conf["protected_keys"]
+        self.cert = auth_conf["cert"]
+        self.key = auth_conf["key"]
 
         # assign explicitly a decorator to provide cache for _allowed_destinations
         if cache:
-            self._allowed_destinations = cache.memoize(timeout=config["cache_timeout"])(
+            self._allowed_destinations = cache.memoize(timeout=auth_conf["cache_timeout"])(
                 self._allowed_destinations_impl)
         else:
             self._allowed_destinations = self._allowed_destinations_impl
+
+        # assign explicitly a decorator to monitor the authorisation
+        if auth_conf["monitor"]:
+            self.timer = TimeCollector(config.monitoring, name="ats")
+            self.is_authorised = self.timed_is_authorised
+        else:
+            self.is_authorised = self.is_authorised_impl
+
+    def timed_is_authorised(self, username: str, request):
+        """
+        This method is an explicit decorator of the is_authorised_impl method to provide time performance monitoring
+        """
+        return self.timer(self.is_authorised_impl, args=(username, request))
 
     def _allowed_destinations_impl(self, username: str):
         """
@@ -66,7 +80,7 @@ class Authoriser:
         logger.debug(f"Username {username} is allowed to access: {destinations}")
         return destinations
 
-    def is_authorised(self, username: str, request):
+    def is_authorised_impl(self, username: str, request):
         """
         This method verifies that the user can access to the resource specified in the request
         :param username:

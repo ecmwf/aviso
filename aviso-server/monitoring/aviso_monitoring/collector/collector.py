@@ -18,9 +18,12 @@ class Collector(ABC):
     This class is responsible for collecting a telemetry and to transmit it. It's an abstract class as it is assumed 
     that the details on how and what to collect are in its specialisation.
     """
-    def __init__(self, config: Config) -> None:
+    def __init__(self, config: Config, name=None) -> None:
         self.enabled = config.enabled
         self.telemetry_type = config.telemetry_type
+        # this is used to create sub tlms under the same tlm type
+        self.telemetry_name = f"{self.telemetry_type}_{name}" if name else self.telemetry_type
+        
         # create a buffer for the measurements collected
         self.tlm_buffer = []
         self.transmitter = Transmitter(

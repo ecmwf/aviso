@@ -7,6 +7,8 @@
 # nor does it submit to any jurisdiction.
 
 import requests
+from aviso_monitoring.collector.time_collector import TimeCollector
+
 from . import logger
 from .custom_exceptions import InvalidInputError, InternalSystemError
 
@@ -14,10 +16,24 @@ from .custom_exceptions import InvalidInputError, InternalSystemError
 class BackendAdapter:
 
     def __init__(self, config):
-        self.url = f"{config['url']}{config['route']}"
-        self.req_timeout = config["req_timeout"]
+        backend_conf = config.backend
+        self.url = f"{backend_conf['url']}{backend_conf['route']}"
+        self.req_timeout = backend_conf["req_timeout"]
 
-    def forward(self, request):
+        # assign explicitly a decorator to monitor the fowarding
+        if backend_conf["monitor"]:
+            self.timer = TimeCollector(config.monitoring, name="be")
+            self.forward = self.timed_forward
+        else:
+            self.forward = self.forward_impl
+
+    def timed_forward(self, request):
+        """
+        This method is an explicit decorator of the forward_impl method to provide time performance monitoring
+        """
+        return self.timer(self.forward_impl, args=(request))
+
+    def forward_impl(self, request):
         """
         This method forwards the request to the backend configured
         :param request:

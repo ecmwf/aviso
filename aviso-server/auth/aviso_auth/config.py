@@ -14,8 +14,8 @@ import os
 import re
 import sys
 from typing import Optional, Dict
-
 import yaml
+from aviso_monitoring.collector.config import Config as MonitoringConfig
 
 from . import logger, HOME_FOLDER, SYSTEM_FOLDER
 
@@ -23,21 +23,22 @@ from . import logger, HOME_FOLDER, SYSTEM_FOLDER
 CONF_FILE = "config.yaml"
 
 
-class UserConfig:
+class Config:
     """
     This class is in charge of holding the user configuration, which can be defined by command line options,
     environment variables, configuration files or defaults.
     """
 
     def __init__(self,
-                 conf_path: Optional[str] = None,
-                 logging_path: Optional[str] = None,
-                 debug: Optional[bool] = None,
-                 authorisation_server: [Dict[str, any]] = None,
-                 authentication_server: [Dict[str, any]] = None,
-                 backend: [Dict[str, any]] = None,
-                 frontend: Optional[Dict[str, any]] = None,
-                 cache: Optional[Dict] = None):
+                 conf_path=None,
+                 logging_path=None,
+                 debug=None,
+                 authorisation_server=None,
+                 authentication_server=None,
+                 backend=None,
+                 frontend=None,
+                 cache=None,
+                 monitoring=None):
         """
         :param conf_path: path to the system configuration file. If not provided,
         the default location is HOME_FOLDER/user_config.yaml.
@@ -49,17 +50,18 @@ class UserConfig:
         :param backend: server used to forward the valid requests
         :param frontend: configuration for the REST frontend
         :param cache: configuration dictionary to initialise Flask cache
+        :param monitoring: configuration related to the monitoring of this component
         """
         try:
             # we build the configuration in priority order from the lower to the higher
             # start from the defaults
             self._config = self._create_default_config()
             # add the configuration files
-            UserConfig.deep_update(self._config, self._parse_config_files(conf_path))
+            Config.deep_update(self._config, self._parse_config_files(conf_path))
             # initialise logger, this needs to be done ASAP
             self.logging_setup(logging_path)
             # add environment variables
-            UserConfig.deep_update(self._config, self._read_env_variables())
+            Config.deep_update(self._config, self._read_env_variables())
             # add constructor parameters
             self.debug = debug
             self.authorisation_server = authorisation_server
@@ -67,6 +69,7 @@ class UserConfig:
             self.backend = backend
             self.frontend = frontend
             self.cache = cache
+            self.monitoring = monitoring
 
             logger.debug(f"Loading configuration completed")
 
@@ -82,6 +85,7 @@ class UserConfig:
         authentication_server["url"] = "https://api.ecmwf.int/v1/who-am-i"
         authentication_server["req_timeout"] = 60  # seconds
         authentication_server["cache_timeout"] = 86400  # 1 day in seconds
+        authentication_server["monitor"] = False
 
         # authorisation_server
         authorisation_server = {}
@@ -92,12 +96,14 @@ class UserConfig:
         authorisation_server["protected_keys"] = ["/ec/diss"]
         authorisation_server["cert"] = "crt.pem"
         authorisation_server["key"] = "key.pem"
+        authorisation_server["monitor"] = False
 
         # backend
         backend = {}
         backend["url"] = "http://127.0.0.1:2379"
-        backend["req_timeout"] = 5  # seconds
+        backend["req_timeout"] = 60  # seconds
         backend["route"] = "/v3/kv/range"
+        backend["monitor"] = False
 
         # frontend
         frontend = {}
@@ -108,6 +114,7 @@ class UserConfig:
 
         # main config
         config = {}
+        config["monitoring"] = {}
         config["authorisation_server"] = authorisation_server
         config["authentication_server"] = authentication_server
         config["backend"] = backend
@@ -125,7 +132,7 @@ class UserConfig:
                 with open(file_path, "r") as f:
                     config = yaml.load(f.read(), Loader=HomeFolderLoader)
                 # merge with the current config
-                UserConfig.deep_update(current_config, config)
+                Config.deep_update(current_config, config)
             except Exception as e:
                 logger.error(f"Not able to load the configuration in {file_path}, exception: {type(e)} {e}")
                 logger.debug("", exc_info=True)
@@ -172,10 +179,16 @@ class UserConfig:
             config["frontend"]["workers"] = int(os.environ["AVISO_AUTH_FRONTEND_WORKERS"])
         if "AVISO_AUTH_BACKEND_URL" in os.environ:
             config["backend"]["url"] = os.environ["AVISO_AUTH_BACKEND_URL"]
+        if "AVISO_AUTH_BACKEND_MONITOR" in os.environ:
+            config["backend"]["monitor"] = os.environ["AVISO_AUTH_BACKEND_MONITOR"]
         if "AVISO_AUTH_AUTHENTICATION_URL" in os.environ:
             config["authentication_server"]["url"] = os.environ["AVISO_AUTH_AUTHENTICATION_URL"]
+        if "AVISO_AUTH_AUTHENTICATION_MONITOR" in os.environ:
+            config["authentication_server"]["monitor"] = os.environ["AVISO_AUTH_AUTHENTICATION_MONITOR"]
         if "AVISO_AUTH_AUTHORISATION_URL" in os.environ:
             config["authorisation_server"]["url"] = os.environ["AVISO_AUTH_AUTHORISATION_URL"]
+        if "AVISO_AUTH_AUTHORISATION_MONITOR" in os.environ:
+            config["authorisation_server"]["monitor"] = os.environ["AVISO_AUTH_AUTHORISATION_MONITOR"]
         return config
 
     def logging_setup(self, logging_conf_path: str):
@@ -213,6 +226,21 @@ class UserConfig:
             sys.exit(-1)
 
     @property
+    def monitoring(self) -> MonitoringConfig:
+        return self._monitoring
+
+    @monitoring.setter
+    def monitoring(self, monitoring: Dict):
+        m = self._config.get("monitoring")
+        if monitoring is not None and m is not None:
+            Config.deep_update(m, monitoring)
+        elif monitoring is not None:
+            m = monitoring
+        # verify is valid
+        assert m is not None, "monitoring has not been configured"
+        self._monitoring = MonitoringConfig(**m)
+
+    @property
     def authentication_server(self) -> Dict[str, any]:
         return self._authentication_server
 
@@ -220,7 +248,7 @@ class UserConfig:
     def authentication_server(self, authentication_server: Dict[str, any]):
         server = self._config.get("authentication_server")
         if authentication_server is not None and server is not None:
-            UserConfig.deep_update(server, authentication_server)
+            Config.deep_update(server, authentication_server)
         elif authentication_server is not None:
             server = authentication_server
         # verify is valid
@@ -228,6 +256,7 @@ class UserConfig:
         assert server.get("url") is not None, "authentication_server url has not been configured"
         assert server.get("req_timeout") is not None, "authentication_server req_timeout has not been configured"
         assert server.get("cache_timeout") is not None, "authentication_server cache_timeout has not been configured"
+        assert server.get("monitor") is not None, "authentication_server monitor has not been configured"
         self._authentication_server = server
 
     @property
@@ -238,7 +267,7 @@ class UserConfig:
     def authorisation_server(self, authorisation_server: Dict[str, any]):
         server = self._config.get("authorisation_server")
         if authorisation_server is not None and server is not None:
-            UserConfig.deep_update(server, authorisation_server)
+            Config.deep_update(server, authorisation_server)
         elif authorisation_server is not None:
             server = authorisation_server
         # verify is valid
@@ -248,6 +277,7 @@ class UserConfig:
         assert server.get("cache_timeout") is not None, "authorisation_server cache_timeout has not been configured"
         assert server.get("cert") is not None, "authorisation_server cert has not been configured"
         assert server.get("key") is not None, "authorisation_server key has not been configured"
+        assert server.get("monitor") is not None, "authorisation_server monitor has not been configured"
         self._authorisation_server = server
 
     @property
@@ -258,14 +288,15 @@ class UserConfig:
     def backend(self, backend: Dict[str, any]):
         server = self._config.get("backend")
         if backend is not None and server is not None:
-            UserConfig.deep_update(server, backend)
+            Config.deep_update(server, backend)
         elif backend is not None:
             server = backend
         # verify is valid
-        assert server is not None, "Backend has not been configured"
-        assert server.get("url") is not None, "Backend url has not been configured"
-        assert server.get("req_timeout") is not None, "Backend timeout has not been configured"
-        assert server.get("route") is not None, "Backend route has not been configured"
+        assert server is not None, "backend has not been configured"
+        assert server.get("url") is not None, "backend url has not been configured"
+        assert server.get("req_timeout") is not None, "backend timeout has not been configured"
+        assert server.get("route") is not None, "backend route has not been configured"
+        assert server.get("monitor") is not None, "backend monitor has not been configured"
         self._backend = server
 
     @property
@@ -276,7 +307,7 @@ class UserConfig:
     def frontend(self, frontend: Dict[str, any]):
         fe = self._config.get("frontend")
         if frontend is not None and fe is not None:
-            UserConfig.deep_update(fe, frontend)
+            Config.deep_update(fe, frontend)
         elif frontend is not None:
             fe = frontend
         # verify is valid
@@ -322,7 +353,8 @@ class UserConfig:
                 f", authentication_server: {self.authentication_server}" +
                 f", backend: {self.backend}" +
                 f", debug: {self.debug}" +
-                f", frontend: {self.frontend}"
+                f", frontend: {self.frontend}" +
+                f", monitoring: {self.monitoring}"
         )
         return config_string
 
@@ -350,7 +382,7 @@ class UserConfig:
     def deep_update(d, u):
         for k, v in u.items():
             if isinstance(v, collections.abc.Mapping):
-                d[k] = UserConfig.deep_update(d.get(k, type(v)()), v)
+                d[k] = Config.deep_update(d.get(k, type(v)()), v)
             else:
                 d[k] = v
         return d

@@ -43,10 +43,10 @@ class TimeCollector(Collector):
         """
         if len(tlms):
             agg_tlm = {
-                self.telemetry_type+"_counter": len(tlms),
-                self.telemetry_type+"_avg": sum(tlms) / len(tlms),
-                self.telemetry_type+"_max": max(tlms),
-                self.telemetry_type+"_min": min(tlms)
+                self.telemetry_name+"_counter": len(tlms),
+                self.telemetry_name+"_avg": sum(tlms) / len(tlms),
+                self.telemetry_name+"_max": max(tlms),
+                self.telemetry_name+"_min": min(tlms)
             }
             return agg_tlm
         else: 

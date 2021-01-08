@@ -10,6 +10,7 @@ import requests
 import json
 import time
 import random
+from aviso_monitoring.collector.time_collector import TimeCollector
 
 from . import logger
 from .custom_exceptions import AuthenticationException, InvalidInputError, InternalSystemError
@@ -23,17 +24,30 @@ class Authenticator:
         {"WWW-Authenticate": "EmailKey realm='ecmwf',info='Authenticate with ECMWF API credentials <email>:<key>'"}
 
     def __init__(self, config, cache=None):
-        self.url = config["url"]
-        self.req_timeout = config["req_timeout"]
+        self.url = config.authentication_server["url"]
+        self.req_timeout = config.authentication_server["req_timeout"]
 
         # assign explicitly a decorator to provide cache for _token_to_username
         if cache:
-            self._token_to_username = cache.memoize(timeout=config["cache_timeout"])(
+            self._token_to_username = cache.memoize(timeout=config.authentication_server["cache_timeout"])(
                 self._token_to_username_impl)
         else:
             self._token_to_username = self._token_to_username_impl
 
-    def authenticate(self, request):
+        # assign explicitly a decorator to monitor the authentication
+        if config.authentication_server["monitor"]:
+            self.timer = TimeCollector(config.monitoring, name="att")
+            self.authenticate = self.timed_authenticate
+        else:
+            self.authenticate = self.authenticate_impl
+
+    def timed_authenticate(self, request):
+        """
+        This method is an explicit decorator of the authenticate_impl method to provide time performance monitoring
+        """
+        return self.timer(self.authenticate_impl, args=(request))
+
+    def authenticate_impl(self, request):
         """
         This method verifies the token in the request header corresponds to a valid user
         :param request:

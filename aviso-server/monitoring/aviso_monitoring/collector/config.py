@@ -58,7 +58,7 @@ class Config:
         # main config
         config = {}
         config["transmitter"] = transmitter
-        config["enabled"] = True
+        config["enabled"] = False
         config["telemetry_type"] = "TBD"
         return config
 
