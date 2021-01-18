@@ -66,7 +66,7 @@ class Authenticator:
             auth_type, credentials = auth_header.split(' ', 1)
             auth_email, auth_token = credentials.split(':', 1)
         except ValueError:
-            logger.debug(f"Authorization header not reconsigned {auth_header}")
+            logger.debug(f"Authorization header not recognised {auth_header}")
             raise AuthenticationException(
                 "Could not read authorization header, expected 'Authorization: <email>:<key>'")
 
@@ -117,7 +117,7 @@ class Authenticator:
             raise InternalSystemError(f'Error in authenticating token {token}')
         email = resp_body['email']
 
-        logger.debug(f"Token {token} correctly validated with user {username}, email {email}")
+        logger.info(f"Token correctly validated with user {username}, email {email}")
         return username, email
 
     def wait_for_resp(self, token):
