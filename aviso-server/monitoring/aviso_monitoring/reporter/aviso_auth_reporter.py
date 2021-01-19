@@ -36,6 +36,7 @@ class AvisoAuthReporter(Reporter):
         metrics = []
 
         # incoming tlms
+        assert self.tlm_receiver, "TLM receiver is None"
         new_tlms = self.tlm_receiver.extract_incoming_tlms(self.tlm_type)
         if len(new_tlms):
             agg_tlms = []

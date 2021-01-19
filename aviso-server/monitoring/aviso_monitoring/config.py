@@ -27,7 +27,7 @@ class Config:
                  monitor_server=None,
                  aviso_rest_reporter=None,
                  aviso_auth_reporter=None,
-                 test=None):
+                 etcd_reporter=None):
 
         try:
             # we build the configuration in priority order from the lower to the higher
@@ -40,6 +40,7 @@ class Config:
             self.monitor_server = monitor_server
             self.aviso_rest_reporter = aviso_rest_reporter
             self.aviso_auth_reporter = aviso_auth_reporter
+            self.etcd_reporter = etcd_reporter
 
             logger.debug(f"Loading configuration completed")
 
@@ -82,12 +83,21 @@ class Config:
             "sub_tlms": []
         }
 
+        etcd_reporter = {
+            "enabled": False,
+            "frequency": 5,  # in minutes
+            "member_urls": ["http://localhost:2379"],
+            "tlm_type": ["etcd_store_size", "etcd_cluster_status", "etcd_total_keys"],
+            "req_timeout": 60,  # seconds
+        }
+
         # main config
         config = {}
         config["udp_server"] = udp_server
         config["monitor_server"] = monitor_server
         config["aviso_rest_reporter"] = aviso_rest_reporter
         config["aviso_auth_reporter"] = aviso_auth_reporter
+        config["etcd_reporter"] = etcd_reporter
         return config
 
     def _read_env_variables(self) -> Dict:
@@ -174,12 +184,33 @@ class Config:
         assert aa.get("critical_t") is not None, "aviso_auth_reporter critical_t has not been configured"
         self._aviso_auth_reporter = aa
 
+    @property
+    def etcd_reporter(self):
+        return self._etcd_reporter
+
+    @etcd_reporter.setter
+    def etcd_reporter(self, etcd_reporter):
+        e = self._config.get("etcd_reporter")
+        if etcd_reporter is not None and e is not None:
+            Config.deep_update(e, etcd_reporter)
+        elif etcd_reporter is not None:
+            e = etcd_reporter
+        # verify is valid
+        assert e is not None, "etcd_reporter has not been configured"
+        assert e.get("tlm_type") is not None, "etcd_reporter tlm_type has not been configured"
+        assert e.get("enabled") is not None, "etcd_reporter enabled has not been configured"
+        assert e.get("frequency") is not None, "etcd_reporter frequency has not been configured"
+        assert e.get("member_urls") is not None, "etcd_reporter member_urls has not been configured"
+        assert e.get("req_timeout") is not None, "etcd_reporter req_timeout has not been configured"
+        self._etcd_reporter = e
+
     def __str__(self):
         config_string = (
             f"udp_server: {self.udp_server}" +
             f", monitor_server: {self.monitor_server}" +
             f", aviso_rest_reporter: {self.aviso_rest_reporter}" +
-            f", aviso_auth_reporter: {self.aviso_auth_reporter}"
+            f", aviso_auth_reporter: {self.aviso_auth_reporter}" +
+            f", etcd_reporter: {self.etcd_reporter}"
         )
         return config_string
 

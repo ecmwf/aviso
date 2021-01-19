@@ -36,7 +36,6 @@ class Config:
                  debug=None,
                  compactor=None,
                  cleaner=None,
-                 monitor=None,
                  monitoring=None):
         """
         :param conf_path: path to the system configuration file. If not provided,
@@ -46,7 +45,7 @@ class Config:
         :param debug: flag to activate the debug log to the console output
         :param compactor: config for the compactor process
         :param cleaner: config for the cleaner process
-        :param monitor: config for monitor processes
+        :param monitoring: config for monitor processes
         """
         try:
             # we build the configuration in priority order from the lower to the higher
@@ -62,7 +61,6 @@ class Config:
             self.debug = debug
             self.compactor = compactor
             self.cleaner = cleaner
-            self.monitor = monitor
             self.monitoring = monitoring
 
             logger.debug(f"Loading configuration completed")
@@ -95,52 +93,11 @@ class Config:
             "scheduled_time": "00:00",
             "enabled": True
         }
-        
-        # monitors
-        etcd = {
-            "member_urls": ["http://localhost:2379"],
-            "metrics": ["etcd_store_size", "etcd_cluster_status", "etcd_diss_keys", "etcd_mars_keys"],
-            "enabled": True,
-            "frequency": 10,  # in minutes
-            "req_timeout": 60,  # seconds
-        }
-        aviso_auth = {
-            "url": "http://localhost:2379",
-            "username": "TBD",
-            "password":"TBD",
-            "metrics": ["auth_resp_time"],
-            "enabled": False,
-            "frequency": 2,  # in minutes
-            "req_timeout": 60,  # seconds
-        }
-        aviso_rest = {
-            "url": "http://localhost:2379",
-            "metrics": ["rest_resp_time"],
-            "enabled": False,
-            "frequency": 2,  # in minutes
-            "req_timeout": 60,  # seconds
-        }
-        # this are the setting for sending the telemetry to a monitoring server like Opsview
-        monitor_server = {
-            "url": "https://localhost",
-            "username": "TBD",
-            "password":"TBD",
-            "service_host": "aviso",
-            "req_timeout": 60,  # seconds
-
-        }
-        monitor = {
-            "monitor_server": monitor_server,
-            "etcd_monitor": etcd,
-            "aviso_rest_monitor": aviso_rest,
-            "aviso_auth_monitor": aviso_auth
-        }
 
         # main config
         config = {
             "compactor": compactor,
             "cleaner": cleaner,
-            "monitor": monitor,
             "monitoring": {},
             "debug": False
         }
@@ -292,53 +249,6 @@ class Config:
         self._cleaner = cl
 
     @property
-    def monitor(self):
-        return self._monitor
-
-    @monitor.setter
-    def monitor(self, monitor):
-        m = self._config.get("monitor")
-        if monitor is not None and m is not None:
-            Config.deep_update(m, monitor)
-        elif monitor is not None:
-            m = monitor
-        # verify is valid
-        assert m is not None, "monitor has not been configured"
-        assert m.get("monitor_server") is not None, "monitor server have not been configured"
-        assert m.get("etcd_monitor") is not None, "etcd monitor have not been configured"
-        assert m.get("aviso_rest_monitor") is not None, "aviso rest monitor have not been configured"
-        # monitor server
-        assert m["monitor_server"].get("url") is not None, "monitor_server url has not been configured"
-        assert m["monitor_server"].get("service_host") is not None, "monitor_server service_host has not been configured"
-        assert m["monitor_server"].get("username") is not None, "monitor_server username has not been configured"
-        assert m["monitor_server"].get("password") is not None, "monitor_server password has not been configured"
-        assert m["monitor_server"].get("req_timeout") is not None, "monitor_server req_timeout has not been configured"
-        # etcd monitor
-        assert m["etcd_monitor"].get("member_urls") is not None, "etcd monitor member_urls have not been configured"
-        assert m["etcd_monitor"].get("metrics") is not None, "etcd monitor metrics have not been configured"
-        assert m["etcd_monitor"].get("frequency") is not None, "etcd monitor frequency has not been configured"
-        assert m["etcd_monitor"].get("enabled") is not None, "etcd monitor enabled has not been configured"
-        if type(m["etcd_monitor"].get("enabled")) is str:
-           m["etcd_monitor"]["enabled"] = m["etcd_monitor"].get("enabled").casefold() == "true".casefold()
-        # aviso-rest monitor
-        assert m["aviso_rest_monitor"].get("url") is not None, "aviso_rest monitor url have not been configured"
-        assert m["aviso_rest_monitor"].get("metrics") is not None, "aviso_rest monitor metrics have not been configured"
-        assert m["aviso_rest_monitor"].get("frequency") is not None, "aviso_rest monitor frequency has not been configured"
-        assert m["aviso_rest_monitor"].get("enabled") is not None, "aviso_rest enabled has not been configured"
-        if type(m["aviso_rest_monitor"].get("enabled")) is str:
-           m["aviso_rest_monitor"]["enabled"] = m["aviso_rest_monitor"].get("enabled").casefold() == "true".casefold()
-        # aviso-auth monitor
-        assert m["aviso_auth_monitor"].get("url") is not None, "aviso_auth monitor url have not been configured"
-        assert m["aviso_auth_monitor"].get("metrics") is not None, "aviso_auth monitor metrics have not been configured"
-        assert m["aviso_auth_monitor"].get("frequency") is not None, "aviso_auth monitor frequency has not been configured"
-        assert m["aviso_auth_monitor"].get("username") is not None, "aviso_auth monitor username has not been configured"
-        assert m["aviso_auth_monitor"].get("password") is not None, "aviso_auth monitor password has not been configured"
-        assert m["aviso_auth_monitor"].get("enabled") is not None, "aviso_auth enabled has not been configured"
-        if type(m["aviso_auth_monitor"].get("enabled")) is str:
-           m["aviso_auth_monitor"]["enabled"] = m["aviso_auth_monitor"].get("enabled").casefold() == "true".casefold()
-        self._monitor = m
-
-    @property
     def monitoring(self) -> MonitoringConfig:
         return self._monitoring
 
@@ -378,7 +288,6 @@ class Config:
         config_string = (
                 f"compactor: {self.compactor}" +
                 f", cleaner: {self.cleaner}" +
-                f", monitor: {self.monitor}" +
                 f", monitoring: {self.monitoring}" +
                 f", debug: {self.debug}"
         )

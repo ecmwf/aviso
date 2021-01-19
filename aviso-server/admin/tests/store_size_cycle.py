@@ -1,8 +1,7 @@
 import requests, json, datetime, queue
 from aviso_admin.compactor import Compactor
 from aviso_admin.cleaner import Cleaner
-from aviso_admin.monitoring.collectors.etcd_collectors import StoreSizeCollector
-from aviso_admin.monitoring.etcd_monitor import EtcdMetricType
+from aviso_monitoring.reporter.etcd_reporter import StoreSize, EtcdReporter, EtcdMetricType
 from aviso_admin import config
 
 """
@@ -47,8 +46,9 @@ def delete_destination_keys(date):
     return cleaner.delete_destination_keys(date)
 
 def store_size():
-    collector = StoreSizeCollector(EtcdMetricType.etcd_store_size, member_urls=["http://localhost:2379"])
-    size = collector.store_size("http://localhost:2379")
+    reporter = EtcdReporter(conf().monitoring)
+    checker = StoreSize(EtcdMetricType.etcd_store_size, member_urls=reporter.member_urls, raw_tlms=reporter.retrive_raw_tlms())
+    size = checker.max_store_size("etcd_mvcc_db_total_size_in_use_in_bytes")
     return size 
 
 def submit_notification(destination, target, date):

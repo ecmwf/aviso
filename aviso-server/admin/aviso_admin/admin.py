@@ -12,10 +12,10 @@ import schedule
 from aviso_admin import logger, __version__
 from aviso_admin.cleaner import Cleaner
 from aviso_admin.compactor import Compactor
-from aviso_admin.monitoring.monitor_factory import MonitorFactory
 from aviso_admin.config import Config
 from aviso_monitoring.reporter.aviso_rest_reporter import AvisoRestReporter
 from aviso_monitoring.reporter.aviso_auth_reporter import AvisoAuthReporter
+from aviso_monitoring.reporter.etcd_reporter import EtcdReporter
 from aviso_monitoring.receiver import Receiver
 from aviso_monitoring.udp_server import UdpServer
 
@@ -38,14 +38,6 @@ def main():
     if cleaner.enabled:
         schedule.every().day.at(config.cleaner["scheduled_time"]).do(cleaner.run)
 
-    # Instantiate the monitor factory and schedule all the monitors
-    m_fact = MonitorFactory(config.monitor)
-    # schedule the monitors
-    for m in m_fact.monitors:
-        if m.enabled:
-            schedule.every(m.frequency).minutes.do(m.run)
-
-    # run UPD server
     # create the UDP server
     receiver = Receiver()
     udp_server = UdpServer(config.monitoring.udp_server, receiver)
@@ -58,6 +50,9 @@ def main():
     auth_reporter = AvisoAuthReporter(config.monitoring, receiver)
     if auth_reporter.enabled:
         schedule.every(auth_reporter.frequency).minutes.do(auth_reporter.run)
+    etcd_reporter = EtcdReporter(config.monitoring)
+    if etcd_reporter.enabled:
+        schedule.every(etcd_reporter.frequency).minutes.do(etcd_reporter.run)
 
     # Loop so that the scheduling task keeps on running all time.
     while True:

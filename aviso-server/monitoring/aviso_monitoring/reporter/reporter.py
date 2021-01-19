@@ -16,7 +16,7 @@ from ..config import Config
 
 class Reporter(ABC):
 
-    def __init__(self, config: Config, tlm_receiver):
+    def __init__(self, config: Config, tlm_receiver=None):
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         self.ms_url = config.monitor_server["url"]
         self.ms_service_host = config.monitor_server["service_host"]
@@ -81,19 +81,19 @@ class Reporter(ABC):
 
     def run(self):
         """
-        Run the various monitors configured. Each monitor collects a list of metrics that are then being sent to the
-        monitoring server
+        Run the reporter configured. It collects and aggregates a list of TLMs that are then being sent to the
+        monitoring server as metrics
         :return: True if successful
         """
         logger.debug(f"Running {self.__class__.__name__}...")
 
-        # Process metrics
+        # Process TLMs
         metrics = self.process_tlms()
 
         # authenticate to monitoring server
         token = self.ms_authenticate()
         if token:
-            # send etcd metrics
+            # send metrics
             for m in metrics:
                 self.submit_metric(token, m)
             logger.debug(f"{self.__class__.__name__} cycle completed")
@@ -105,7 +105,7 @@ class Reporter(ABC):
 
     def aggregate_tlms_stats(self, tlms):
         """
-        This method aggregates the telemetry passed, maintaining the same stats.
+        This method aggregates the TLMs passed, maintaining the same stats.
 
         Args:
             tlms (List): List of measurements to aggregates
