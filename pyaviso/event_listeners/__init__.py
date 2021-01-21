@@ -9,8 +9,6 @@
 __all__ = [
     "event_listener",
     "event_listener_factory",
-    "dissemination_event_listener",
-    "mars_event_listener",
     "listener_manager"
 ]
 

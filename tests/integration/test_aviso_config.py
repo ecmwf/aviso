@@ -30,9 +30,9 @@ def create_conf() -> user_config.UserConfig:  # this automatically configure the
 
 # setting up multiple configurations for running the tests multiple times
 c1 = create_conf()
-c1.notification_engine.type = EngineType.ETCD_REST
+c1.configuration_engine.type = EngineType.ETCD_REST
 c2 = create_conf()
-c2.notification_engine.type = EngineType.ETCD_GRPC
+c2.configuration_engine.type = EngineType.ETCD_GRPC
 confs = [c1, c2]
 
 

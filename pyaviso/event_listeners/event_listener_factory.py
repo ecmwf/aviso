@@ -22,7 +22,6 @@ class EventListenerFactory:
 
     def __init__(self, engine_factory: EngineFactory, listener_schema: Dict[str, any]):
         """
-
         :param engine_factory:
         :param listener_schema:
         """
@@ -58,11 +57,10 @@ class EventListenerFactory:
 
             # extract the relevant listener schema
             assert "event" in l, "Wrong file structure, 'event' could not be located"
-            listener_type = l.get("event")
-            assert listener_type in self._listener_schema, \
-                f"Wrong schema structure, {listener_type} could not be located"
-            schema = self._listener_schema.get(listener_type)
-            listener_type = el.EventListenerType[listener_type.lower()]
+            event_type = l.get("event")
+            assert event_type in self._listener_schema, \
+                f"Wrong schema structure, {event_type} could not be located"
+            schema = self._listener_schema.get(event_type)
 
             # Parse the request and build the key to the forecast dataset
             assert "request" in l, "Wrong file structure, 'request' could not be located"
@@ -72,8 +70,8 @@ class EventListenerFactory:
             triggers: Optional[List[Dict[str, any]]] = self._parse_triggers(l)
 
             # create the listener
-            listener = listener_type.get_class()(
-                engine, request, triggers, schema, from_date, to_date)
+            listener = el.EventListener(
+                event_type, engine, request, triggers, schema, from_date, to_date)
             listeners.append(listener)
 
         return listeners

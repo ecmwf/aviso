@@ -17,15 +17,11 @@ from . import logger, user_config, exit_channel
 from .authentication.auth import Auth
 from .custom_exceptions import EventListenerException, InvalidInputError, ServiceConfigException
 from .engine import engine_factory as ef
-from .event_listeners.event_listener import EventListenerType
+from .event_listeners.event_listener import EventListener
 from .event_listeners.listener_manager import ListenerManager
 from .service_config_manager import ServiceConfigManager
 
 LOCAL_CONFIG_FOLDER = "service_configuration"
-LISTENER_SCHEMA_FILE_NAME = "event_listener_schema.json"
-MARS_SCHEMA_FILE_NAME = "language.json"
-
-
 class NotificationManager:
     """
     This class manages implements the various operations associated to the notification system
@@ -60,8 +56,8 @@ class NotificationManager:
         else:
             listeners_list.append(listeners)
 
-        # retrieve the updated listener schema
-        listener_schema = self._latest_listener_schema(config)
+        # retrieve listener schema
+        listener_schema = self._listener_schema(config)
 
         # Call the listener manager
         self.listener_manager.listen(listeners_list, listener_schema, config, from_date, to_date)
@@ -138,18 +134,17 @@ class NotificationManager:
 
         # retrieve the updated listener schema
         logger.debug("Getting relevant schema...")
-        general_schema = self._latest_listener_schema(config)
+        general_schema = self._listener_schema(config)
         # # extract the relevant listener schema
         if listener_type not in general_schema:
             raise InvalidInputError(f"Invalid notification, {listener_type} could not be located in the schema")
         listener_schema = general_schema.get(listener_type)
         logger.debug("Relevant schema successfully found")
-        listener_type = EventListenerType[listener_type.lower()]
 
         logger.debug("Generating key...")
         filtered_params = params.copy()
         filtered_params.pop("event")
-        key, root, admin_key = listener_type.get_class().derive_notification_keys(
+        key, root, admin_key = EventListener.derive_notification_keys(
             filtered_params, listener_schema, config.notification_engine.type)
         logger.debug(f"Keys generated {root}, {key}, {admin_key}")
 
@@ -199,10 +194,8 @@ class NotificationManager:
 
             # check the location
             assert "event" in notification, "Invalid notification, 'event' could not be located"
-            listener_type = EventListenerType[notification.get("event").lower()]
             value = "None"
-            if listener_type == EventListenerType.dissemination:
-                assert "location" in notification, "Invalid notification, 'location' could not be located"
+            if "location" in notification:
                 value = notification.pop("location")
         except AssertionError as e:
             raise InvalidInputError(e)
@@ -237,7 +230,7 @@ class NotificationManager:
 
         return True
 
-    def _latest_listener_schema(self, config: user_config.UserConfig) -> Dict[str, any]:
+    def _listener_schema(self, config: user_config.UserConfig) -> Dict[str, any]:
         """
         Helper method to retrieve the latest schema
         :param config:
@@ -245,76 +238,25 @@ class NotificationManager:
         """
         logger.debug("Updating configurations...")
 
-        # This may be the first try we access to the home folder, be sure it exists
-        # os.makedirs(os.path.dirname(config_lock_path), exist_ok=True)
-
+        #if config.remote_configuration:
         # Pull the latest event listeners configuration files
         config_manager = ServiceConfigManager(config)
-        pulled_files = config_manager.pull(config.notification_engine.service)
+        schema_files = config_manager.pull(config.notification_engine.service)
+        #else:
+            # This may be the first try we access to the home folder, be sure it exists
+        # os.makedirs(os.path.dirname(config_lock_path), exist_ok=True)
 
-        if len(pulled_files) == 0:
+        if len(schema_files) == 0:
             logger.warning("Not able to pull any event listener configuration file")
         else:
-            for f in pulled_files:
+            for f in schema_files:
                 logger.debug(f"Event Listener configuration pulled")
 
-        # load mars schema
-        mars_schema_file_s = list(filter(lambda mf: MARS_SCHEMA_FILE_NAME in mf["key"], pulled_files))
-        if len(mars_schema_file_s) != 1:
-            raise ServiceConfigException("No MARS language file could be found to validate request")
-        mars_schema_file = mars_schema_file_s[0]
-        mars_schema = json.loads(mars_schema_file["value"].decode())
-        # load event listener schema
-        evl_schema_file_s = list(filter(lambda esf: LISTENER_SCHEMA_FILE_NAME in esf["key"], pulled_files))
-        if len(evl_schema_file_s) != 1:
-            raise ServiceConfigException("No Event Listener schema file could be found to validate request")
-        evl_schema_file = evl_schema_file_s[0]
-        evl_schema = json.loads(evl_schema_file["value"].decode())
+        # create the listener parser and parse the configuration files
+        return config.listener_schema_parser.parser().parse(schema_files=schema_files, custom_listener_schema=config.listener_schema)
+        
 
-        # merge the schemas
-        listener_schema = self._update_schema(mars_schema, evl_schema, config.listener_schema)
-
-        return listener_schema
-
-    def _update_schema(self, mars_schema, evl_schema, custom_schema: Dict = None) -> Dict[str, any]:
-        """
-        This method is used to update the aviso schema with values from the mars schema and the ones from the custom
-        schema defined in the config file.
-        :param mars_schema - this is the MARS language schema
-        :param evl_schema - this is the Event Listener schema to update
-        :param custom_schema - this is a extra portion of schema defined in the configuration
-        :return: aviso schema updated
-        """
-        # search for all the enum keys in all event listener types
-        logger.debug("Parsing mars language schema...")
-        for e in evl_schema.items():
-            if type(e[1]) == dict and e[1].get("request"):
-                request = e[1].get("request")
-                for k in request:
-                    for t in request[k]:
-                        if t["type"] == "EnumHandler":
-                            new_enum = []
-                            # check the mars schema
-                            mars_enums = mars_schema["_field"][k]["values"]
-                            for me in mars_enums:
-                                if type(me) == list:
-                                    for en in me:
-                                        new_enum.append(en)
-                                else:
-                                    new_enum.append(me)
-                            # check the custom schema
-                            if custom_schema:
-                                if k in list(custom_schema.keys()):
-                                    if type(custom_schema[k]) == list:
-                                        for en in custom_schema[k]:
-                                            new_enum.append(en)
-                                    else:
-                                        new_enum.append(custom_schema[k])
-                            # save the enum in aviso_schema
-                            t["values"] = new_enum
-                logger.debug("Parsing completed")
-
-        return evl_schema
+   
 
     def _load_listener_files(self, listener_files: List[str]):
         """

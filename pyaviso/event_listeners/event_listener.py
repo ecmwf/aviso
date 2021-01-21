@@ -6,14 +6,10 @@
 # granted to it by virtue of its status as an intergovernmental organisation
 # nor does it submit to any jurisdiction.
 
-import importlib
 import itertools
 import re
-from abc import ABC, abstractmethod
 from datetime import datetime
-from enum import Enum
 from typing import Dict, List
-
 import parse
 
 from .validation import *
@@ -23,33 +19,22 @@ from ..engine import EngineType
 from ..engine.engine import Engine
 from ..triggers import trigger_factory as tf
 
-
-class EventListenerType(Enum):
-    """
-    This Enum describes the various event listeners that can be used
-    """
-
-    dissemination = ("dissemination_event_listener", "DisseminationEventListener")
-    mars = ("mars_event_listener", "MarsEventListener")
-
-    def get_class(self):
-        module = importlib.import_module("pyaviso.event_listeners." + self.value[0])
-        return getattr(module, self.value[1])
-
-
-class EventListener(ABC):
+class EventListener():
     """
     This class contains of all the details needed to create an event listener and execute its triggers
     """
 
-    def __init__(self,
-                 engine: Engine,
-                 request: Dict[str, any],
-                 triggers: List[Dict[str, any]],
-                 listener_schema: Dict[str, any],
-                 from_date: datetime = None,
-                 to_date: datetime = None):
-        super(EventListener, self).__init__()
+    def __init__(
+        self,
+        event_type: str,
+        engine: Engine,
+        request: Dict[str, any],
+        triggers: List[Dict[str, any]],
+        listener_schema: Dict[str, any],
+        from_date: datetime = None,
+        to_date: datetime = None
+        ):
+        self._event_type = event_type
         self._engine = engine
         self._request = request if request else {}
         self._triggers = triggers
@@ -59,6 +44,13 @@ class EventListener(ABC):
         self._filter = self.filter_expansion(self._request)
         self._from_date = from_date
         self._to_date = to_date
+    
+    def __str__(self):
+        return f"{self.event_type} listener to keys: {self.keys}"
+
+    @property
+    def event_type(self) -> str:
+        return self._event_type
 
     @property
     def from_date(self) -> datetime:
@@ -170,16 +162,27 @@ class EventListener(ABC):
             raise EventListenerException(f"Key {key} failed validation, exception: {e}")
         return notification
 
-    @abstractmethod
     def callback(self, key: str, value: str):
         """
-        Abstract method defining the function will be called when a notification is received. A notification is made
-        of a key and a value. The semantic associated to the key and value depends on the specific type of EventListener
+        This callback function first parses the key and build a notification dictionary, it then filters it using the
+        self.filter requested. If it passes the filter phase the notification is then passed to the triggers
+        otherwise the notification is ignored.
         :param key:
         :param value:
         :return:
         """
-        pass
+        # parse and filter the key
+        not_request: Dict[str, any] = self.parse_key(key)
+
+        if self._is_expected(not_request):
+            # prepare the notification dictionary to pass to the trigger
+            notification: Dict[str, any] = {"event": self.event_type, "request": not_request}
+            if value != "None":
+                notification["location"] = value
+            # execute all the triggers defined in the EventListener
+            logger.info("A valid notification has been received, executing triggers...")
+            logger.debug(f"{notification}")
+            self.execute_triggers(notification)
 
     def listen(self) -> bool:
         """

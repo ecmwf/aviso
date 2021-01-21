@@ -31,7 +31,8 @@ from pyaviso.engine.etcd_engine import LOCAL_STATE_FOLDER
 from pyaviso.engine.etcd_grpc_engine import EtcdGrpcEngine
 from pyaviso.engine.etcd_rest_engine import EtcdRestEngine
 from pyaviso.engine.test_engine import TestEngine
-from pyaviso.notification_manager import NotificationManager, LOCAL_CONFIG_FOLDER, LISTENER_SCHEMA_FILE_NAME
+from pyaviso.notification_manager import NotificationManager, LOCAL_CONFIG_FOLDER
+from pyaviso.event_listeners.listener_schema_parser import LISTENER_SCHEMA_FILE_NAME
 
 aviso = NotificationManager()
 

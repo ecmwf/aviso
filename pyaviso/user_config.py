@@ -22,6 +22,7 @@ import yaml
 from . import logger, HOME_FOLDER, SYSTEM_FOLDER
 from .authentication import AuthType
 from .engine import EngineType
+from .event_listeners.listener_schema_parser import ListenerSchemaParserType
 
 # Default configuration location
 CONF_FILE = "config.yaml"
@@ -97,6 +98,7 @@ class UserConfig:
                  auth_type: Optional[str] = None,
                  key_ttl: Optional[int] = None,
                  listener_schema: Optional[Dict[str, any]] = None,
+                 listener_schema_parser: Optional[str] = None,
                  listeners: Optional[Dict[str, any]] = None):
         """
         :param conf_path: path to the system configuration file. If not provided,
@@ -115,6 +117,7 @@ class UserConfig:
         :param auth_type: Authentication type
         :param key_ttl: Time to live of the keys submitted
         :param listener_schema: custom schema to add to the listener validation
+        :param listener_schema_parser: parser to use to build the listener schema
         :param listeners: listeners configuration
         """
         try:
@@ -139,17 +142,18 @@ class UserConfig:
             self.configuration_engine = configuration_engine
             self.debug = debug
             self.quiet = quiet
-            self.no_fail = no_fail
+            self.no_fail = no_fail            
             self.username = username
             self.username_file = username_file
-            self.key_file = key_file
             self.auth_type = auth_type
             if self.auth_type != AuthType.NONE:
+                self.key_file = key_file
                 self.password = self._read_key()
                 if self.username_file:
                     self.username = self._read_username_file()
             self.key_ttl = key_ttl
             self.listener_schema = listener_schema
+            self.listener_schema_parser = listener_schema_parser
             self.listeners = listeners
       
             logger.debug(f"Loading configuration completed")
@@ -163,9 +167,9 @@ class UserConfig:
     def _create_default_config() -> Dict[str, any]:
         # notification engine
         notification_engine = {}
-        notification_engine["host"] = "aviso.ecmwf.int"
-        notification_engine["port"] = 443
-        notification_engine["https"] = True
+        notification_engine["host"] = "localhost"
+        notification_engine["port"] = 2379
+        notification_engine["https"] = False
         notification_engine["type"] = "etcd_rest"
         notification_engine["polling_interval"] = 30  # seconds
         notification_engine["timeout"] = 60  # seconds
@@ -174,9 +178,9 @@ class UserConfig:
 
         # configuration engine
         configuration_engine = {}
-        configuration_engine["host"] = "aviso.ecmwf.int"
-        configuration_engine["port"] = 443
-        configuration_engine["https"] = True
+        configuration_engine["host"] = "localhost"
+        configuration_engine["port"] = 2379
+        configuration_engine["https"] = False
         configuration_engine["type"] = "etcd_rest"
         configuration_engine["max_file_size"] = 500  # KiB
         configuration_engine["timeout"] = 60  # seconds
@@ -185,15 +189,16 @@ class UserConfig:
         config = {}
         config["notification_engine"] = notification_engine
         config["configuration_engine"] = configuration_engine
-        config["username"] = getpass.getuser()
+        config["username"] = None
         config["username_file"] = None
         config["debug"] = False
         config["quiet"] = False
         config["no_fail"] = False
         config["key_file"] = os.path.join(SYSTEM_FOLDER, KEY_FILE)
-        config["auth_type"] = "ecmwf"
+        config["auth_type"] = "none"
         config["key_ttl"] = -1  # not expiring
         config["listener_schema"] = {}
+        config["listener_schema_parser"] = "generic"
         return config
 
     def _read_key(self) -> str:
@@ -411,6 +416,14 @@ class UserConfig:
         self._listener_schema = self._configure_property(listener_schema, "listener_schema")
 
     @property
+    def listener_schema_parser(self) -> ListenerSchemaParserType:
+        return self._listener_schema_parser
+
+    @listener_schema_parser.setter
+    def listener_schema_parser(self, listener_schema_parser: str):
+        self._listener_schema_parser = ListenerSchemaParserType[self._configure_property(listener_schema_parser, "listener_schema_parser").upper()]
+
+    @property
     def key_ttl(self):
         return self._key_ttl
 
@@ -424,7 +437,7 @@ class UserConfig:
 
     @username.setter
     def username(self, username: str):
-        self._username = self._configure_property(username, "username")
+        self._username = self._configure_property(username, "username", nullable=True)
 
     @property
     def username_file(self) -> str:
@@ -523,7 +536,10 @@ class UserConfig:
                 f", debug: {self.debug}" +
                 f", quiet: {self.quiet}" +
                 f", username: {self.username}" +
-                f", key_ttl: {self.key_ttl}"
+                f", username_file: {self.username_file}" +
+                f", no_fail: {self.no_fail}" +
+                f", key_ttl: {self.key_ttl}" +
+                f", listener_schema_parser: {self.listener_schema_parser}"
         )
         return config_string
 
