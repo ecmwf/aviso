@@ -8,7 +8,7 @@ Aviso is a scalable notification system designed for high-throughput. It is deve
 * Notifying **events**
 * Triggering users' **workflows**
 * Supporting a semantic **When** <this> … **Do** <that> …
-* Persistent history and replay ability
+* Persistent **history** and **replay** ability
 * **Independent** of HPC or Cloud environments
 * **Protocol agnostic**
 * Highly reliable - built for **time-critical** applications.

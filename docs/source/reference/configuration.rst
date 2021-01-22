@@ -161,18 +161,18 @@ Configuration file     .. code-block:: yaml
                           listener_schema_parser: generic
 ====================   ============================
 
-Remote configuration
+Remote Schema
 ^^^^^^^^^^^^^^^^^^^^
-TBC
+If `False` the listener schema is read locally from the expected default location. In this case all the configuration engine settings are ignored. If `True` the listener schema is retrieved dynamically from the configuration server when the application starts. More info in :ref:`configuration_cli`
 
 ====================   ============================
 Type                   boolean
-Defaults               True
+Defaults               False
 Command Line options   N/A
-Environment variable   AVISO_REMOTE_CONFIGURATION
+Environment variable   AVISO_REMOTE_SCHEMA
 Configuration file     .. code-block:: yaml
                         
-                          remote_configuration: True
+                          remote_schema: False
 ====================   ============================
 
 Notification Engine

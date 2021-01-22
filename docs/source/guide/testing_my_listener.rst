@@ -1,6 +1,6 @@
 .. _testing_my_listener:
 
-Testing my listener
+Testing my Listener
 =====================
 
 Aviso provides the capability of submitting test notifications to a local server. This functionality can 

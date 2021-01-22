@@ -2,7 +2,7 @@
 
 .. highlight:: console
 
-How to develop
+How to Develop
 ==============
 
 .. Warning::

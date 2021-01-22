@@ -1,6 +1,6 @@
 .. _aviso_ecmwf:
 
-How Aviso works at ECMWF
+How Aviso Works at ECMWF
 ========================
 
 This section presents how Aviso has been configured and deployed at ECMWF. This is a real-life example of usage of Aviso as well as a service users can request to access.

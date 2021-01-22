@@ -1,6 +1,6 @@
 .. _running_service:
 
-Running as a service
+Running as a Service
 =====================
 
 Aviso can be executed as a system service. This helps automating its restart in case of machine reboots. 

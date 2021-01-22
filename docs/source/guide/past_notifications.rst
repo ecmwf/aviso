@@ -1,6 +1,6 @@
 .. _past_notifications:
 
-Dealing with past notifications
+Notification Catch-up
 =====================================
 
 Before listening to new notifications, Aviso by default checks what was the last notification received and 
