@@ -9,6 +9,7 @@
 import base64
 import json
 import requests
+from requests.auth import HTTPBasicAuth
 from aviso_monitoring.collector.time_collector import TimeCollector
 
 from . import logger
@@ -23,8 +24,8 @@ class Authoriser:
         self.req_timeout = auth_conf["req_timeout"]
         self.open_keys = auth_conf["open_keys"]
         self.protected_keys = auth_conf["protected_keys"]
-        self.cert = auth_conf["cert"]
-        self.key = auth_conf["key"]
+        self.username = auth_conf["username"]
+        self.password = auth_conf["password"]
 
         # assign explicitly a decorator to provide cache for _allowed_destinations
         if cache:
@@ -57,7 +58,8 @@ class Authoriser:
         """
         logger.debug(f"Request allowed destinations for username {username}")
         try:
-            resp = requests.get(self.url, params={"id": username}, timeout=self.req_timeout, cert=(self.cert, self.key))
+            resp = requests.get(self.url, params={"id": username}, timeout=self.req_timeout, 
+            auth=HTTPBasicAuth(self.username, self.password))
         except Exception as e:
             logger.exception(e)
             raise InternalSystemError(f'Error in retrieving destinations for {username}')

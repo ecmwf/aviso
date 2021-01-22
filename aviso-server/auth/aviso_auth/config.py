@@ -94,8 +94,8 @@ class Config:
         authorisation_server["cache_timeout"] = 86400  # 1 day in seconds
         authorisation_server["open_keys"] = ["/ec/mars", "/ec/config/aviso"]
         authorisation_server["protected_keys"] = ["/ec/diss"]
-        authorisation_server["cert"] = "crt.pem"
-        authorisation_server["key"] = "key.pem"
+        authorisation_server["username"] = None
+        authorisation_server["password"] = None
         authorisation_server["monitor"] = False
 
         # backend
@@ -275,8 +275,8 @@ class Config:
         assert server.get("url") is not None, "authorisation_server url has not been configured"
         assert server.get("req_timeout") is not None, "authorisation_server req_timeout has not been configured"
         assert server.get("cache_timeout") is not None, "authorisation_server cache_timeout has not been configured"
-        assert server.get("cert") is not None, "authorisation_server cert has not been configured"
-        assert server.get("key") is not None, "authorisation_server key has not been configured"
+        assert server.get("username") is not None, "authorisation_server username has not been configured"
+        assert server.get("password") is not None, "authorisation_server password has not been configured"
         assert server.get("monitor") is not None, "authorisation_server monitor has not been configured"
         self._authorisation_server = server
 
