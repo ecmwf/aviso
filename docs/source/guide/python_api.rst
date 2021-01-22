@@ -20,12 +20,14 @@ creates a listener that references this function trigger and finally passes it t
    trigger = {"type": "function", "function": do_something}
 
    # create a event listener request that uses that trigger
-   request = {"class": "od", "stream": "oper", "expver": 1, "domain": "g", "step": 1}
-   listeners = {"listeners": [{"event": "mars", "request": request, "triggers": [trigger]}]}
+   request = {"key1": "value1", "key2": "20210101", "key3": "a"}
+   listeners = {"listeners": [{"event": "generic1", "request": request, "triggers": [trigger]}]}
 
    # run it
    aviso = NotificationManager()
    aviso.listen(listeners=listeners)
 
 .. note::
-   The example is assuming the default configuration file ~/aviso/config.yaml is defined for authentication purposes as explained in :ref:`getting_started`.
+   This example is using the default configuration file in `~/aviso/config.yaml` and the generic listener schema presented in :ref:`getting_started`. Alternatively, a configuration object can be passed to the `NotificationManager`.
+
+See :ref:`python_api_ref` for more info.

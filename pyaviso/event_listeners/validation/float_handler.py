@@ -11,8 +11,8 @@ from .type_handler import TypeHandler
 
 class FloatHandler(TypeHandler):
 
-    def __init__(self, key, type=None, required=False, canonic=None):
-        super(FloatHandler, self).__init__(key, type, required)
+    def __init__(self, key, required=False, canonic=None):
+        super(FloatHandler, self).__init__(key, required)
         self._canonic = canonic
 
     @property

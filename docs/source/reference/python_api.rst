@@ -14,11 +14,9 @@ This component internally relies on Aviso client to submit notification to the s
 
 Listen
 ------
-This method is used to start the polling for changes from Aviso client to Aviso server. This allows the user to retrieve 
-new notifications as they are submitted to Aviso server.
+This method is used to start the polling for changes from Aviso client to Aviso server. This allows the user to retrieve new notifications as they are submitted to Aviso server.
 
-Below is an example of a python script that defines a function to be executed once a notification is received, 
-creates a listener that references to this function trigger and finally passes it to Aviso to execute.
+Below is an example of a python script that defines a function to be executed once a notification is received, creates a listener that references to this function trigger and finally passes it to Aviso to execute.
 
 .. code-block:: python
 
@@ -33,8 +31,8 @@ creates a listener that references to this function trigger and finally passes i
    trigger = {"type": "function", "function": do_something}
 
    # create a event listener request that uses that trigger
-   request = {"class": "od", "stream": "oper", "expver": 1, "domain": "g", "step": 1}
-   listeners = {"listeners": [{"event": "mars", "request": request, "triggers": [trigger]}]}
+   request = {"key1": "value1", "key2": "20210101", "key3": "a"}
+   listeners = {"listeners": [{"event": "generic1", "request": request, "triggers": [trigger]}]}
 
    # run it
    aviso = NotificationManager()
@@ -43,34 +41,28 @@ creates a listener that references to this function trigger and finally passes i
 This script will put the main process is busy waiting while polling at regular time the server.
 All the various types of triggers presented in :ref:`triggers` can also be defined or manually loaded from file.
 
-The object ``NotificationManager`` can take as parameter a ``UserConfig`` object that the user can 
-create and customise. If not passed the 
-manager object will instantiate a config object that follows the criteria explained in :ref:`configuration`.
+The object ``NotificationManager`` can take as parameter a ``UserConfig`` object that the user can create and customise. If not passed the manager object will instantiate a config object that follows the criteria explained in :ref:`configuration`. This example shows the latter, moreover, it using the generic listener schema presented in :ref:`getting_started`.
 
 
 Notify
 ------
-This method is used to submit notification. End-users are not currently allowed to submit to the ECMWF Aviso service but 
-they can submit notification in test mode, see :ref:`testing_my_listener`, or to local instances of the store.
-The example belows shows how to send a ``mars`` notification.
+This method is used to submit notification. 
+The example belows shows how to send a generic notification compliant with the generic listener schema presented in :ref:`getting_started`
 
 .. code-block:: python
 
-    from pyaviso import NotificationManager
+   from pyaviso import NotificationManager
 
-    aviso = NotificationManager()
+   aviso = NotificationManager()
 
-    # define the parameters of the notification
-    notification = {
-        "event": "mars",
-        "class": "od", 
-        "stream": "oper", 
-        "expver": 1, 
-        "domain": "g", 
-        "step": 1,
-        "date": "20190810",
-        "time": "0"
-        }
+   # define the parameters of the notification
+   notification = {
+      "event":"generic1",
+      "key1": "value1",
+      "key2": "20210101", 
+      "key3": "a", 
+      "location": "xxx", 
+   }
 
-    # send the notification
-    aviso.notify(notification)
+   # send the notification
+   aviso.notify(notification)

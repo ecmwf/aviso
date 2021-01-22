@@ -24,4 +24,4 @@ Please ensure the coverage at least stays the same before you submit a pull requ
 
 Enforce PEP8 code quality by running `black` with:::
 
-    % black --line-length=120 ecmwf_aviso
+    % black --line-length=120 pyaviso

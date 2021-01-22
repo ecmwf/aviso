@@ -13,8 +13,8 @@ from .type_handler import TypeHandler
 
 class IntHandler(TypeHandler):
 
-    def __init__(self, key, type=None, required=False, canonic=None, range=None):
-        super(IntHandler, self).__init__(key, type, required)
+    def __init__(self, key, required=False, canonic=None, range=None):
+        super(IntHandler, self).__init__(key, required)
         self._canonic = canonic
         self._range = range
 

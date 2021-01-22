@@ -13,8 +13,8 @@ from .type_handler import TypeHandler
 
 class DateHandler(TypeHandler):
 
-    def __init__(self, key, canonic, type=None, required=False):
-        super(DateHandler, self).__init__(key, type, required)
+    def __init__(self, key, canonic, required=False):
+        super(DateHandler, self).__init__(key, required)
         self._canonic = canonic
 
     @property

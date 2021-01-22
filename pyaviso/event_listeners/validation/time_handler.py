@@ -13,8 +13,8 @@ from .enum_handler import EnumHandler
 
 class TimeHandler(EnumHandler):
 
-    def __init__(self, key, values: List[str], canonic, type=None, required=False):
-        super(TimeHandler, self).__init__(key, values, type, required)
+    def __init__(self, key, values: List[str], canonic, required=False):
+        super(TimeHandler, self).__init__(key, values, required)
         self._canonic = canonic
 
     @property

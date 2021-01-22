@@ -17,8 +17,7 @@ run the following:
 
 This command will also reset the notification history.
 
-Users can also explicitly replay past notifications until available. ECMWF Aviso service currently stores notifications 
-up to 14 days in the past. This can also be used to test the listener configuration with real notifications.​
+Users can also explicitly replay past notifications until available. This can also be used to test the listener configuration with real notifications.​
 Here is an example, launch Aviso with the following options:​
 
 .. code-block:: console

@@ -11,7 +11,7 @@ from abc import ABC, abstractmethod
 
 class TypeHandler(ABC):
 
-    def __init__(self, key, type=None, required=False):
+    def __init__(self, key, required=False):
         super(TypeHandler, self).__init__()
         self._key = key
         self._required = required

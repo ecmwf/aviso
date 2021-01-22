@@ -92,18 +92,17 @@ Configuration file     .. code-block:: yaml
 
 Authentication Type
 ^^^^^^^^^^^^^^^^^^^
-Type of authentication to use when talking to the server. ECMWF is the default as it is expected by the Aviso-auth component. See :ref:`aviso_server` for more information.
-In case of talking directly to the store the other authentication methods may be used. If None is selected, settings as
-username, username_file or key will be ignored.
+Type of authentication to use when talking to the server. ``ecmwf`` is required if accessing to the ECMWF Aviso service. See :ref:`aviso_ecmwf` for more information.
+In case of talking directly to the store the other authentication methods may be used. If ``none`` is selected, settings as ``username``, ``username_file`` or ``key`` will be ignored.
 
 ====================   ============================
 Type                   Enum [ecmwf, etcd, none]
-Defaults               ecmwf
+Defaults               none
 Command Line options   N/A
 Environment variable   AVISO_AUTH_TYPE
 Configuration file     .. code-block:: yaml
                         
-                          auth_type: ecmwf
+                          auth_type: none
 ====================   ============================
 
 Username
@@ -112,7 +111,7 @@ This is used to authenticate the requests to the server.
 
 ====================   ============================
 Type                   string
-Defaults               “login name” of the user on the workstation where the application will run
+Defaults               None
 Command Line options   ``-u``, ``--username``
 Environment variable   AVISO_USERNAME
 Configuration file     .. code-block:: yaml
@@ -122,7 +121,7 @@ Configuration file     .. code-block:: yaml
 
 Username File
 ^^^^^^^^^^^^^
-If set, the username will be read from the file defined. This takes priority over Username.
+If set, the username will be read from the file defined. This takes priority over `username`.
 
 ====================   ============================
 Type                   string, file path
@@ -148,45 +147,72 @@ Configuration file     .. code-block:: yaml
                           key_file: /etc/aviso/key
 ====================   ============================
 
+Listener Schema Parser
+^^^^^^^^^^^^^^^^^^^^^^
+Type of parser to use to read the event listener schema. ``ecmwf`` is required if accessing to the ECMWF Aviso service. 
+
+====================   ============================
+Type                   Enum [generic, ecmwf]
+Defaults               generic
+Command Line options   N/A
+Environment variable   AVISO_LISTENER_SCHEMA_PARSER
+Configuration file     .. code-block:: yaml
+                        
+                          listener_schema_parser: generic
+====================   ============================
+
+Remote configuration
+^^^^^^^^^^^^^^^^^^^^
+TBC
+
+====================   ============================
+Type                   boolean
+Defaults               True
+Command Line options   N/A
+Environment variable   AVISO_REMOTE_CONFIGURATION
+Configuration file     .. code-block:: yaml
+                        
+                          remote_configuration: True
+====================   ============================
+
 Notification Engine
 -------------------
-This group of settings defines the connection to the notification server. The current defaults allow the connection to the ECMWF Aviso service.
+This group of settings defines the connection to the notification server. The current defaults allow the connection to a default `etcd` local installation.
 
 Host
 ^^^^
 ====================   ============================
 Type                   string
-Defaults               aviso.ecmwf.int
+Defaults               localhost
 Command Line options   ``-H``, ``--host``
 Environment variable   AVISO_NOTIFICATION_HOST
 Configuration file     .. code-block:: yaml
                         
                           notification_engine:
-                            host: aviso.ecmwf.int
+                            host: localhost
 ====================   ============================
 
 Port
 ^^^^
 ====================   ============================
 Type                   integer
-Defaults               443
+Defaults               2379
 Command Line options   ``-P``, ``--port``
 Environment variable   AVISO_NOTIFICATION_PORT
 Configuration file     .. code-block:: yaml
                         
                           notification_engine:
-                            port: 443
+                            port: 2379
 ====================   ============================
 
 Type
 ^^^^
 This defines the protocol to use to connect to the server.
-In case of ``test`` the application will run in `TestMode` by connecting to a local store, part of Aviso itself. 
-In this mode, users can execute any of the commands described in :ref:`notification_cli`. The only restriction 
-applies to retrieving past notifications that are not available.
+In case of ``file_based`` the application will run in `TestMode` by connecting to a local store, part of Aviso itself. 
+In this mode, users can execute any of the commands described in :ref:`notification_cli`. The only restriction applies to retrieving past notifications that are not available. See :ref:`testing_my_listener` for more info.
 
 ====================   ============================
-Type                   Enum: [ etcd_rest, etcd_grpc, test ]
+Type                   Enum: [ etcd_rest, etcd_grpc, file_based ]
 Defaults               etcd_rest
 Command Line options   N/A
 Environment variable   AVISO_NOTIFICATION_ENGINE
@@ -230,13 +256,13 @@ HTTPS
 ^^^^^
 ====================   ============================
 Type                   boolean
-Defaults               True
+Defaults               False
 Command Line options   N/A
 Environment variable   AVISO_NOTIFICATION_HTTPS
 Configuration file     .. code-block:: yaml
                         
                           notification_engine:
-                            https: True
+                            https: False
 ====================   ============================
 
 Catchup
@@ -274,39 +300,39 @@ Configuration file     .. code-block:: yaml
 Configuration Engine
 --------------------
 
-This group of settings defines the connection to the configuration management server. The current defaults allows connecting to the ECMWF Aviso service also as configuration server. 
+This group of settings defines the connection to the configuration management server. The current defaults allows connecting to a default `etcd` local installation. 
 This is however not a requirement and different servers can be used. See :ref:`configuration_cli` for more information.
 
 Host
 ^^^^
 ====================   ============================
 Type                   string
-Defaults               aviso.ecmwf.int
+Defaults               localhost
 Command Line options   ``-H``, ``--host``
 Environment variable   AVISO_CONFIGURATION_HOST
 Configuration file     .. code-block:: yaml
                         
                           configuration_engine:
-                            host: aviso.ecmwf.int
+                            host: localhost
 ====================   ============================
 
 Port
 ^^^^
 ====================   ============================
 Type                   integer
-Defaults               443
+Defaults               2379
 Command Line options   ``-P``, ``--port``
 Environment variable   AVISO_CONFIGURATION_PORT
 Configuration file     .. code-block:: yaml
                         
                           configuration_engine:
-                            port: 443
+                            port: 2379
 ====================   ============================
 
 Type
 ^^^^
 ====================   ============================
-Type                   Enum: [ etcd_rest, etcd_grpc, test ]
+Type                   Enum: [ etcd_rest, etcd_grpc, file_based ]
 Defaults               etcd_rest
 Command Line options   N/A
 Environment variable   AVISO_CONFIGURATION_ENGINE
@@ -335,13 +361,13 @@ HTTPS
 ^^^^^
 ====================   ============================
 Type                   boolean
-Defaults               True
+Defaults               False
 Command Line options   N/A
 Environment variable   AVISO_CONFIGURATION_HTTPS
 Configuration file     .. code-block:: yaml
                         
                           configuration_engine:
-                            https: True
+                            https: False
 ====================   ============================
 
 Max File Size

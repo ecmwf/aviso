@@ -13,8 +13,8 @@ from .type_handler import TypeHandler
 
 class EnumHandler(TypeHandler):
 
-    def __init__(self, key, values: List[str], type=None, required=False, default=None):
-        super(EnumHandler, self).__init__(key, type, required)
+    def __init__(self, key, values: List[str], required=False, default=None):
+        super(EnumHandler, self).__init__(key, required)
         self._valid_values = values
         self._default = default
 

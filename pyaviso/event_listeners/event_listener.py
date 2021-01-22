@@ -386,7 +386,7 @@ class EventListener():
             for p_schema in type_list:
                 try:
                     assert "type" in p_schema, f"Wrong schema structure, 'type' could not be located for {p}"
-                    validator_class = p_schema["type"]
+                    validator_class = p_schema.pop("type")
                     validator: TypeHandler = eval(f"{validator_class}(key=p, **p_schema)")
                     # format the values associated to this attribute
                     value = params[p]

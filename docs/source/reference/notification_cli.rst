@@ -120,20 +120,19 @@ pair. This command is mostly used for debugging.
 
 Here is an example of this command::
 
-    % aviso key event=dissemination,target=E1,class=od,date=20190810,destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=0
+    % aviso key event=generic1,key1=value1,key2=20210101,key3=a
 
-Note the various parameters required by the notification. The output from this command will be something like::
+Note all the keys are required. The output from this command will be something like::
 
-    /ec/diss/FOO/target=E1,class=od,expver=0001,domain=g,date=20190810,time=00,stream=enfo,step=001
+    /tmp/aviso/generic/value1/20210101/a
 
-Note how the format and the order of the parameters have been adjusted to complying with the internal key schema.
+Note how the format and the order of the parameters have been adjusted to complying with the listener schema presented in :ref:`getting_started`
 
 All the options accepted by this command are covered in :ref:`notification_cli_listen` and in :ref:`configuration`.
 
 Value
 -----
-This command is used to retrieve from the server the value associated to a set of key-value pairs using the same syntax 
-of the command ``key``.
+This command is used to retrieve from the store the value associated to a specific key using the same syntax of the command ``key``.
 
 .. code-block:: console
 
@@ -161,9 +160,10 @@ of the command ``key``.
 
 Here is  an example of this command::
 
-    % aviso value event=dissemination,target=E1,class=od,date=20190810,destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=0
+    % aviso value event=generic1,key1=value1,key2=20210101,key3=a
 
 Note the list of parameters required, this is the same list required by the ``key`` command.
+Not all keys have corresponding values because it is optional. In this case this command displays ``None``
 
 All the options accepted by this command are covered in :ref:`notification_cli_listen` and in :ref:`configuration`.
 
@@ -195,15 +195,9 @@ This command is used to directly send a notification to the server using the sam
 
 Here is an example of this command::
 
-    % aviso notify event=dissemination,target=E1,class=od,date=20190810,destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=0,location=xxxxxxxx
+    % aviso notify event=generic1,key1=value1,key2=20210101,key3=a,location=xxxx
 
-Note the list of parameters required, this is the same list required by the ``key`` command with the addition of the ``location``
-pair. This is needed only for the ``dissemination`` event. 
+Note the list of parameters required, this is the same list required by the ``key`` command with the addition of the ``location`` pair. This is needed to assign a value to the key that will be saved into the store. If not given the value will be ``None``. This last case is used when only an acknowledgement that something happened is needed, i.e. a data has been produced and users know how access to it independently.
 
-In the case of a ``mars`` event the command looks like this::
-
-    % aviso notify event=mars,class=od,date=20190810,domain=g,expver=1,step=1,stream=enfo,time=0
-
-with no ``destination``, ``target`` and ``location`` pair.
 
 All the options accepted by this command are covered in :ref:`notification_cli_listen` and in :ref:`configuration`.

@@ -6,7 +6,7 @@
 # granted to it by virtue of its status as an intergovernmental organisation
 # nor does it submit to any jurisdiction.
 
-__all__ = ["engine", "engine_factory", "etcd_grpc_engine", "etcd_rest_engine", "test_engine"]
+__all__ = ["engine", "engine_factory", "etcd_grpc_engine", "etcd_rest_engine", "file_based_engine"]
 
 import importlib
 from enum import Enum
@@ -20,7 +20,7 @@ class EngineType(Enum):
 
     ETCD_GRPC = ("etcd_grpc_engine", "EtcdGrpcEngine")
     ETCD_REST = ("etcd_rest_engine", "EtcdRestEngine")
-    TEST = ("test_engine", "TestEngine")
+    FILE_BASED = ("file_based_engine", "FileBasedEngine")
 
     def __str__(self):
         return self.name.lower()

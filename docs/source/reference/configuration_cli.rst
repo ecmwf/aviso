@@ -11,13 +11,14 @@ and the value is the configuration content. This means that the two Aviso functi
 configuration, share the same server technology and architecture, and therefore most of user options 
 presented in :ref:`notification_cli`.
 
-This configuration management functionality is currently used for the Aviso notification service.
-Specifically, this is used to dynamically pull the Aviso configuration files such as the event 
-listener schema and the MARS language at the beginning of every listening operation. This allows to share and update these schemas with the notification providers. 
-The notification provider is required to comply with the notification format otherwise the notification will be wrongly filtered out by the listeners.
-Given the high-throughput of the system this solution exploits the scalability of the server architecture already in place.
+.. note::
 
-This section presents the commands available with the configuration CLI.
+   This functionality can be used as part of the Aviso notification workflow.
+   Specifically, it can dynamically pull the event 
+   listener schema when Aviso client startups. This allows to share and update this schema with the notification providers. The notification provider is required to comply with the notification format otherwise the notification will be wrongly identified by the listeners.
+   Given the high-throughput of the system this solution exploits the scalability of the server architecture already in place. See :ref:`configuration` on how to enable it.
+
+The following section presents the commands available with the configuration CLI.
 
 .. code-block:: console
 

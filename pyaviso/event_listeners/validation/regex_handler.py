@@ -13,8 +13,8 @@ from .type_handler import TypeHandler
 
 class RegexHandler(TypeHandler):
 
-    def __init__(self, key, regex, type=None, required=False):
-        super(RegexHandler, self).__init__(key, type, required)
+    def __init__(self, key, regex, required=False):
+        super(RegexHandler, self).__init__(key, required)
         self._regex = regex
 
     @property
