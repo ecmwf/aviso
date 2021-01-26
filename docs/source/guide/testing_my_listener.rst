@@ -10,7 +10,7 @@ be used to test the listener configuration without any impact to the operational
 
    .. code-block:: console
 
-      % aviso listen --test
+      aviso listen --test
       
    The console should display a Test Mode message. 
 
@@ -19,17 +19,17 @@ be used to test the listener configuration without any impact to the operational
       We are assuming the listener is defined in the default configuration file as shown in :ref:`getting_started`.
 
 2. Send a test notification. From another terminal, run the notify command. 
-Here is an example for a ``generic1`` event notification.
+Here is an example for a ``flight`` event notification.
 
    .. code-block:: console
 
-      % aviso notify event=generic1,key1=value1,key2=20210101,key3=a,location=xxx --test
+      aviso notify event=flight,country=Italy,airport=fco,date=20210101,number=AZ203,payload=Landed --test
 
-
-   .. note::
-     
-      The order of the keys is not important, but the command requires all of them. `location`
-      is optional as it translates in the value associated to the key-value pair in the store.
-      If not defined the value in the store will be `None`
 
 3. After a few seconds, the trigger defined should be executed. 
+
+Test mode can be activated at global level by setting the notification engine type to ``file_based`` In this way the ``--test`` option is not needed. See :ref:`configuration` for more info.
+
+.. note::
+
+   The catch_up functionality is not available in Test Mode.

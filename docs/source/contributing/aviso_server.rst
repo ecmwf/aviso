@@ -39,16 +39,16 @@ This component is a REST frontend that allows notification providers to submit n
 
 Install it by, from the main project directory:: 
    
-   % pip install -e .
-   % pip install -e aviso-server/monitoring
-   % pip install -e aviso-server/rest
+   pip install -e .
+   pip install -e aviso-server/monitoring
+   pip install -e aviso-server/rest
 
 The `aviso` and `aviso-monitoring` packages are required by `aviso-rest`.
 
 
 Launch it by::
 
-   % aviso-rest
+   aviso-rest
 
 
 
@@ -69,14 +69,14 @@ If both steps are successful the request is forwarded to the store.
 
 Install it by, from the main project directory:: 
    
-   % pip install -e aviso-server/monitoring
-   % pip install -e aviso-server/auth 
+   pip install -e aviso-server/monitoring
+   pip install -e aviso-server/auth 
 
 The `aviso-monitoring` package is required by `aviso-auth`.
 
 Launch it by::
 
-   % aviso-auth
+   aviso-auth
 
 
 Aviso Admin
@@ -92,14 +92,14 @@ This component also uses the _monitoring_ package to run a UDP server to receive
 
 Install it by, from the main project directory:: 
    
-   % pip install -e aviso-server/monitoring
-   % pip install -e aviso-server/admin 
+   pip install -e aviso-server/monitoring
+   pip install -e aviso-server/admin 
 
 The `aviso-monitoring` package is required by `aviso-admin`.
 
 Launch it by::
 
-   % aviso-admin
+   aviso-admin
 
 
 Monitoring
@@ -116,4 +116,4 @@ The second capability is used by the Aviso Admin component.
 
 Install it by, from the main project directory:: 
    
-   % pip install -e aviso-server/monitoring 
+   pip install -e aviso-server/monitoring 

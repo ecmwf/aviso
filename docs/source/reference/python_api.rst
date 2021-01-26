@@ -9,7 +9,7 @@ This object allows to programmatically define any setting described in in :ref:`
 This is intended for users that want to integrate Aviso in a workflow or application
 written in Python. An example of integration of Aviso in a external Python application is the server component **Aviso REST**, 
 described in :ref:`aviso_server`.
-This component internally relies on Aviso client to submit notification to the store.
+This component internally relies on Aviso client to submit notifications to the store.
 
 
 Listen
@@ -31,8 +31,8 @@ Below is an example of a python script that defines a function to be executed on
    trigger = {"type": "function", "function": do_something}
 
    # create a event listener request that uses that trigger
-   request = {"key1": "value1", "key2": "20210101", "key3": "a"}
-   listeners = {"listeners": [{"event": "generic1", "request": request, "triggers": [trigger]}]}
+   request = {"country": "Italy"}
+   listeners = {"listeners": [{"event": "flight", "request": request, "triggers": [trigger]}]}
 
    # run it
    aviso = NotificationManager()
@@ -41,13 +41,13 @@ Below is an example of a python script that defines a function to be executed on
 This script will put the main process is busy waiting while polling at regular time the server.
 All the various types of triggers presented in :ref:`triggers` can also be defined or manually loaded from file.
 
-The object ``NotificationManager`` can take as parameter a ``UserConfig`` object that the user can create and customise. If not passed the manager object will instantiate a config object that follows the criteria explained in :ref:`configuration`. This example shows the latter, moreover, it using the generic listener schema presented in :ref:`getting_started`.
+The object ``NotificationManager`` can take as parameter a ``UserConfig`` object that the user can create and customise. If not passed the manager object will instantiate a config object that follows the criteria explained in :ref:`configuration`. This example shows the latter, moreover, it is using the default listener schema presented in :ref:`make_your_event`.
 
 
 Notify
 ------
 This method is used to submit notification. 
-The example belows shows how to send a generic notification compliant with the generic listener schema presented in :ref:`getting_started`
+The example belows shows how to send a generic notification compliant with the generic listener schema presented in :ref:`make_your_event`
 
 .. code-block:: python
 
@@ -57,11 +57,12 @@ The example belows shows how to send a generic notification compliant with the g
 
    # define the parameters of the notification
    notification = {
-      "event":"generic1",
-      "key1": "value1",
-      "key2": "20210101", 
-      "key3": "a", 
-      "location": "xxx", 
+      "event":"flight",
+      "country": "italy",
+      "date": "20210101",
+      "airport": "FCO",
+      "number": "AZ203"
+      "payload": "Landed", 
    }
 
    # send the notification

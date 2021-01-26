@@ -3,7 +3,7 @@
 Post
 =================
 
-Below find an example of a basic event listener for ``dissemination`` events that will execute a ``post`` trigger 
+Below find an example of an event listener for ``flight`` events that will execute a ``post`` trigger 
 in case of notifications. Specifically, this trigger will format the notification according to the CloudEvent_ 
 specification and will send it to the endpoint defined by the user.
 

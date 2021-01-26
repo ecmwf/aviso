@@ -147,7 +147,7 @@ Configuration file     .. code-block:: yaml
                           key_file: /etc/aviso/key
 ====================   ============================
 
-Listener Schema Parser
+Schema Parser
 ^^^^^^^^^^^^^^^^^^^^^^
 Type of parser to use to read the event listener schema. ``ecmwf`` is required if accessing to the ECMWF Aviso service. 
 
@@ -155,15 +155,15 @@ Type of parser to use to read the event listener schema. ``ecmwf`` is required i
 Type                   Enum [generic, ecmwf]
 Defaults               generic
 Command Line options   N/A
-Environment variable   AVISO_LISTENER_SCHEMA_PARSER
+Environment variable   AVISO_SCHEMA_PARSER
 Configuration file     .. code-block:: yaml
                         
-                          listener_schema_parser: generic
+                          schema_parser: generic
 ====================   ============================
 
 Remote Schema
 ^^^^^^^^^^^^^^^^^^^^
-If `False` the listener schema is read locally from the expected default location. In this case all the configuration engine settings are ignored. If `True` the listener schema is retrieved dynamically from the configuration server when the application starts. More info in :ref:`configuration_cli`
+If `False` the listener schema is read locally from the expected default location. In this case all the configuration engine settings are ignored. If `True` the listener schema is retrieved dynamically from the configuration server when the application starts. More info in :ref:`config_manage`
 
 ====================   ============================
 Type                   boolean
@@ -208,8 +208,10 @@ Configuration file     .. code-block:: yaml
 Type
 ^^^^
 This defines the protocol to use to connect to the server.
-In case of ``file_based`` the application will run in `TestMode` by connecting to a local store, part of Aviso itself. 
-In this mode, users can execute any of the commands described in :ref:`notification_cli`. The only restriction applies to retrieving past notifications that are not available. See :ref:`testing_my_listener` for more info.
+In case of ``file_based`` Aviso will run in `TestMode` by connecting to a local store, part of Aviso itself. In this mode, users can execute any of the commands described in :ref:`notification_cli`. The only restriction applies to retrieving past notifications that are not available. See :ref:`testing_my_listener` for more info.
+In case of ``etcd_grpc`` or``etcd_rest`` Aviso will connect to a etcd store either by its native gRPC API or by the RESTfull API implemented by the etcd gRPC gateway_.
+
+.. _gateway: https://etcd.io/docs/v3.4.0/dev-guide/api_grpc_gateway/
 
 ====================   ============================
 Type                   Enum: [ etcd_rest, etcd_grpc, file_based ]
@@ -267,7 +269,7 @@ Configuration file     .. code-block:: yaml
 
 Catchup
 ^^^^^^^
-If True the application will start retrieving first the missed notifications and then listening to the new ones. See :ref:`past_notifications` for more information.
+If True the application will start retrieving first the missed notifications and then listening to the new ones. See :ref:`catch_up` for more information.
 
 ====================   ============================
 Type                   boolean
@@ -282,7 +284,7 @@ Configuration file     .. code-block:: yaml
 
 Service
 ^^^^^^^
-Key identifying Aviso application in the configuration management system. See :ref:`configuration_cli` for more information.
+Key identifying Aviso application in the configuration management system. See :ref:`config_manage` for more information.
 
 ====================   ============================
 Values                 string
@@ -301,7 +303,7 @@ Configuration Engine
 --------------------
 
 This group of settings defines the connection to the configuration management server. The current defaults allows connecting to a default `etcd` local installation. 
-This is however not a requirement and different servers can be used. See :ref:`configuration_cli` for more information.
+This is however not a requirement and different servers can be used. See :ref:`config_manage` for more information.
 
 Host
 ^^^^
@@ -332,7 +334,7 @@ Configuration file     .. code-block:: yaml
 Type
 ^^^^
 ====================   ============================
-Type                   Enum: [ etcd_rest, etcd_grpc, file_based ]
+Type                   Enum: [ etcd_rest, etcd_grpc ]
 Defaults               etcd_rest
 Command Line options   N/A
 Environment variable   AVISO_CONFIGURATION_ENGINE

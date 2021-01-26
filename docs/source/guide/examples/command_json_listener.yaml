@@ -1,10 +1,10 @@
 listeners:
-  - event: dissemination
+  - event: flight
     request:
-      destination: FOO
-      class: od
-      expver: 1
-      domain: g
+      country: italy
+      airport: [FCO, CIA]
+      date: 20210101
+      number: AZ203
     triggers:
       - type: command
-        command: ./script.sh --json ${json}
+        command: ./my_script.sh --json ${json}

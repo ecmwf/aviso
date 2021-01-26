@@ -4,7 +4,7 @@ Aviso as a Python API
 =====================
 
 Aviso can be used as a Python API. This is intended for users that want to integrate Aviso in a bigger workflow written in Python or that simply have their trigger 
-defined as a Python function. Below find an example of a python script that defines a function to be executed once a notification is received, 
+defined as a Python function. Below find an example of a Python script that defines a function to be executed once a notification is received, 
 creates a listener that references this function trigger and finally passes it to aviso to execute.
 
 .. code-block:: python
@@ -20,8 +20,8 @@ creates a listener that references this function trigger and finally passes it t
    trigger = {"type": "function", "function": do_something}
 
    # create a event listener request that uses that trigger
-   request = {"key1": "value1", "key2": "20210101", "key3": "a"}
-   listeners = {"listeners": [{"event": "generic1", "request": request, "triggers": [trigger]}]}
+   request = {"country": "italy"}
+   listeners = {"listeners": [{"event": "flight", "request": request, "triggers": [trigger]}]}
 
    # run it
    aviso = NotificationManager()

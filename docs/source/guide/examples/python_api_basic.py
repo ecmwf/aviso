@@ -11,7 +11,7 @@ from pyaviso.notification_manager import NotificationManager
 
 # define function to be called
 def do_something(notification):
-    print(f"Notification for step {notification['request']['step']} received")
+    print(f"Notification for step {notification['request']['number']} received")
     # now do something useful with it ...
 
 
@@ -19,8 +19,8 @@ def do_something(notification):
 trigger = {"type": "function", "function": do_something}
 
 # create a event listener request that uses that trigger
-request = {"stream": "enfo", "date": 20190810, "time": 0}
-listeners = {"listeners": [{"event": "mars", "request": request, "triggers": [trigger]}]}
+request = {"country": "italy", "date": 20210101}
+listeners = {"listeners": [{"event": "flight", "request": request, "triggers": [trigger]}]}
 
 # run it
 aviso = NotificationManager()

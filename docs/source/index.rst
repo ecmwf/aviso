@@ -7,6 +7,7 @@ It allows users to:
 
 * Define events that require notification
 * Define triggers to be executed once a notification is received
+* Send and receive notifications
 
 This enables the creation of automatic workflows, timely triggered as events are notified.
 
@@ -19,11 +20,11 @@ See :ref:`overview` for more information.
 
    guide/overview
    guide/getting_started
-   guide/defining_my_listener
+   guide/define_my_listener
    guide/python_api
    guide/examples
    guide/testing_my_listener
-   guide/past_notifications
+   guide/catch_up
    guide/make_your_event
    guide/running_service
    guide/aviso_ecmwf
@@ -36,7 +37,7 @@ See :ref:`overview` for more information.
    reference/triggers
    reference/notification_cli
    reference/python_api
-   reference/configuration_cli
+   reference/config_manage
 
 .. toctree::
    :maxdepth: 1

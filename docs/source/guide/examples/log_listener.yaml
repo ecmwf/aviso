@@ -1,8 +1,7 @@
 listeners:
-  - event: dissemination
+  - event: flight
     request:
-      destination: FOO
-      stream: enfo
+      date: 20210101
     triggers:
       - type: log
         path: log/testLog.log

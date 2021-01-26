@@ -1,14 +1,10 @@
 listeners:
-  - event: dissemination
+  - event: flight
     request:
-      destination: FOO
-      stream: enfo
+      country: [italy, france, Germany]
     triggers:
       - type: echo
       - type: log
         path: log/testLog.log
       - type: command
-        command: examples/script.sh --date ${request.date} -s ${request.stream}
-        environment:
-          STEP: ${request.step}
-          TIME: "The time is ${request.time}"
+        command: ./my_script.sh --date ${request.date} --number ${request.number}

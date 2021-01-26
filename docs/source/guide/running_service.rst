@@ -10,7 +10,7 @@ The following steps help to configure Aviso to run as a service that automatical
 
    .. code-block:: console
       
-      % whereis aviso
+      whereis aviso
 
 2. Create a system service unit, by creating the following file in `/etc/systemd/system/aviso.service`:
 
@@ -33,19 +33,19 @@ The following steps help to configure Aviso to run as a service that automatical
 
    .. code-block:: console
 
-      % sudo systemctl enable aviso.service​
+      sudo systemctl enable aviso.service​
 
 4. Reload systemd:
 
    .. code-block:: console
 
-      % sudo systemctl daemon-reload​
+      sudo systemctl daemon-reload​
 
 5. Start the service:
 
    .. code-block:: console
 
-      % sudo systemctl start aviso.service
+      sudo systemctl start aviso.service
 
 .. note::
    If users change the Aviso configuration, Aviso service must be restarted otherwise the change will be ineffective.

@@ -14,10 +14,10 @@ Aviso is a scalable notification system designed for high-throughput. It is deve
 * Highly reliable - built for **time-critical** applications.
 
 Aviso is a client-server application. We refer to the notification server as Aviso Server while to the client application as Aviso Client or just Aviso. 
-This user guide and the reference are focused on Aviso client. See more info on its architecture in :ref:`aviso_client`.
+This user guide and the reference are focused on Aviso client. More info on its architecture is available in :ref:`aviso_client`.
 
-The server system is based on a persistent key-value store where the events are stored, the key represents the product's metadata while the value, the product's location.
-See more info on the server solution and its components in :ref:`aviso_server`.
+The server system is based on a persistent key-value store where the events are stored, the key represents the event's metadata while the value, the event's payload.
+More info on the server architecture and its components is available in :ref:`aviso_server`.
 
 
 What could I use Aviso for?
@@ -30,12 +30,12 @@ Aviso can be used for:
 * Automating users' workflows requiring notifications based on user-defined events.
 * Automating users' workflows requiring ECMWF notifications on data availability. See :ref:`aviso_ecmwf` for more details on this service
 * Automating multi-domain workflows across different Clouds and HPC centres. Aviso client can be extended to connect to various general purpose notification systems; similarly 
-  Aviso server can be extended to store generic events and integrate with legacy architectures
-* Configuration Management. This functionality goes beyond Aviso's main aim but it is part of the notification workflow and can also be used independently. See :ref:`configuration_cli` for more info
+  Aviso server can store generic events and be extended to integrate with legacy architectures
+* Configuration Management. This functionality goes beyond Aviso's main aim but it is part of the notification workflow and can also be used independently. See :ref:`config_manage` for more info
 
 
-Aviso General Workflow
-----------------
+Aviso general workflow
+----------------------
 
 Figure below represents the general workflow of the Aviso system:
 

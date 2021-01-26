@@ -2,7 +2,7 @@
 
 Getting Started
 ===============
-Aviso Client can be used as a Python API or as Command-Line Interface (CLI) application. Below find a few steps to quickly get a working configuration.
+Aviso Client can be used as a Python API or as Command-Line Interface (CLI) application. Below find a few steps to quickly get a working configuration on Linux.
 
 .. note::
 
@@ -14,45 +14,55 @@ Installing
 ----------
 
 .. warning::
-  Aviso requires Python 3.6 or above.
+  Aviso requires Python 3.6+ and etcd 3.4+
 
 
 1. Install Aviso Client, simply run the following command:
 
 .. code-block:: console
 
-   % pip install pyaviso
+   pip install pyaviso
 
-2. Install etcd_
+2. Install etcd_, below the basic steps to install a local server:
 
 .. code-block:: console
 
-   % pip install pyaviso
+   ETCD_VER=v3.4.14
+   DOWNLOAD_URL=https://github.com/etcd-io/etcd/releases/download
 
+   curl -L ${DOWNLOAD_URL}/${ETCD_VER}/etcd-${ETCD_VER}-linux-amd64.tar.gz -o /tmp/etcd-${ETCD_VER}-linux-amd64.tar.gz
+   tar xzvf /tmp/etcd-${ETCD_VER}-linux-amd64.tar.gz -C /tmp/etcd-download-test --strip-components=1
+
+   # start a local etcd server
+   /tmp/etcd-download-test/etcd
+
+For more advanced configuration or installation on different platforms please refer to the official documentation on the release_ page. Note that the etcd version mentioned in the script above is the latest available at the time of writing this documentation. Use any compatible version.
+
+.. _release: https://github.com/etcd-io/etcd/releases
 
 Configuring
 -----------------
+
+All the examples of this guide are based on a representative use case, the broadcast of flight events, such as landing or take-off, that could trigger workflows for flight trackers and related applications. This use case is available by default. The following steps show how to try it out. See :ref:`make_your_event` to customise it to your application.
 
 Create a configuration file in the default location `~/.aviso/config.yaml` with the following settings:
 
 .. code-block:: yaml
 
    listeners:
-   - event: generic1
+   - event: flight
       request:
-         key1: value1
-         key2: 20210101
-         key3: a
+         country: Italy
       triggers:
          - type: echo
 
 This file defines how to run Aviso, the event to listen to and the triggers to execute in case of notifications. 
-The file above shows a basic example of a generic listener to event of type ``generic1``. 
-The block ``request`` describes for which events the user wants to execute the triggers. It is made by a list of keys. The users have to specify only the keys that they want to use to identify the events they are interested into. Only the notifications complying with all the keys defined will execute the triggers. These keys are defined by the listener schema file explained at the next step.
+This is a basic example of a generic listener to events of type ``flight``. 
+``request`` describes for which events the user wants to execute the triggers. It is made by a list of keys. The users have to specify only the keys that they want to use to identify the events they are interested into. Only the notifications complying with all the keys defined will execute the triggers. In this example the trigger will be executed only when flight events for Italy will be received. These keys are defined by the listener schema file, see :ref:`make_your_event` for more info.
 
 The trigger in this example is ``echo``. This will simply print out the notification to the console output.
 
-Check :ref:`defining_my_listener` for more information.
+Check :ref:`define_my_listener` to create a more complex listener.
 
 Launching
 -----------------
@@ -61,7 +71,7 @@ Launching
 
    .. code-block:: console
 
-      % aviso listen
+      aviso listen
 
    Once in execution this command will create a process waiting for notifications compliant with the listener defined above.
       
@@ -70,27 +80,29 @@ Launching
    .. note::
       The configuration file is only read at start time, therefore every time users make changes to it they need to restart the listening process.
 
-2. Submit a notification, from another terminal:
+2. Submit a example notification, from another terminal:
 
    .. code-block:: console
 
-      % aviso notify event=generic1,key1=value1,key2=20210101,key3=a,payload=xxxx
+      aviso notify event=flight,country=Italy,airport=fco,date=20210101,number=AZ203,payload=Landed
 
+This example represents the landing event for the flight AZ203 in Fiumicino(FCO) Airport in Rome on 01-01-2021.
 
 3. After a few seconds, the trigger defined should be executed. The terminal where the listening process is running should display the following:
 
    .. code-block:: console
 
-      "event": "generic1",
+      "event": "flight",
+      "payload": "Landed",
       "request": {
-         "key1": "value1",
-         "key2": "20210101",
-         "key3": "a"
-      },
-      "payload":xxxx
+         "country": "italy",
+         "date": "20210101",
+         "airport": "FCO",
+         "number": "AZ203"
+      }
 
-.. note::
+   .. note::
 
-   ``payload`` is used to assign a value to the specific event notified. It is, however, optional. If not given the payload will be `None`. This last case is used when only an acknowledgement that something happened is needed.
+      ``payload`` is used to assign a value to the specific event notified. It is, however, optional. If not given the payload will be `None`. This last case is used when only an acknowledgement that something happened is needed.
    
-More information on the available commands can be found in :ref:`notification_cli`
+The complete list of available commands can be found in :ref:`notification_cli`

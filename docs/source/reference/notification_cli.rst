@@ -2,8 +2,8 @@
 
 .. _notification_cli:
 
-CLI for Notification
-====================
+Notification CLI
+=================
 
 Aviso provides a Command Line Interface (CLI) for listening to notifications from the server system described in :ref:`aviso_server`. 
 This section describes in detail the various commands associated with this functionality.
@@ -30,7 +30,7 @@ This command allows to listen to notifications compliant with the listeners defi
 
 .. code-block:: console
 
-    % aviso listen -h
+    aviso listen -h
     Usage: aviso listen [OPTIONS] [LISTENER_FILES]...
 
     This method allows the user to execute the listeners defined in the YAML
@@ -60,12 +60,12 @@ The parameter ``listener_files`` is used to define the event listeners and the t
 of notifications. If not present the system will look for the default listeners which can be 
 defined in the configuration files. Here is an example of invoking this command with one listener file::
 
-    % aviso listen examples/echoListener.yaml
+    aviso listen examples/echoListener.yaml
 
 Once in execution this command will create a background process waiting for notifications and a foreground process in busy 
 waiting mode. Multiple files can also be indicated as  shown below::
 
-   % aviso listen listener1.yaml listener2.yaml
+   aviso listen listener1.yaml listener2.yaml
 
 Most of the options accepted by this command are used to change the application configuration. Below are presented only the options
 that are not covered by the :ref:`configuration` section.
@@ -81,11 +81,11 @@ If the option ``--test`` is present, the application will run in `TestMode`. See
 
 Now
 ^^^
-If the option ``--now`` is present, the application will start ignoring the missed notifications while listening only to the new ones. See :ref:`past_notifications` for more information.
+If the option ``--now`` is present, the application will start ignoring the missed notifications while listening only to the new ones. See :ref:`catch_up` for more information.
 
 Catchup
 ^^^^^^^
-If the option ``--catchup`` is present, the application will start retrieving first the missed notifications and then listening to the new ones. See :ref:`past_notifications` for more information.
+If the option ``--catchup`` is present, the application will start retrieving first the missed notifications and then listening to the new ones. See :ref:`catch_up` for more information.
 This option is enabled by default. See :ref:`configuration` for more information.
 
 
@@ -120,11 +120,11 @@ pair. This command is mostly used for debugging.
 
 Here is an example of this command::
 
-    % aviso key event=generic1,key1=value1,key2=20210101,key3=a
+    aviso key event=flight,country=Italy,airport=fco,date=20210101,number=AZ203
 
 Note all the keys are required. The output from this command will be something like::
 
-    /tmp/aviso/generic/value1/20210101/a
+    /tmp/aviso/flight/20210101/italy/FCO/AZ203
 
 Note how the format and the order of the parameters have been adjusted to complying with the listener schema presented in :ref:`getting_started`
 
@@ -160,12 +160,16 @@ This command is used to retrieve from the store the value associated to a specif
 
 Here is  an example of this command::
 
-    % aviso value event=generic1,key1=value1,key2=20210101,key3=a
+    aviso value event=flight,country=Italy,airport=fco,date=20210101,number=AZ203
 
 Note the list of parameters required, this is the same list required by the ``key`` command.
-Not all keys have corresponding values because it is optional. In this case this command displays ``None``
+The output from this command will be something like::
 
-All the options accepted by this command are covered in :ref:`notification_cli_listen` and in :ref:`configuration`.
+    Landed
+    
+Not all keys have corresponding values because it is optional. In this case the output would be ``None``
+
+All the options accepted are covered in :ref:`notification_cli_listen` and in :ref:`configuration`.
 
 Notify
 ------
@@ -195,9 +199,8 @@ This command is used to directly send a notification to the server using the sam
 
 Here is an example of this command::
 
-    % aviso notify event=generic1,key1=value1,key2=20210101,key3=a,location=xxxx
+    aviso notify event=flight,country=Italy,airport=fco,date=20210101,number=AZ203,payload=Landed
 
-Note the list of parameters required, this is the same list required by the ``key`` command with the addition of the ``location`` pair. This is needed to assign a value to the key that will be saved into the store. If not given the value will be ``None``. This last case is used when only an acknowledgement that something happened is needed, i.e. a data has been produced and users know how access to it independently.
-
+Note the list of parameters required, this is the same list required by the ``key`` command with the addition of the ``payload`` pair. This is needed to assign a value to the key that will be saved into the store. If not given the value will be ``None``. This last case is used when only an acknowledgement that something happened is needed. 
 
 All the options accepted by this command are covered in :ref:`notification_cli_listen` and in :ref:`configuration`.

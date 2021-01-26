@@ -1,8 +1,7 @@
 listeners:
-  - event: dissemination
+  - event: flight
     request:
-      destination: FOO
-      stream: enfo
-      step: [1,2,3]
+      country: [italy, france, Germany]
+      number: [AZ203, AZ303]
     triggers:
       - type: echo

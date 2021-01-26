@@ -1,7 +1,7 @@
 listeners:
-  - event: dissemination
+  - event: flight
     request:
-      destination: FOO
+      number: AZ203
     triggers:
       - type: command
-        command: ./script.sh --jsonpath ${jsonpath}
+        command: ./my_script.sh --jsonpath ${jsonpath}

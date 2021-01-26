@@ -1,24 +1,19 @@
 listeners:
-  - event: dissemination
+  - event: flight
     request:
-      destination: FOO
-      target: E1
-      class: od
-      expver: 1
-      domain: g
-      date: 20200810
-      stream: enfo
-      step: 0
+      country: italy
     triggers:
-      - type: echo
-  - event: mars
+      - type: command
+        command: ./my_script_ita.sh
+  - event: flight
     request:
-      class: od
-      expver: 1
-      domain: g
-      date: 20190810
-      time: [0, 12]
-      stream: [enfo, oper]
-      step: [0,1,2,3]
+      country: germany
     triggers:
-      - type: echo
+      - type: command
+        command: ./my_script_de.sh
+  - event: flight
+    request:
+      country: france
+    triggers:
+      - type: command
+        command: ./my_script_per_fr.sh
