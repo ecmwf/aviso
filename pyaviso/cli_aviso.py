@@ -137,7 +137,7 @@ def notification_server_setup(f):
             kwargs['configuration'].notification_engine.port = kwargs['port']
         kwargs.pop("port")
         if kwargs['test']:
-            kwargs['configuration'].notification_engine.type = EngineType.TEST
+            kwargs['configuration'].notification_engine.type = EngineType.FILE_BASED
         kwargs.pop("test")
 
         return f(*args, **kwargs)

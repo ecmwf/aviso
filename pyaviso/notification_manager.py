@@ -10,18 +10,17 @@ import json
 import time
 from datetime import datetime
 from typing import List, Dict, Tuple
-
+import os
 import yaml
 
 from . import logger, user_config, exit_channel
 from .authentication.auth import Auth
-from .custom_exceptions import EventListenerException, InvalidInputError, ServiceConfigException
+from .custom_exceptions import EventListenerException, InvalidInputError
 from .engine import engine_factory as ef
-from .event_listeners.event_listener import EventListener
+from .event_listeners.event_listener import EventListener, DEFAULT_PAYLOAD_KEY
 from .event_listeners.listener_manager import ListenerManager
-from .service_config_manager import ServiceConfigManager
 
-LOCAL_CONFIG_FOLDER = "service_configuration"
+
 class NotificationManager:
     """
     This class manages implements the various operations associated to the notification system
@@ -57,7 +56,7 @@ class NotificationManager:
             listeners_list.append(listeners)
 
         # retrieve listener schema
-        listener_schema = self._listener_schema(config)
+        listener_schema = config.schema_parser.parser().load(config)
 
         # Call the listener manager
         self.listener_manager.listen(listeners_list, listener_schema, config, from_date, to_date)
@@ -115,7 +114,7 @@ class NotificationManager:
             else:
                 time.sleep(1)
 
-    def key(self, params: Dict, config: user_config.UserConfig = None) -> Tuple[str, str, str]:
+    def key(self, params: Dict, config: user_config.UserConfig = None, general_schema: Dict = None) -> Tuple[str, str, str]:
         """
         Generate a key to send to the notification server with the params passed and complying to the current schema
         :param params: parameters to use in the key
@@ -132,9 +131,10 @@ class NotificationManager:
             raise InvalidInputError("Invalid notification, 'event' could not be located")
         listener_type = params["event"]
 
-        # retrieve the updated listener schema
-        logger.debug("Getting relevant schema...")
-        general_schema = self._listener_schema(config)
+        if not general_schema:
+            # retrieve listener schema
+            logger.debug("Getting schema...")
+            general_schema = config.schema_parser.parser().load(config)
         # # extract the relevant listener schema
         if listener_type not in general_schema:
             raise InvalidInputError(f"Invalid notification, {listener_type} could not be located in the schema")
@@ -188,15 +188,22 @@ class NotificationManager:
         :param config: UserConfig object
         :return: True if the notification has been submitted
         """
+        logger.debug(f"Calling notify with the following notification {notification}...")
+
+        # retrieve listener schema
+        logger.debug("Getting schema...")
+        listener_schema = config.schema_parser.parser().load(config)
+
         # validate the input
         try:
-            logger.debug(f"Calling notify with the following notification {notification}...")
-
-            # check the location
+            # check the payload key
+            payload_key = listener_schema.get("payload")
+            if not payload_key:
+                payload_key = DEFAULT_PAYLOAD_KEY
             assert "event" in notification, "Invalid notification, 'event' could not be located"
             value = "None"
-            if "location" in notification:
-                value = notification.pop("location")
+            if payload_key in notification:
+                value = notification.pop(payload_key)
         except AssertionError as e:
             raise InvalidInputError(e)
 
@@ -212,7 +219,7 @@ class NotificationManager:
         ttl = None if ttl == -1 else ttl
 
         # generate the key
-        key, base_key, admin_key = self.key(notification, config)
+        key, base_key, admin_key = self.key(notification, config, listener_schema)
 
         # create the engine
         engine_factory: ef.EngineFactory = ef.EngineFactory(config.notification_engine, Auth.get_auth(config))
@@ -229,34 +236,7 @@ class NotificationManager:
             ttl=ttl)
 
         return True
-
-    def _listener_schema(self, config: user_config.UserConfig) -> Dict[str, any]:
-        """
-        Helper method to retrieve the latest schema
-        :param config:
-        :return: latest event listener schema
-        """
-        logger.debug("Updating configurations...")
-
-        #if config.remote_configuration:
-        # Pull the latest event listeners configuration files
-        config_manager = ServiceConfigManager(config)
-        schema_files = config_manager.pull(config.notification_engine.service)
-        #else:
-            # This may be the first try we access to the home folder, be sure it exists
-        # os.makedirs(os.path.dirname(config_lock_path), exist_ok=True)
-
-        if len(schema_files) == 0:
-            logger.warning("Not able to pull any event listener configuration file")
-        else:
-            for f in schema_files:
-                logger.debug(f"Event Listener configuration pulled")
-
-        # create the listener parser and parse the configuration files
-        return config.listener_schema_parser.parser().parse(schema_files=schema_files, custom_listener_schema=config.listener_schema)
         
-
-   
 
     def _load_listener_files(self, listener_files: List[str]):
         """

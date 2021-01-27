@@ -44,7 +44,7 @@ class EngineFactory:
             # connect to the server by using the REST API
             logger.debug(f"Setting up REST interface to connect to the etcd server "
                          f"{self._conf.host}:{self._conf.port}")
-        elif self._conf.type == EngineType.TEST:
+        elif self._conf.type == EngineType.FILE_BASED:
             # connect to the test file based server
             logger.debug(f"Setting up file-based test engine")
         else:

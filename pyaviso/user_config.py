@@ -97,8 +97,8 @@ class UserConfig:
                  key_file: Optional[str] = None,
                  auth_type: Optional[str] = None,
                  key_ttl: Optional[int] = None,
-                 listener_schema: Optional[Dict[str, any]] = None,
-                 listener_schema_parser: Optional[str] = None,
+                 schema_parser: Optional[str] = None,
+                 remote_schema: Optional[bool] = None,
                  listeners: Optional[Dict[str, any]] = None):
         """
         :param conf_path: path to the system configuration file. If not provided,
@@ -116,8 +116,8 @@ class UserConfig:
         :param key_file: file path to the key required to authenticate to the notification and configuration servers
         :param auth_type: Authentication type
         :param key_ttl: Time to live of the keys submitted
-        :param listener_schema: custom schema to add to the listener validation
-        :param listener_schema_parser: parser to use to build the listener schema
+        :param schema_parser: parser to use to build the listener schema
+        :param remote_schema: flag to activate the dynamic retrieval of the listener schema from the configuration server
         :param listeners: listeners configuration
         """
         try:
@@ -152,14 +152,14 @@ class UserConfig:
                 if self.username_file:
                     self.username = self._read_username_file()
             self.key_ttl = key_ttl
-            self.listener_schema = listener_schema
-            self.listener_schema_parser = listener_schema_parser
+            self.schema_parser = schema_parser
+            self.remote_schema = remote_schema
             self.listeners = listeners
       
             logger.debug(f"Loading configuration completed")
 
         except Exception as e:
-            logger.error(f"Error occurred while setting the configuration,  {e}")
+            logger.error(f"Error occurred while setting the configuration, {type(e)}, {e}")
             logger.debug("", exc_info=True)
             sys.exit(-1)
 
@@ -197,8 +197,8 @@ class UserConfig:
         config["key_file"] = os.path.join(SYSTEM_FOLDER, KEY_FILE)
         config["auth_type"] = "none"
         config["key_ttl"] = -1  # not expiring
-        config["listener_schema"] = {}
-        config["listener_schema_parser"] = "generic"
+        config["schema_parser"] = "generic"
+        config["remote_schema"] = False
         return config
 
     def _read_key(self) -> str:
@@ -307,6 +307,10 @@ class UserConfig:
             config["key_ttl"] = int(os.environ["AVISO_KEY_TTL"])
         if "AVISO_AUTH_TYPE" in os.environ:
             config["auth_type"] = os.environ["AVISO_AUTH_TYPE"]
+        if "AVISO_REMOTE_SCHEMA" in os.environ:
+            config["remote_schema"] = os.environ["AVISO_REMOTE_SCHEMA"]
+        if "AVISO_SCHEMA_PARSER" in os.environ:
+            config["schema_parser"] = os.environ["AVISO_SCHEMA_PARSER"]
         if "AVISO_TIMEOUT" in os.environ:  # one variable for both engine
             timeout = None if os.environ["AVISO_TIMEOUT"] == "null" else int(os.environ["AVISO_TIMEOUT"])
             config["notification_engine"]["timeout"] = timeout
@@ -402,26 +406,30 @@ class UserConfig:
         if type(ce["https"]) is str:
             ce["https"] = ce["https"].casefold() == "true".casefold()
 
+        # exclude file_based from the options for the configuration engine
+        assert ce["type"].casefold() != "file_based", "File_based engine not available as configuration engine"
         # translate the ce in a ConfigurationEngineConfig
         self._configuration_engine = EngineConfig(
             ce["host"], ce["port"], ce["type"], max_file_size=ce["max_file_size"],
             timeout=ce["timeout"], https=ce["https"])
 
     @property
-    def listener_schema(self):
-        return self._listener_schema
+    def schema_parser(self) -> ListenerSchemaParserType:
+        return self._schema_parser
 
-    @listener_schema.setter
-    def listener_schema(self, listener_schema: Dict):
-        self._listener_schema = self._configure_property(listener_schema, "listener_schema")
+    @schema_parser.setter
+    def schema_parser(self, schema_parser: str):
+        self._schema_parser = ListenerSchemaParserType[self._configure_property(schema_parser, "schema_parser").upper()]
 
     @property
-    def listener_schema_parser(self) -> ListenerSchemaParserType:
-        return self._listener_schema_parser
+    def remote_schema(self) -> bool:
+        return self._remote_schema
 
-    @listener_schema_parser.setter
-    def listener_schema_parser(self, listener_schema_parser: str):
-        self._listener_schema_parser = ListenerSchemaParserType[self._configure_property(listener_schema_parser, "listener_schema_parser").upper()]
+    @remote_schema.setter
+    def remote_schema(self, remote_schema: str):
+        self._remote_schema = self._configure_property(remote_schema, "remote_schema")
+        if type(self._remote_schema) is str:
+            self._remote_schema = self._remote_schema.casefold() == "true".casefold()
 
     @property
     def key_ttl(self):
@@ -539,7 +547,8 @@ class UserConfig:
                 f", username_file: {self.username_file}" +
                 f", no_fail: {self.no_fail}" +
                 f", key_ttl: {self.key_ttl}" +
-                f", listener_schema_parser: {self.listener_schema_parser}"
+                f", schema_parser: {self.schema_parser}" +
+                f", remote_schema: {self.remote_schema}"
         )
         return config_string
 

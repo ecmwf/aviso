@@ -19,6 +19,7 @@ from ..engine import EngineType
 from ..engine.engine import Engine
 from ..triggers import trigger_factory as tf
 
+DEFAULT_PAYLOAD_KEY = "payload"
 class EventListener():
     """
     This class contains of all the details needed to create an event listener and execute its triggers
@@ -32,7 +33,8 @@ class EventListener():
         triggers: List[Dict[str, any]],
         listener_schema: Dict[str, any],
         from_date: datetime = None,
-        to_date: datetime = None
+        to_date: datetime = None,
+        payload_key: str = None,
         ):
         self._event_type = event_type
         self._engine = engine
@@ -44,6 +46,7 @@ class EventListener():
         self._filter = self.filter_expansion(self._request)
         self._from_date = from_date
         self._to_date = to_date
+        self.payload_key = payload_key
     
     def __str__(self):
         return f"{self.event_type} listener to keys: {self.keys}"
@@ -51,6 +54,17 @@ class EventListener():
     @property
     def event_type(self) -> str:
         return self._event_type
+
+    @property
+    def payload_key(self) -> str:
+        return self._payload_key
+
+    @payload_key.setter
+    def payload_key(self, payload_key: any):
+        if payload_key:
+            self._payload_key = payload_key
+        else:
+            self._payload_key = DEFAULT_PAYLOAD_KEY
 
     @property
     def from_date(self) -> datetime:
@@ -178,7 +192,7 @@ class EventListener():
             # prepare the notification dictionary to pass to the trigger
             notification: Dict[str, any] = {"event": self.event_type, "request": not_request}
             if value != "None":
-                notification["location"] = value
+                notification[self.payload_key] = value
             # execute all the triggers defined in the EventListener
             logger.info("A valid notification has been received, executing triggers...")
             logger.debug(f"{notification}")

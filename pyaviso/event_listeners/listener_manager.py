@@ -136,12 +136,15 @@ class ListenerManager:
         engine_factory: ef.EngineFactory = ef.EngineFactory(config.notification_engine, Auth.get_auth(config))
         listener_factory: elf.EventListenerFactory = elf.EventListenerFactory(engine_factory, listener_schema)
 
+        # read the payload key from the schema
+        payload_key = listener_schema.get("payload")
+
         # Parse notification listeners
         event_listeners: List[EventListener] = []
         for ls in listeners:
             logger.debug(f"Reading listeners {ls}")
             try:
-                for ev_listener in listener_factory.create_listeners(ls, from_date, to_date):
+                for ev_listener in listener_factory.create_listeners(ls, from_date, to_date, payload_key=payload_key):
                     event_listeners.append(ev_listener)
                 logger.debug(f"Listener dictionary correctly parsed")
             except Exception as e:
