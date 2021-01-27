@@ -21,7 +21,7 @@ disseminated via ECMWF dissemination system. The delivery of these products is a
 .. image:: ../_static/data_flow.png
    :align: center
 
-This service is based on the Aviso server solution presented in :ref:`aviso_server`. 
+This service is based on the Aviso server solution presented in :ref:`aviso_server`. This server is currently receiving over 300k notifications a day.
 
 .. warning::
 
@@ -128,7 +128,7 @@ All aspects regarding the keys above are defined by the ECMWF schema that is ret
    }
       
 The schema above regards to the ``dissemination`` event; the ``mars`` event definition would just follow.
-``endpoint`` shows a different key construction depending on the engine adapter to use. The one reserved for etcd allows the key to be human-readable while the one for ``file_based`` to be compatible with a file system.
+``endpoint`` shows a different key construction depending on the engine adapter to use. The one reserved for etcd allows the key to be human-readable while the one for ``file_based`` to be compatible with a file system. ``admin`` key is used by the Aviso-admin component of Aviso Server to carry out maintenance on the store.
 
 ``request`` contains a number of keys some of which are of type ``EnumHandler``. Note that no values are provided. 
 This would normally raise an error at runtime. However, this schema would be parsed by the ECMWF parser implemented by ``EcmwfSchemaParser`` class. This loads the enum values directly from the ECMWF MARS_ language definition.
