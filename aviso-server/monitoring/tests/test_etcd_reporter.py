@@ -7,12 +7,10 @@
 # nor does it submit to any jurisdiction.
 
 import os
-import datetime
-from aviso_monitoring import logger
-from aviso_monitoring.reporter.etcd_reporter import EtcdReporter
-from aviso_monitoring.receiver import Receiver
-from aviso_monitoring.config import Config
 
+from aviso_monitoring import logger
+from aviso_monitoring.config import Config
+from aviso_monitoring.reporter.etcd_reporter import EtcdReporter
 
 tlm_type = "test2"  # to be defined
 config = {
@@ -37,6 +35,7 @@ def test_run_reporter():
     reporter = EtcdReporter(Config(**config))
     reporter.run()
 
+
 def test_process_tlms():
     logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
     reporter = EtcdReporter(Config(**config))
@@ -48,4 +47,3 @@ def test_process_tlms():
     assert len(status["metrics"]) == 1
     keys = list(filter(lambda m: m["name"] == "etcd_total_keys", metrics))[0]
     assert len(keys["metrics"]) == 1
-

@@ -18,8 +18,8 @@ __version__ = re.search(
 
 setup(
     name='aviso',
-    description='Aviso is a notification application allowing users to define the events for which being notified and '
-                'to define the triggers to be executed once a notification is received',
+    description='Aviso is a notification application allowing users to send and receive custom events and to trigger '
+                'users workflows',
     version=__version__,
     url='https://git.ecmwf.int/projects/AVISO/repos/aviso/browse',
     author='ECMWF',

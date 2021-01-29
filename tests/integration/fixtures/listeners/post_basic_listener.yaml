@@ -1,0 +1,9 @@
+listeners:
+  - event: flight
+    request:
+      country: italy
+    triggers:
+      - type: post
+        protocol: 
+          type: cloudevent
+          url: http://127.0.0.1:8001/test

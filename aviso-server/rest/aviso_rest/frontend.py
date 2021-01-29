@@ -20,11 +20,13 @@ from aviso_rest import logger, __version__
 from pyaviso.custom_exceptions import InvalidInputError
 # from flask_swagger_ui import get_swaggerui_blueprint
 from pyaviso.notification_manager import NotificationManager
+from pyaviso.version import __version__ as aviso_version
 from aviso_rest.config import Config
 from aviso_monitoring.collector.time_collector import TimeCollector
 
 SWAGGER_URL = '/openapi'
 API_URL = 'frontend/web/openapi.yaml'
+
 
 class Frontend:
 
@@ -41,7 +43,7 @@ class Frontend:
         """
         This method initialise the timer that is valid globally at application level or per worker
         """
-        self.timer = TimeCollector(self.config.monitoring)   
+        self.timer = TimeCollector(self.config.monitoring)
 
     def create_handler(self) -> Flask:
         handler = Flask(__name__)
@@ -80,8 +82,8 @@ class Frontend:
                 content = fh.read()
             content = content.format(
                 page_title="Aviso",
-                welcome_title=f"Aviso v. { __version__} homepage",
-                welcome_text="This is the frontend of the Aviso notification system"
+                welcome_title=f"Aviso v. {__version__} homepage",
+                welcome_text="This is the RESTful frontend of the Aviso notification system"
             )
             return content
 
@@ -115,7 +117,8 @@ class Frontend:
         return self.timer(self.notification_manager.notify, args=(notification, config))
 
     def run_server(self):
-        logger.info(f"Running AVISO Frontend - version { __version__} on server {self.config.server_type}")
+        logger.info(f"Running AVISO Frontend - version {__version__} with Aviso version {aviso_version} on server "
+                    f"{self.config.server_type}")
         logger.info(f"Configuration loaded: {self.config}")
 
         if self.config.server_type == "flask":
@@ -131,22 +134,22 @@ class Frontend:
             logging.error(f"server_type {self.config.server_type} not supported")
             raise NotImplementedError
 
-    def _parse_cloud_event(self, request) -> Dict:
+    def _parse_cloud_event(self, req) -> Dict:
         """
         This helper method parses cloud event message, validate it and return the notification associated to it
-        :param request: cloud event request
+        :param req: cloud event request
         :return: notification as dictionary
         """
         try:
-            cloudevent = from_http(request.headers, request.get_data())
+            cloudevent = from_http(req.headers, req.get_data())
 
             # extract the notification
             assert cloudevent.data is not None, "Invalid notification, 'data' could not be located"
             notification = cloudevent.data
             assert notification.get("event") is not None, "Invalid notification, 'event' could not be located"
             assert notification.get("request") is not None, "Invalid notification, 'request' could not be located"
-            req = notification.pop("request")
-            notification.update(req)
+            r = notification.pop("request")
+            notification.update(r)
             return notification
         except Exception as e:
             raise InvalidInputError(e)
@@ -155,12 +158,14 @@ class Frontend:
         """
         This method is called just after a worker has initialized the application.
         This method is a Gunicorn server hook. Gunicorn spawns this app over multiple workers as processes.
-        This method ensures that there is only one timer and one transmitter thread running per worker. Without this hook a transmitter thread is created at 
-        application level but not at worker level and then at every request a timer will be created detached from the transmitter thread.
-        This would result in no teletry collected.
+        This method ensures that there is only one timer and one transmitter thread running per worker. Without this
+        hook a transmitter thread is created at application level but not at worker level and then at every request a
+        timer will be created detached from the transmitter thread.
+        This would result in no telemetry collected.
         """
         logger.debug("Initialising a tlm collector per worker")
         self.init_timer()
+
 
 def main():
     # initialising the user configuration configuration
@@ -207,4 +212,3 @@ class GunicornServer(gunicorn.app.base.BaseApplication):
 # when running directly from this file
 if __name__ == "__main__":
     main()
-

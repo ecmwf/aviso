@@ -14,15 +14,8 @@ aviso:
     port: 2379
     https: false
   auth_type: none
-  listener_schema:
-    stream: [scef, scwe]
-  listeners:
-    - event: dissemination
-      request:
-        destination: FOO
-        stream: enfo
-      triggers:
-        - type: echo
+  schema_parser: ecmwf
+  remote_schema: True
 logging:
   version: 1
   disable_existing_loggers: False

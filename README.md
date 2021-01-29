@@ -1,14 +1,15 @@
 # Aviso
 
-Aviso is a service developed at ECMWF with the aim of notifying for **data availability** of the time-critical data
-produced at ECMWF, such as the real-time forecast and derived products.
+Aviso is a software developed by ECMWF that allows to notify  **time-critical events** across HPC and Cloud systems in 
+order to enable workflows among multiple domains.
 
 It allows users to:
 
-* Define which events to be notified of.
-* Define the triggers to be executed once a notification is received.
+* Define events that require notification
+* Define triggers to be executed once a notification is received
+* Send and receive notifications
 
-This enables the creation of automatic workflows timely triggered as data become available
+This enables the creation of automatic workflows, timely triggered as events are notified.
  
 
-The documentation can be found at https://aviso.readthedocs.io/.
+The documentation can be found at https://pyaviso.readthedocs.io/.

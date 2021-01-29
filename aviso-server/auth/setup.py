@@ -11,8 +11,9 @@ from setuptools import setup, find_packages
 
 setup(
     name='aviso-auth',
-    description='Aviso-auth is a proxy designed to authenticate and authorise the listening request directed towards the store',
-    version= __version__,
+    description='Aviso-auth is a proxy designed to authenticate and authorise the listening request directed towards '
+                'the store',
+    version=__version__,
     url='https://git.ecmwf.int/projects/AVISO/repos/aviso/browse',
     author='ECMWF',
     packages=find_packages(),

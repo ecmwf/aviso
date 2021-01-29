@@ -14,8 +14,8 @@ from pyaviso import user_config, logger
 from pyaviso.authentication import auth
 from pyaviso.engine import engine_factory as ef
 from pyaviso.event_listeners import listener_manager
-from pyaviso.event_listeners.dissemination_event_listener import DisseminationEventListener
-from pyaviso.notification_manager import NotificationManager
+from pyaviso.event_listeners.event_listener import EventListener
+from pyaviso.event_listeners.listener_schema_parser import ListenerSchemaParser
 
 
 @pytest.fixture()
@@ -27,9 +27,8 @@ def conf() -> user_config.UserConfig:  # this automatically configure the loggin
 @pytest.fixture()
 def schema(conf):
     # Load the schema
-    aviso = NotificationManager()
-    listener_schema = aviso._latest_listener_schema(conf)
-    return listener_schema['dissemination']
+    listener_schema = ListenerSchemaParser().load(conf)
+    return listener_schema['flight']
 
 
 def test_adding_listener(conf, schema):
@@ -40,8 +39,8 @@ def test_adding_listener(conf, schema):
 
     # create a listener that uses that trigger
     eng = engine_factory.create_engine()
-    request = {"destination": "FOO", "stream": "enfo", "date": "20190810", "time": 0}
-    listener = DisseminationEventListener(eng, request, [{"type": "Log"}], schema)
+    request = {"country": "italy", "date": 20210101}
+    listener = EventListener("flight", eng, request, [{"type": "Log"}], schema)
 
     aviso._add_listener(listener)
 
@@ -56,8 +55,8 @@ def test_deleting_new_listener(conf, schema):
 
     # create a listener that uses that trigger
     eng = engine_factory.create_engine()
-    request = {"destination": "FOO", "stream": "enfo", "date": "20190810", "time": 0}
-    listener = DisseminationEventListener(eng, request, [{"type": "Log"}], schema)
+    request = {"country": "italy", "date": 20210101}
+    listener = EventListener("flight", eng, request, [{"type": "Log"}], schema)
 
     aviso._add_listener(listener)
 
@@ -75,9 +74,9 @@ def test_adding_listeners(conf, schema):
 
     # create a listener that uses that trigger
     eng = engine_factory.create_engine()
-    request = {"destination": "FOO", "stream": "enfo", "date": "20190810", "time": 0}
-    listener1 = DisseminationEventListener(eng, request, [{"type": "Log"}], schema)
-    listener2 = DisseminationEventListener(eng, request, [{"type": "Log"}], schema)
+    request = {"country": "italy", "date": 20210101}
+    listener1 = EventListener("flight", eng, request, [{"type": "Log"}], schema)
+    listener2 = EventListener("flight", eng, request, [{"type": "Log"}], schema)
 
     listeners: list = [listener1, listener2]
 
@@ -87,12 +86,3 @@ def test_adding_listeners(conf, schema):
     # now delete them
     aviso.cancel_listeners()
     assert aviso.listeners.__len__() == 0
-
-
-def test_schema_mars_update(conf, schema):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
-    # check the enums are in it
-    assert 'values' in schema['request']['class'][0]
-    class_enums = schema['request']['class'][0]['values']
-    assert len(class_enums) > 0
-    assert 'austria' in class_enums

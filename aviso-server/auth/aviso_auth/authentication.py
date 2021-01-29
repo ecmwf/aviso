@@ -6,20 +6,19 @@
 # granted to it by virtue of its status as an intergovernmental organisation
 # nor does it submit to any jurisdiction.
 
-import requests
-import json
-import time
 import random
+import time
+
+import requests
 from aviso_monitoring.collector.time_collector import TimeCollector
 
 from . import logger
-from .custom_exceptions import AuthenticationException, InvalidInputError, InternalSystemError
+from .custom_exceptions import AuthenticationException, InternalSystemError
 
 MAX_N_TRIES = 25
 
 
 class Authenticator:
-
     UNAUTHORISED_RESPONSE_HEADER = \
         {"WWW-Authenticate": "EmailKey realm='ecmwf',info='Authenticate with ECMWF API credentials <email>:<key>'"}
 
@@ -45,7 +44,7 @@ class Authenticator:
         """
         This method is an explicit decorator of the authenticate_impl method to provide time performance monitoring
         """
-        return self.timer(self.authenticate_impl, args=(request))
+        return self.timer(self.authenticate_impl, args=request)
 
     def authenticate_impl(self, request):
         """
@@ -138,4 +137,5 @@ class Authenticator:
                 n_tries += 1
             else:
                 break
+        # noinspection PyUnboundLocalVariable
         return resp

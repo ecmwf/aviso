@@ -1,0 +1,7 @@
+listeners:
+  - event: flight
+    request:
+      country: [Italy, Germany]
+    triggers:
+      - type: echo
+

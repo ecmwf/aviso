@@ -78,7 +78,7 @@ class Config:
 
     @staticmethod
     def _create_default_config() -> Dict:
-   
+
         # main config
         config = {}
         config["monitoring"] = {}
@@ -132,6 +132,7 @@ class Config:
 
         # instantiate Aviso Config
         if "aviso" in current_config:
+            # noinspection PyTypeChecker
             current_config["aviso"] = AvisoConfig(conf_from_file=current_config["aviso"])
 
         return current_config
@@ -219,7 +220,7 @@ class Config:
     @host.setter
     def host(self, host: str):
         self._host = self._configure_property(host, "host")
-    
+
     @property
     def port(self):
         return self._port
@@ -267,13 +268,13 @@ class Config:
 
     def __str__(self):
         config_string = (
-            f"host: {self.host}" +
-            f", port: {self.port}" +
-            f", server_type: {self.server_type}" +
-            f", debug: {self.debug}" +
-            f", workers: {self.workers}"+
-            f", aviso: {self.aviso}" +
-            f", monitoring: {self.monitoring}"
+                f"host: {self.host}" +
+                f", port: {self.port}" +
+                f", server_type: {self.server_type}" +
+                f", debug: {self.debug}" +
+                f", workers: {self.workers}" +
+                f", aviso: {self.aviso}" +
+                f", monitoring: {self.monitoring}"
         )
         return config_string
 

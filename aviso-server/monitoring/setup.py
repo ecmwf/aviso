@@ -11,8 +11,9 @@ from setuptools import setup, find_packages
 
 setup(
     name='aviso-monitoring',
-    description='Aviso_monitoring is a library providing collectors to fetch telemetries, receivers and reporters to transmit them to the monitoring servers',
-    version= __version__,
+    description='Aviso_monitoring is a library providing collectors to fetch telemetries, receivers and reporters to '
+                'transmit them to the monitoring servers',
+    version=__version__,
     url='https://git.ecmwf.int/projects/AVISO/repos/aviso/browse',
     author='ECMWF',
     packages=find_packages(),

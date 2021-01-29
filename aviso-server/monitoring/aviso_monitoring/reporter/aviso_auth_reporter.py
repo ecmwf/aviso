@@ -12,7 +12,6 @@ from .. import logger
 
 class AvisoAuthReporter(Reporter):
 
-
     def __init__(self, config, *args, **kwargs):
         aviso_auth_config = config.aviso_auth_reporter
         self.frequency = aviso_auth_config["frequency"]
@@ -43,13 +42,13 @@ class AvisoAuthReporter(Reporter):
 
             # process first the sub_tlm
             if len(self.sub_tlms) > 0:
-                for sub_tlm in self.sub_tlms:  
-                    s_tlms = list(filter(lambda tlm: ("_"+sub_tlm in list(tlm.get("telemetry").keys())[0]), new_tlms))  
+                for sub_tlm in self.sub_tlms:
+                    s_tlms = list(filter(lambda tlm: ("_" + sub_tlm in list(tlm.get("telemetry").keys())[0]), new_tlms))
                     # aggregate the telemetries
                     agg_tlms.append(self.aggregate_tlms_stats(s_tlms))
                     # remove these tlms from the main list
                     new_tlms = [tlm for tlm in new_tlms if tlm not in s_tlms]
-            
+
             # process the main tlms
             agg_tlms.append(self.aggregate_tlms_stats(new_tlms))
 
@@ -63,10 +62,9 @@ class AvisoAuthReporter(Reporter):
 
         return metrics
 
-
     def to_metric(self, tlms=None):
         """
-        This method transforms the response time aggregated into one metric that inclides a status evaluation
+        This method transforms the response time aggregated into one metric that includes a status evaluation
 
         Args:
             tlms (Dict): TLMs aggregated to evaluate and report
@@ -80,8 +78,8 @@ class AvisoAuthReporter(Reporter):
             resp_time_max = 0
             for tlm in tlms:
                 for k in list(tlm.keys()):
-                    if k == self.tlm_type+"_max":
-                        resp_time_max = tlm.get(k) # we evaluate with the max value of the main tlm
+                    if k == self.tlm_type + "_max":
+                        resp_time_max = tlm.get(k)  # we evaluate with the max value of the main tlm
             if resp_time_max > self.critical_t:
                 status = 2
                 message = f"Response time of {resp_time_max}s"
@@ -105,7 +103,7 @@ class AvisoAuthReporter(Reporter):
                 "message": message,
                 "metrics": metrics
             }
-        else: # default metrics when no tlm have been received
+        else:  # default metrics when no tlm have been received
             m_status = {
                 "name": self.tlm_type,
                 "status": status,

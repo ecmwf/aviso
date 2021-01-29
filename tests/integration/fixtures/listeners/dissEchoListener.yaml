@@ -1,9 +1,0 @@
-listeners:
-  - event: dissemination
-    request:
-      destination: FOO
-      stream: [scef, scwe]
-      step: 1
-    triggers:
-      - type: echo
-

@@ -14,6 +14,7 @@ import socket
 
 from .. import logger
 
+
 class Transmitter(Thread):
     """
     This class encapsulates the capabilities required to transmit the telemetry
@@ -26,13 +27,12 @@ class Transmitter(Thread):
         self.monitoring_server_host = config["monitoring_server_host"]
         self.monitoring_server_port = config["monitoring_server_port"]
         self.component_name = config["component_name"]
-        self.frequency = config["frequency"] # in seconds
+        self.frequency = config["frequency"]  # in seconds
         self.tlm_buffer = tlm_buffer
         self.aggregate_tlms = aggregate_tlms
         self.telemetry_type = telemetry_type
         # run in the background
         self.setDaemon(True)
-    
 
     def run(self):
         """
@@ -45,7 +45,6 @@ class Transmitter(Thread):
             # process the telemetry
             self.transmitter_cycle()
 
-
     def transmitter_cycle(self):
         """
         This method implements the lifecycle of the telemetry transmitter that is made of:
@@ -54,11 +53,11 @@ class Transmitter(Thread):
         3) transmitting the aggregated tlm
 
         Returns:
-            bool: True if successfull False otherwise
+            bool: True if successful False otherwise
         """
-        #logger.debug("Telemetry transmitter cycle started")
+        # logger.debug("Telemetry transmitter cycle started")
 
-        if len(self.tlm_buffer): # don't do anything if the buffer is empty
+        if len(self.tlm_buffer):  # don't do anything if the buffer is empty
 
             # read the event buffer and clear it
             tlms = self.tlm_buffer.copy()
@@ -75,7 +74,6 @@ class Transmitter(Thread):
         logger.debug("Telemetry transmitter cycle completed")
         return True
 
-
     def transmit_tlm(self, tlm):
         """
         This method transmits the tml as UPD packet to the monitoring server
@@ -84,7 +82,7 @@ class Transmitter(Thread):
             tlm (Dict): telemetry to transmit
 
         Returns:
-            bool: True if successfull False otherwise
+            bool: True if successful False otherwise
         """
         # prepare message to send as UDP packet
         message = {
@@ -97,7 +95,7 @@ class Transmitter(Thread):
         # send the message
         byte_message = json.dumps(message).encode()
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        try: 
+        try:
             logger.debug(f"Sending tlm {message} to {self.monitoring_server_host}:{self.monitoring_server_port}")
             res = s.sendto(byte_message, (self.monitoring_server_host, self.monitoring_server_port))
             logger.debug(f"Tlm sending return: {res}")

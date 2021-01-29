@@ -6,17 +6,15 @@
 # granted to it by virtue of its status as an intergovernmental organisation
 # nor does it submit to any jurisdiction.
 
-import requests
-import json
-from typing import Dict
-import uuid
 import datetime
 import importlib
 from enum import Enum
+from typing import Dict
+
+import requests
 from cloudevents.http import CloudEvent, to_structured
 
 from . import trigger
-from .trigger import TriggerType
 from .. import logger
 from ..custom_exceptions import TriggerException
 
@@ -28,8 +26,9 @@ class ProtocolType(Enum):
     cloudevent = ("post_trigger", "PostCloudEvent")
 
     def get_class(self):
-        module = importlib.import_module("pyaviso.triggers."+self.value[0])
+        module = importlib.import_module("pyaviso.triggers." + self.value[0])
         return getattr(module, self.value[1])
+
 
 class PostTrigger(trigger.Trigger):
     """
@@ -39,21 +38,21 @@ class PostTrigger(trigger.Trigger):
 
     def __init__(self, notification: Dict, params: Dict):
         trigger.Trigger.__init__(self, notification, params)
-        assert params.get("protocol") is not None, "protocol is a mandatory field" 
+        assert params.get("protocol") is not None, "protocol is a mandatory field"
         protocol_params = params.get("protocol")
-        assert protocol_params.get("type") is not None, "protocol type is a mandatory field" 
+        assert protocol_params.get("type") is not None, "protocol type is a mandatory field"
         self.protocol = ProtocolType[protocol_params.get("type").lower()].get_class()(notification, protocol_params)
 
     def execute(self):
         logger.info(f"Starting Post Trigger for (params.get('protocol'))...'")
-        
+
         # execute the specific protocol
         self.protocol.execute()
 
         logger.debug(f"Post Trigger completed")
 
 
-class PostCloudEvent():
+class PostCloudEvent:
     """
     This class implements a trigger in charge of translating the notification in a CloudEvent message and 
     POST it to the URL specified by the user.
@@ -71,22 +70,21 @@ class PostCloudEvent():
         self.headers = params.get("headers", {})
 
         # cloudEvent specific fields
-        if  params.get("cloudevent"):
+        if params.get("cloudevent"):
             self.type = params.get("cloudevent").get("type", self.TYPE_DEFAULT)
             self.source = params.get("cloudevent").get("source", self.SOURCE_DEFAULT)
         else:
             self.type = self.TYPE_DEFAULT
             self.source = self.SOURCE_DEFAULT
 
-
     def execute(self):
-        
+
         # prepare the CloudEvent message
 
         attributes = {
             "type": self.type,
             "source": self.source,
-            "time": datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")     
+            "time": datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
         }
         data = self.notification
         event = CloudEvent(attributes, data)
@@ -102,9 +100,9 @@ class PostCloudEvent():
             resp = requests.post(self.url, data=body, headers=self.headers, verify=False, timeout=self.timeout)
         except Exception as e:
             logger.error("Not able to POST CloudEvent notification")
-            raise TriggerException(e) 
+            raise TriggerException(e)
         if resp.status_code != 200:
             raise TriggerException(f"Not able to POST CloudEvent notification to {self.url}, "
-                         f"status {resp.status_code}, {resp.reason}, {resp.content.decode()}")
-             
+                                   f"status {resp.status_code}, {resp.reason}, {resp.content.decode()}")
+
         logger.debug(f"CloudEvent notification sent successfully")

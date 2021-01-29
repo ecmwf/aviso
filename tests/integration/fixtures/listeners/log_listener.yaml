@@ -1,0 +1,7 @@
+listeners:
+  - event: flight
+    request:
+      date: 20210101
+    triggers:
+      - type: log
+        path: testLog.log

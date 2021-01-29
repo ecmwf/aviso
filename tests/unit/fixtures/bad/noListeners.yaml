@@ -1,11 +1,7 @@
 list:
-  - event: dissemination
+  - event: flight
     request:
-      destination: FOO
-      stream: enfo
-      date: 20190810
-      time: 00
-      step: [001]
+      country: [Italy, Germany]
     triggers:
       - type: echo
 

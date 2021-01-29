@@ -14,6 +14,7 @@ import math
 from .. import logger
 from ..config import Config
 
+
 class Reporter(ABC):
 
     def __init__(self, config: Config, tlm_receiver=None):
@@ -26,10 +27,10 @@ class Reporter(ABC):
         self.tlm_receiver = tlm_receiver
 
     def ms_authenticate(self):
-        '''
+        """
         This method authenticate to the monitoring server
         :return: token if successfully authenticated, None otherwise
-        '''
+        """
         headers = {"Content-type": "application/json", "Accept": "application/json"}
         data = {"username": self.ms_username, "password": self.ms_password}
         try:
@@ -47,13 +48,14 @@ class Reporter(ABC):
         return json.loads(resp.text)["token"]
 
     def submit_metric(self, token, metric):
-        '''
+        """
         This method send the metric passed to the monitoring server
         :param token: authentication token
         :param metric:
         :return: True if successful, False otherwise
-        '''
-        headers = {"Content-type": "application/json", "X-Opsview-Username": f"{self.ms_username}", "X-Opsview-Token": token}
+        """
+        headers = {"Content-type": "application/json", "X-Opsview-Username": f"{self.ms_username}",
+                   "X-Opsview-Token": token}
         url = f"{self.ms_url}/detail?hostname={self.ms_service_host}&servicename=Passive Check: {metric.get('name')}"
         data = {
             "passive_checks": {"enabled": 1},
@@ -94,14 +96,15 @@ class Reporter(ABC):
         token = self.ms_authenticate()
         if token:
             # send metrics
+            # noinspection PyTypeChecker
             for m in metrics:
                 self.submit_metric(token, m)
             logger.debug(f"{self.__class__.__name__} cycle completed")
             return True
         else:
-            logger.error(f"{self.__class__.__name__} cycle could not be complected, login to monitoring server not available")
+            logger.error(f"{self.__class__.__name__} cycle could not be complected, "
+                         f"login to monitoring server not available")
             return False
-
 
     def aggregate_tlms_stats(self, tlms):
         """
@@ -114,22 +117,24 @@ class Reporter(ABC):
         r_tlms = list(map(lambda t: t.get("telemetry"), tlms))
 
         # determine tlm_type
-        first_key=list(r_tlms[0].keys())[0]
+        first_key = list(r_tlms[0].keys())[0]
         tlm_type = first_key[:first_key.rfind("_")]
 
         # setup the aggregated tlm to return 
         agg_tlm = {
-            tlm_type+"_counter": 0,
-            tlm_type+"_avg": 0,
-            tlm_type+"_max": -math.inf,
-            tlm_type+"_min": math.inf
-            }
-        sum = 0
+            tlm_type + "_counter": 0,
+            tlm_type + "_avg": 0,
+            tlm_type + "_max": -math.inf,
+            tlm_type + "_min": math.inf
+        }
+        summation = 0
         for tlm in r_tlms:
-            agg_tlm[tlm_type+"_counter"] += tlm[tlm_type+"_counter"]
-            agg_tlm[tlm_type+"_max"] = tlm[tlm_type+"_max"] if tlm[tlm_type+"_max"] > agg_tlm[tlm_type+"_max"] else agg_tlm[tlm_type+"_max"]
-            agg_tlm[tlm_type+"_min"] = tlm[tlm_type+"_min"] if tlm[tlm_type+"_min"] < agg_tlm[tlm_type+"_min"] else agg_tlm[tlm_type+"_min"]
-            sum += tlm[tlm_type+"_counter"] * tlm[tlm_type+"_avg"]
-        agg_tlm[tlm_type+"_avg"] = sum / agg_tlm[tlm_type+"_counter"]
-        
+            agg_tlm[tlm_type + "_counter"] += tlm[tlm_type + "_counter"]
+            agg_tlm[tlm_type + "_max"] = tlm[tlm_type + "_max"] if tlm[tlm_type + "_max"] > agg_tlm[tlm_type + "_max"] \
+                else agg_tlm[tlm_type + "_max"]
+            agg_tlm[tlm_type + "_min"] = tlm[tlm_type + "_min"] if tlm[tlm_type + "_min"] < agg_tlm[tlm_type + "_min"] \
+                else agg_tlm[tlm_type + "_min"]
+            summation += tlm[tlm_type + "_counter"] * tlm[tlm_type + "_avg"]
+        agg_tlm[tlm_type + "_avg"] = summation / agg_tlm[tlm_type + "_counter"]
+
         return agg_tlm

@@ -10,16 +10,15 @@ import json
 import os
 import time
 from multiprocessing import Process
+
 import pytest
 import requests
-import os
-
 from aviso_rest import logger
 from aviso_rest.config import Config
-from pyaviso.cli_aviso import _parse_inline_params
 from aviso_rest.frontend import Frontend
+
+from pyaviso.cli_aviso import _parse_inline_params
 from pyaviso.notification_manager import NotificationManager
-from aviso_monitoring.udp_server import UdpServer
 
 config = Config(conf_path="aviso-server/rest/tests/config.yaml")
 frontend_url_home = f"http://{config.host}:{config.port}"
@@ -290,37 +289,6 @@ def test_bad_request_no_event():
     assert message.get("message") == 'Invalid notification, \'event\' could not be located'
 
 
-def test_bad_request_no_location():
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
-    body = {
-        "type": "aviso",
-        "data": {
-            "event": "dissemination",
-            "request": {
-                "class": "od",
-                "date": "20190810",
-                "destination": "MACI",
-                "domain": "g",
-                "expver": "1",
-                "step": "1",
-                "stream": "enfo",
-                "time": "0",
-                "target": "E1"
-            },
-        },
-        "datacontenttype": "application/json",
-        "id": "0c02fdc5-148c-43b5-b2fa-cb1f590369ff",
-        "source": "/host/user",
-        "specversion": "1.0",
-        "time": "2020-03-02T13:34:40.245Z",
-    }
-    resp = requests.post(f"{frontend_url_api}/notification", json=body)
-    assert resp.status_code == 400
-    assert resp.text
-    message = json.loads(resp.text)
-    assert message.get("message") == "Invalid notification, 'location' could not be located"
-
-
 def test_bad_request_no_request():
     logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
     body = {
@@ -354,6 +322,7 @@ def test_method_not_allowed_405():
     assert resp.status_code == 405
 
 
+# noinspection PyPep8
 def test_notify_ttl():
     logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
     body = {

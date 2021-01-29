@@ -7,10 +7,10 @@
 # nor does it submit to any jurisdiction.
 
 import base64
-import json
+
 import requests
-from requests.auth import HTTPBasicAuth
 from aviso_monitoring.collector.time_collector import TimeCollector
+from requests.auth import HTTPBasicAuth
 
 from . import logger
 from .custom_exceptions import InternalSystemError, InvalidInputError
@@ -58,8 +58,8 @@ class Authoriser:
         """
         logger.debug(f"Request allowed destinations for username {username}")
         try:
-            resp = requests.get(self.url, params={"id": username}, timeout=self.req_timeout, 
-            auth=HTTPBasicAuth(self.username, self.password))
+            resp = requests.get(self.url, params={"id": username}, timeout=self.req_timeout,
+                                auth=HTTPBasicAuth(self.username, self.password))
         except Exception as e:
             logger.exception(e)
             raise InternalSystemError(f'Error in retrieving destinations for {username}')

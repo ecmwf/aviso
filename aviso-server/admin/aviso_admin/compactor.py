@@ -208,10 +208,10 @@ class Compactor:
 
         url = self.url + "/v3/maintenance/defragment"
 
-        #TBD make the call for each member
+        # TBD make the call for each member
         resp = requests.post(url, data={}, timeout=self.req_timeout)
-        assert resp.status_code == 200, f'Error returned from defragmentation call on {url}, status {resp.status_code}, ' \
-            f'{resp.reason}, {resp.content.decode()}'
+        assert resp.status_code == 200, f'Error returned from defragmentation call on {url}, ' \
+            f'status {resp.status_code}, {resp.reason}, {resp.content.decode()}'
         logger.debug(f"Defragmentation completed")
         return True
 
@@ -250,5 +250,3 @@ class Compactor:
 
         logger.debug("Compactor execution completed.")
         return True
-
-

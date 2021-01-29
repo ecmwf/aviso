@@ -1,0 +1,11 @@
+listeners:
+  - event: flight
+    request:
+      country: [italy, france, Germany]
+    triggers:
+      - type: echo
+      - type: log
+        path: testLog.log
+      - type: command
+        working_dir: tests/integration/fixtures
+        command: echoerror "AAAAA"

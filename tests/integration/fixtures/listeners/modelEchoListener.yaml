@@ -1,7 +1,0 @@
-listeners:
-  - event: forecastcycle
-    request:
-      stream: enfo
-    triggers:
-      - type: echo
-

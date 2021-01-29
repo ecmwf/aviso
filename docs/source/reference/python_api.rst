@@ -61,8 +61,8 @@ The example belows shows how to send a generic notification compliant with the g
       "country": "italy",
       "date": "20210101",
       "airport": "FCO",
-      "number": "AZ203"
-      "payload": "Landed", 
+      "number": "AZ203",
+      "payload": "Landed" 
    }
 
    # send the notification

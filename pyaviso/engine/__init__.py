@@ -6,7 +6,7 @@
 # granted to it by virtue of its status as an intergovernmental organisation
 # nor does it submit to any jurisdiction.
 
-__all__ = ["engine", "engine_factory", "etcd_grpc_engine", "etcd_rest_engine", "file_based_engine"]
+__all__ = ["engine", "engine_factory", "etcd_grpc_engine", "etcd_rest_engine", "file_based_engine", "EngineType"]
 
 import importlib
 from enum import Enum

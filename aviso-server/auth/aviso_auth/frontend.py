@@ -39,7 +39,9 @@ class Frontend:
         """
         This method initialise a set of components and timers that are valid globally at application level or per worker
         """
+        # noinspection PyUnresolvedReferences
         self.authenticator = Authenticator(self.config, self.handler.cache)
+        # noinspection PyUnresolvedReferences
         self.authoriser = Authoriser(self.config, self.handler.cache)
         self.backend = BackendAdapter(self.config)
         # this is a time collector for the whole request
@@ -51,9 +53,10 @@ class Frontend:
         # We need to bind the logger of aviso to the one of app
         logger.handlers = handler.logger.handlers
 
-        def json_response(m, code, header={}):
+        def json_response(m, code, header=None):
             h = {'Content-Type': 'application/json'}
-            h.update(header)
+            if header:
+                h.update(header)
             return json.dumps({"message": str(m)}), code, h
 
         @handler.errorhandler(InvalidInputError)
@@ -88,11 +91,13 @@ class Frontend:
         @handler.route(self.config.backend['route'], methods=["POST"])
         def root():
             logger.debug("New request received")
+            try:
+                resp_content = timed_process_request()
 
-            resp_content = timed_process_request()
-
-            # forward back the response
-            return Response(resp_content)
+                # forward back the response
+                return Response(resp_content)
+            except ForbiddenRequestException:
+                return forbidden_request("User not allowed to access to the resource")
 
         def process_request():
             # authenticate request
@@ -102,7 +107,7 @@ class Frontend:
             # authorise request
             valid = self.authoriser.is_authorised(username, request)
             if not valid:
-                return forbidden_request("User not allowed to access to the resource")
+                raise ForbiddenRequestException()
             logger.debug("Request successfully authorised")
 
             # forward request to backend
@@ -118,10 +123,9 @@ class Frontend:
             return self.timer(process_request)
 
         return handler
-        
 
     def run_server(self):
-        logger.info(f"Running aviso-auth - version { __version__} on server {self.config.frontend['server_type']}")
+        logger.info(f"Running aviso-auth - version {__version__} on server {self.config.frontend['server_type']}")
         logger.info(f"Configuration loaded: {self.config}")
 
         if self.config.frontend["server_type"] == "flask":
@@ -141,12 +145,14 @@ class Frontend:
         """
         This method is called just after a worker has initialized the application.
         It is a Gunicorn server hook. Gunicorn spawns this app over multiple workers as processes.
-        This method ensures that there is only one set of components and timer running per worker. Without this hook the components and timers are created at 
-        application level but not at worker level and then at every request a timers will be created detached from the main transmitter threads.
-        This would result in no teletry collected.
+        This method ensures that there is only one set of components and timer running per worker. Without this hook
+        the components and timers are created at application level but not at worker level and then at every request a
+        timers will be created detached from the main transmitter threads.
+        This would result in no telemetry collected.
         """
-        logger.debug("Initialising compmentents per worker")
+        logger.debug("Initialising components per worker")
         self.init_components()
+
 
 def main():
     # initialising the user configuration configuration

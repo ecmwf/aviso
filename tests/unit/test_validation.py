@@ -9,20 +9,20 @@
 import os
 
 from pyaviso import logger
-from pyaviso.event_listeners.dissemination_event_listener import DisseminationEventListener
+from pyaviso.event_listeners.event_listener import EventListener
 from pyaviso.event_listeners.validation import *
 
 
 def test_int_handler():
     logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
 
-    schema = {"type": "InitHandler", "range": [0, 20], "canonic": "{0:0>4}", "error": "error"}
+    schema = {"range": [0, 20], "canonic": "{0:0>4}", "error": "error"}
     try:
         validator = IntHandler(key="test", **schema)
     except TypeError as e:
         assert e.args[0] == "__init__() got an unexpected keyword argument 'error'"
 
-    schema = {"type": "InitHandler", "range": [0, 20], "canonic": "{0:0>4}"}
+    schema = {"range": [0, 20], "canonic": "{0:0>4}"}
 
     validator = IntHandler(key="test", **schema)
     try:
@@ -54,7 +54,7 @@ def test_int_handler():
 def test_float_handler():
     logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
 
-    schema = {"type": "FloatHandler", "canonic": "{:2.2f}"}
+    schema = {"canonic": "{:2.2f}"}
 
     validator = FloatHandler(key="test", **schema)
     try:
@@ -76,7 +76,7 @@ def test_float_handler():
 def test_regex_handler():
     logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
 
-    schema = {"type": "RegexHandler", "regex": "a"}
+    schema = {"regex": "a"}
 
     validator = RegexHandler(key="test", **schema)
     try:
@@ -91,13 +91,13 @@ def test_regex_handler():
 def test_string_handler():
     logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
 
-    schema = {"type": "StringHandler", "canonic": "upper"}
+    schema = {"canonic": "upper"}
 
     validator = StringHandler(key="test", **schema)
     result = validator.process("aaa")
     assert result == 'AAA'
 
-    schema = {"type": "StringHandler", "canonic": "uppercase"}
+    schema = {"canonic": "uppercase"}
     validator = StringHandler(key="test", **schema)
     try:
         result = validator.process("aaa")
@@ -108,7 +108,7 @@ def test_string_handler():
 def test_date_handler():
     logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
 
-    schema = {"type": "DateHandler", "canonic": "%Y%m%d"}
+    schema = {"canonic": "%Y%m%d"}
 
     validator = DateHandler(key="test", **schema)
     try:
@@ -138,7 +138,7 @@ def test_date_handler():
 def test_enum_handler():
     logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
 
-    schema = {"type": "EnumHandler", "values": ["1", "2", "3"]}
+    schema = {"values": ["1", "2", "3"]}
 
     validator = EnumHandler(key="test", **schema)
     try:
@@ -157,7 +157,7 @@ def test_enum_handler():
 def test_time_handler():
     logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
 
-    schema = {"type": "TimeHandler", "values": ["0", "6", "12", "18"], "canonic": "{0:0>2}"}
+    schema = {"values": ["0", "6", "12", "18"], "canonic": "{0:0>2}"}
 
     validator = TimeHandler(key="test", **schema)
     try:
@@ -180,25 +180,25 @@ def test_multiple_types():
     schema = {"postproc": [{"type": "EnumHandler", "values": ["auto", "'off'"]}, {"type": "IntHandler"}]}
 
     params = {"postproc": "auto"}
-    DisseminationEventListener._validate(params, schema)
+    EventListener._validate(params, schema)
     assert params["postproc"] == "auto"
 
     params = {"postproc": 12}
-    DisseminationEventListener._validate(params, schema)
+    EventListener._validate(params, schema)
     assert params["postproc"] == '12'
 
     params = {"postproc": "aaaa"}
     try:
-        DisseminationEventListener._validate(params, schema)
+        EventListener._validate(params, schema)
     except ValueError as e:
         assert e.args[0] == "Value aaaa is not valid for key postproc"
 
     params = {"postproc": "12"}
     try:
-        DisseminationEventListener._validate(params, schema)
+        EventListener._validate(params, schema)
     except ValueError as e:
         assert e.args[0] == "Value 12 is not valid for key postproc"
 
     params = {"postproc": 12.5}
-    DisseminationEventListener._validate(params, schema)
+    EventListener._validate(params, schema)
     assert params["postproc"] == '12'

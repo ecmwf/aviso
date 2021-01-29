@@ -1,0 +1,16 @@
+listeners:
+  - event: flight
+    request:
+      country: italy
+    triggers:
+      - type: echo
+  - event: flight
+    request:
+      number: AZ203
+    triggers:
+      - type: echo
+  - event: flight
+    request:
+      airport: FCO
+    triggers:
+      - type: echo

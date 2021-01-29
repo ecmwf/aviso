@@ -6,17 +6,19 @@
 # granted to it by virtue of its status as an intergovernmental organisation
 # nor does it submit to any jurisdiction.
 
-from typing import Iterable
-from .collector import Collector
 from timeit import default_timer as timer
+
+from .collector import Collector
 from .. import logger
+
 
 class TimeCollector(Collector):
     """
-    This specialised collector is used to collect the time taken to complete a function. It is implemented as a decorator.
+    This specialised collector is used to collect the time taken to complete a function.
+    It is implemented as a decorator.
     """
 
-    def __call__(self, f, args=(), kwargs={}):
+    def __call__(self, f, args=(), kwargs=None):
         """
         This method collects the time taken to execute the function. It is called in a decorator fashion.
 
@@ -28,6 +30,8 @@ class TimeCollector(Collector):
         if type(args) is not tuple and type(args) is not list:
             args = [args] 
         start = timer()
+        if not kwargs:
+            kwargs = {}
         res = f(*args, **kwargs)
         self.tlm_buffer.append(timer()-start)
         logger.debug("Time collected")
@@ -51,4 +55,3 @@ class TimeCollector(Collector):
             return agg_tlm
         else: 
             return {}
-        

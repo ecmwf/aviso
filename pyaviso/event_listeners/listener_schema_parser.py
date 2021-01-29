@@ -9,14 +9,15 @@
 from enum import Enum
 from typing import Dict
 import json
-import os 
+import os
 
-from ..custom_exceptions import  ServiceConfigException
+from ..custom_exceptions import ServiceConfigException
 from .. import logger, HOME_FOLDER, SYSTEM_FOLDER
 
 LOCAL_SCHEMA_FOLDER = "service_configuration"
 LISTENER_SCHEMA_FILE_NAME = "event_listener_schema.json"
 DEFAULT_SCHEMA_FILE_NAME = "default_listener_schema.json"
+
 
 class ListenerSchemaParserType(Enum):
     """
@@ -24,7 +25,7 @@ class ListenerSchemaParserType(Enum):
     this client is connecting to.
     """
     GENERIC = "ListenerSchemaParser"
-    ECMWF =  "EcmwfSchemaParser"
+    ECMWF = "EcmwfSchemaParser"
 
     def parser(self):
         return eval(self.value + "()")
@@ -67,10 +68,9 @@ class ListenerSchemaParser:
                 local_schema_file_paths = self._scan_folder(home_path)
             else:
                 logger.debug(f"Schema folder in {home_path} not found")
-            
+
         # parse the file loaded
         return self.parse(local_schema_file_paths, remote_schema_files)
-
 
     def _scan_folder(self, directory):
         files = []
@@ -93,11 +93,12 @@ class ListenerSchemaParser:
             # then check if we have local schema
             if len(local_schema_file_paths) == 0:
                 logger.warning("Not local listener schema file found, using default schema")
-                # load the deafault schema
+                # load the default schema
                 evl_schema = self._load_default_schema()
             else:
                 # search for the schema in the local folder
-                evl_schema_file_path = list(filter(lambda esfp: LISTENER_SCHEMA_FILE_NAME in esfp, local_schema_file_paths))
+                evl_schema_file_path = list(filter(
+                    lambda esfp: LISTENER_SCHEMA_FILE_NAME in esfp, local_schema_file_paths))
                 if len(evl_schema_file_path) != 1:
                     raise ServiceConfigException("No local event listener schema file found")
                 with open(evl_schema_file_path[0]) as evl_json:
@@ -124,15 +125,14 @@ class ListenerSchemaParser:
         Returns:
             Dict: Event Listener schema
         """
-        evl_schema =  self._load_event_listener_schema(local_schema_file_paths, remote_schema_files)
+        evl_schema = self._load_event_listener_schema(local_schema_file_paths, remote_schema_files)
 
         return evl_schema
 
 
-class EcmwfSchemaParser (ListenerSchemaParser):
-
+class EcmwfSchemaParser(ListenerSchemaParser):
     MARS_SCHEMA_FILE_NAME = "language.json"
-    
+
     def parse(self, local_schema_file_paths, remote_schema_files):
         """
         This re-implements the parent parse method to include the enum values from the MARS language schema 
@@ -140,7 +140,7 @@ class EcmwfSchemaParser (ListenerSchemaParser):
 
         # load event listener schema
         evl_schema = self._load_event_listener_schema(local_schema_file_paths, remote_schema_files)
-        
+
         # load mars schema
         mars_schema = self._load_mars_schema(remote_schema_files)
 
@@ -173,7 +173,7 @@ class EcmwfSchemaParser (ListenerSchemaParser):
                 for k in request:
                     for t in request[k]:
                         if t["type"] == "EnumHandler":
-                            if not "values" in t:
+                            if "values" not in t:
                                 t["values"] = []
                             # check the mars schema
                             mars_enums = mars_schema["_field"][k]["values"]

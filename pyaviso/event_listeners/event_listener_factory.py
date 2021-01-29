@@ -31,13 +31,15 @@ class EventListenerFactory:
     def create_listeners(self,
                          listeners_dict: Dict[str, any],
                          from_date: datetime = None,
-                         to_date: datetime = None) -> List[el.EventListener]:
+                         to_date: datetime = None,
+                         payload_key: str = None) -> List[el.EventListener]:
         """
         This method is used to parse a key-value dictionary and create a list of event listeners.
 
         :param listeners_dict: key-value dictionary to parse
         :param from_date: date from when to request notifications, if None it will be from now
         :param to_date: date until when to request notifications, if None it will be until now
+        :param payload_key: key to use for the payload in the notification dictionary
         :return: a list of EventListener objects
         """
         listeners: List[el.EventListener] = []
@@ -71,7 +73,7 @@ class EventListenerFactory:
 
             # create the listener
             listener = el.EventListener(
-                event_type, engine, request, triggers, schema, from_date, to_date)
+                event_type, engine, request, triggers, schema, from_date, to_date, payload_key)
             listeners.append(listener)
 
         return listeners

@@ -1,0 +1,10 @@
+listeners:
+  - event: flight
+    request:
+      country: [Italy, Germany]
+    triggers:
+      - type: command
+        working_dir: tests/integration/fixtures
+        command: ./my_script.sh --date ${request.date} --number ${request.number}
+        environment:
+          AIRPORT: ${request.airport}

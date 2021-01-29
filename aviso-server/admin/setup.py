@@ -12,7 +12,7 @@ from setuptools import setup, find_packages
 setup(
     name='aviso-admin',
     description='Aviso-admin is a component in charge of the maintenance of the Aviso service',
-    version= __version__,
+    version=__version__,
     url='https://git.ecmwf.int/projects/AVISO/repos/aviso/browse',
     author='ECMWF',
     packages=find_packages(),

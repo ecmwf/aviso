@@ -13,12 +13,12 @@ import logging.handlers
 import os
 import re
 import sys
-from typing import Optional, Dict
+from typing import Dict
 
 import yaml
+from aviso_monitoring.config import Config as MonitoringConfig
 
 from . import logger, HOME_FOLDER, SYSTEM_FOLDER
-from aviso_monitoring.config import Config as MonitoringConfig
 
 # Default configuration location
 CONF_FILE = "config.yaml"
@@ -103,7 +103,7 @@ class Config:
         }
         return config
 
-    def _parse_config_files(self, user_conf_path) :
+    def _parse_config_files(self, user_conf_path):
         # build the configuration dictionary from system and user inputs
         current_config = {}
 
@@ -221,7 +221,7 @@ class Config:
         assert comp.get("scheduled_time") is not None, "compactor scheduled_time has not been configured"
         assert comp.get("enabled") is not None, "compactor enabled has not been configured"
         if type(comp.get("enabled")) is str:
-           comp["enabled"] = comp.get("enabled").casefold() == "true".casefold()
+            comp["enabled"] = comp.get("enabled").casefold() == "true".casefold()
         self._compactor = comp
 
     @property
@@ -245,7 +245,7 @@ class Config:
         assert cl.get("retention_period") is not None, "cleaner retention_period has not been configured"
         assert cl.get("enabled") is not None, "cleaner enabled has not been configured"
         if type(cl.get("enabled")) is str:
-           cl["enabled"] = cl.get("enabled").casefold() == "true".casefold()
+            cl["enabled"] = cl.get("enabled").casefold() == "true".casefold()
         self._cleaner = cl
 
     @property

@@ -6,11 +6,10 @@
 # granted to it by virtue of its status as an intergovernmental organisation
 # nor does it submit to any jurisdiction.
 
-import json
 import time
 from datetime import datetime
 from typing import List, Dict, Tuple
-import os
+
 import yaml
 
 from . import logger, user_config, exit_channel
@@ -114,11 +113,13 @@ class NotificationManager:
             else:
                 time.sleep(1)
 
-    def key(self, params: Dict, config: user_config.UserConfig = None, general_schema: Dict = None) -> Tuple[str, str, str]:
+    def key(self, params: Dict, config: user_config.UserConfig = None, listener_schema: Dict = None) \
+            -> Tuple[str, str, str]:
         """
         Generate a key to send to the notification server with the params passed and complying to the current schema
         :param params: parameters to use in the key
         :param config:
+        :param listener_schema: event listener schema are loaded as dictionary
         :return: tuple of leaf key and root key
         """
         logger.debug(f"Calling generate key with the following parameters {params}...")
@@ -131,21 +132,21 @@ class NotificationManager:
             raise InvalidInputError("Invalid notification, 'event' could not be located")
         listener_type = params["event"]
 
-        if not general_schema:
+        if not listener_schema:
             # retrieve listener schema
             logger.debug("Getting schema...")
-            general_schema = config.schema_parser.parser().load(config)
+            listener_schema = config.schema_parser.parser().load(config)
         # # extract the relevant listener schema
-        if listener_type not in general_schema:
+        if listener_type not in listener_schema:
             raise InvalidInputError(f"Invalid notification, {listener_type} could not be located in the schema")
-        listener_schema = general_schema.get(listener_type)
+        event_schema = listener_schema.get(listener_type)
         logger.debug("Relevant schema successfully found")
 
         logger.debug("Generating key...")
         filtered_params = params.copy()
         filtered_params.pop("event")
         key, root, admin_key = EventListener.derive_notification_keys(
-            filtered_params, listener_schema, config.notification_engine.type)
+            filtered_params, event_schema, config.notification_engine.type)
         logger.debug(f"Keys generated {root}, {key}, {admin_key}")
 
         return key, root, admin_key
@@ -236,7 +237,6 @@ class NotificationManager:
             ttl=ttl)
 
         return True
-        
 
     def _load_listener_files(self, listener_files: List[str]):
         """

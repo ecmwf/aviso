@@ -10,19 +10,6 @@ configuration_engine:
   port: 2379
   https: false
 auth_type: none
-frontend:
-  host: 127.0.0.1
-  port: 8081
-  server_type: flask
-listener_schema:
-  stream: [scef, scwe]
-listeners:
-  - event: dissemination
-    request:
-      destination: FOO
-      stream: enfo
-    triggers:
-      - type: echo
 logging:
   version: 1
   disable_existing_loggers: False

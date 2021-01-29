@@ -20,22 +20,24 @@ from ..engine.engine import Engine
 from ..triggers import trigger_factory as tf
 
 DEFAULT_PAYLOAD_KEY = "payload"
-class EventListener():
+
+
+class EventListener:
     """
     This class contains of all the details needed to create an event listener and execute its triggers
     """
 
     def __init__(
-        self,
-        event_type: str,
-        engine: Engine,
-        request: Dict[str, any],
-        triggers: List[Dict[str, any]],
-        listener_schema: Dict[str, any],
-        from_date: datetime = None,
-        to_date: datetime = None,
-        payload_key: str = None,
-        ):
+            self,
+            event_type: str,
+            engine: Engine,
+            request: Dict[str, any],
+            triggers: List[Dict[str, any]],
+            listener_schema: Dict[str, any],
+            from_date: datetime = None,
+            to_date: datetime = None,
+            payload_key: str = None,
+    ):
         self._event_type = event_type
         self._engine = engine
         self._request = request if request else {}
@@ -47,7 +49,7 @@ class EventListener():
         self._from_date = from_date
         self._to_date = to_date
         self.payload_key = payload_key
-    
+
     def __str__(self):
         return f"{self.event_type} listener to keys: {self.keys}"
 
@@ -284,7 +286,7 @@ class EventListener():
         if key_admin_format:
             try:
                 # create the admin key
-                admin_key: str = key_admin_format.format(**params)
+                admin_key = key_admin_format.format(**params)
             except KeyError as e:
                 raise KeyError(f"Wrong parameters: {','.join(e.args)} required")
         else:
@@ -400,8 +402,9 @@ class EventListener():
             for p_schema in type_list:
                 try:
                     assert "type" in p_schema, f"Wrong schema structure, 'type' could not be located for {p}"
-                    validator_class = p_schema.pop("type")
-                    validator: TypeHandler = eval(f"{validator_class}(key=p, **p_schema)")
+                    p_schema_c = p_schema.copy()
+                    validator_class = p_schema_c.pop("type")
+                    validator: TypeHandler = eval(f"{validator_class}(key=p, **p_schema_c)")
                     # format the values associated to this attribute
                     value = params[p]
                     if type(value) is list:

@@ -1,0 +1,9 @@
+listeners:
+  - event: flight
+    request:
+      country: italy
+      airport: [FCO, CIA]
+      date: 20210101
+      number: AZ203
+    triggers:
+      - type: echo

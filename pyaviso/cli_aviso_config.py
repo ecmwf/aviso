@@ -40,7 +40,7 @@ def configuration_server_setup(f):
 
 
 @click.group(context_settings=CONTEXT_SETTINGS)
-@click.version_option(version= __version__)
+@click.version_option(version=__version__)
 def cli(): pass
 
 

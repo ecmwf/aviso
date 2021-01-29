@@ -14,6 +14,7 @@ import pytest
 from pyaviso import logger, SYSTEM_FOLDER
 from pyaviso.authentication import AuthType
 from pyaviso.engine import EngineType
+from pyaviso.event_listeners.listener_schema_parser import ListenerSchemaParserType
 from pyaviso.user_config import UserConfig, KEY_FILE
 
 test_config_folder = "tests/unit/fixtures/"
@@ -110,33 +111,43 @@ def clear_environment():
         os.environ.pop("AVISO_KEY_TTL")
     except KeyError:
         pass
+    try:
+        os.environ.pop("AVISO_REMOTE_SCHEMA")
+    except KeyError:
+        pass
+    try:
+        os.environ.pop("AVISO_SCHEMA_PARSER")
+    except KeyError:
+        pass
 
 
 def test_default():
     logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
     c = UserConfig._create_default_config()
     assert not c["debug"]
-    assert c["username"] == getpass.getuser()
     assert c["notification_engine"]["timeout"] == 60
     assert c["notification_engine"]["polling_interval"] == 30
     assert c["notification_engine"]["type"] == "etcd_rest"
-    assert c["notification_engine"]["port"] == 443
-    assert c["notification_engine"]["host"] == "aviso.ecmwf.int"
+    assert c["notification_engine"]["port"] == 2379
+    assert c["notification_engine"]["host"] == "localhost"
     assert c["notification_engine"]["service"] == "aviso/v1"
-    assert c["notification_engine"]["https"]
+    assert not c["notification_engine"]["https"]
     assert c["notification_engine"]["catchup"]
     assert c["configuration_engine"]["timeout"] == 60
-    assert c["configuration_engine"]["port"] == 443
-    assert c["configuration_engine"]["host"] == "aviso.ecmwf.int"
-    assert c["configuration_engine"]["https"]
+    assert c["configuration_engine"]["port"] == 2379
+    assert c["configuration_engine"]["host"] == "localhost"
+    assert not c["configuration_engine"]["https"]
     assert c["configuration_engine"]["max_file_size"] == 500
     assert c["configuration_engine"]["type"] == "etcd_rest"
     assert not c["quiet"]
     assert not c["no_fail"]
     assert c["key_file"] == os.path.join(SYSTEM_FOLDER, KEY_FILE)
     assert c["username_file"] is None
-    assert c["auth_type"] == "ecmwf"
+    assert c["username"] is None
+    assert c["auth_type"] == "none"
     assert c["key_ttl"] == -1
+    assert c["schema_parser"] == "generic"
+    assert not c["remote_schema"]
 
 
 def test_config_file():
@@ -163,6 +174,8 @@ def test_config_file():
     assert c.quiet
     assert c.no_fail
     assert c.key_ttl == 10
+    assert c.remote_schema
+    assert c.schema_parser == ListenerSchemaParserType.ECMWF
 
 
 def test_config_file_with_ev():
@@ -190,6 +203,8 @@ def test_config_file_with_ev():
     assert c.quiet
     assert c.no_fail
     assert c.key_ttl == 10
+    assert c.remote_schema
+    assert c.schema_parser == ListenerSchemaParserType.ECMWF
 
 
 def test_env_variables():
@@ -216,6 +231,8 @@ def test_env_variables():
     os.environ["AVISO_AUTH_TYPE"] = "etcd"
     os.environ["AVISO_KEY_TTL"] = "20"
     os.environ["AVISO_USERNAME_FILE"] = "tests/unit/fixtures/username"
+    os.environ["AVISO_REMOTE_SCHEMA"] = "true"
+    os.environ["AVISO_SCHEMA_PARSER"] = "ecmwf"
 
     # create a config with the configuration file but the environment variables take priority
     c = UserConfig()
@@ -240,6 +257,8 @@ def test_env_variables():
     assert c.quiet
     assert c.no_fail
     assert c.key_ttl == 20
+    assert c.remote_schema
+    assert c.schema_parser == ListenerSchemaParserType.ECMWF
 
 
 def test_env_variables_with_config_file():
@@ -264,6 +283,8 @@ def test_env_variables_with_config_file():
     os.environ["AVISO_TIMEOUT"] = "20"
     os.environ["AVISO_AUTH_TYPE"] = "ecmwf"
     os.environ["AVISO_KEY_TTL"] = "20"
+    os.environ["AVISO_REMOTE_SCHEMA"] = "false"
+    os.environ["AVISO_SCHEMA_PARSER"] = "generic"
 
     # create a config with the configuration file but the environment variables take priority
     c = UserConfig(conf_path=test_config_folder + "config.yaml")
@@ -289,6 +310,8 @@ def test_env_variables_with_config_file():
     assert not c.quiet
     assert not c.no_fail
     assert c.key_ttl == 20
+    assert not c.remote_schema
+    assert c.schema_parser == ListenerSchemaParserType.GENERIC
 
 
 def test_constructor():
@@ -309,7 +332,10 @@ def test_constructor():
         username="test2",
         key_file="tests/unit/fixtures/bad/key",
         auth_type="ecmwf",
-        key_ttl=30
+        key_ttl=30,
+        remote_schema=True,
+        schema_parser="ecmwf"
+
     )
     assert not c.debug
     assert c.notification_engine.polling_interval == 60
@@ -332,6 +358,8 @@ def test_constructor():
     assert not c.quiet
     assert not c.no_fail
     assert c.key_ttl == 30
+    assert c.remote_schema
+    assert c.schema_parser == ListenerSchemaParserType.ECMWF
 
 
 def test_constructor_with_env_var():
@@ -357,6 +385,8 @@ def test_constructor_with_env_var():
     os.environ["AVISO_AUTH_TYPE"] = "etcd"
     os.environ["AVISO_KEY_TTL"] = "20"
     os.environ["AVISO_USERNAME_FILE"] = "tests/unit/fixtures/username"
+    os.environ["AVISO_REMOTE_SCHEMA"] = "false"
+    os.environ["AVISO_SCHEMA_PARSER"] = "generic"
 
     # create a config with passing the configuration file as well as the parameters. The parameters will take priority
     notification_engine = {"host": "localhost", "port": 2379, "type": "ETCD_REST", "polling_interval": 60,
@@ -374,7 +404,9 @@ def test_constructor_with_env_var():
         username="test2",
         key_file="tests/unit/fixtures/key",
         auth_type="ecmwf",
-        key_ttl=30
+        key_ttl=30,
+        remote_schema=True,
+        schema_parser="ecmwf"
     )
     assert not c.debug
     assert c.notification_engine.polling_interval == 60
@@ -397,3 +429,5 @@ def test_constructor_with_env_var():
     assert not c.quiet
     assert not c.no_fail
     assert c.key_ttl == 30
+    assert c.remote_schema
+    assert c.schema_parser == ListenerSchemaParserType.ECMWF

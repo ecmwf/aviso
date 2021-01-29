@@ -7,19 +7,16 @@
 # nor does it submit to any jurisdiction.
 
 import collections.abc
-import os
-import re
 import sys
 from typing import Dict
-import yaml
 
 from . import logger
 
 
 class Config:
     """
-    This class is in charge of holding the configuration for the monitoring system, including UDP server and reporters, which can be defined by arguments,
-    environment variables or defaults.
+    This class is in charge of holding the configuration for the monitoring system, including UDP server and reporters,
+    which can be defined by arguments, environment variables or defaults.
     """
 
     def __init__(self,
@@ -51,7 +48,7 @@ class Config:
 
     @staticmethod
     def _create_default_config() -> Dict:
-   
+
         udp_server = {
             "host": "127.0.0.1",
             "port": 1111,
@@ -61,7 +58,7 @@ class Config:
         monitor_server = {
             "url": "https://localhost",
             "username": "TBD",
-            "password":"TBD",
+            "password": "TBD",
             "service_host": "aviso",
             "req_timeout": 60,  # seconds
 
@@ -71,7 +68,7 @@ class Config:
             "enabled": False,
             "frequency": 1,  # in minutes
             "warning_t": 10,  # s
-            "critical_t": 20, # s
+            "critical_t": 20,  # s
         }
 
         aviso_auth_reporter = {
@@ -79,7 +76,7 @@ class Config:
             "enabled": False,
             "frequency": 1,  # in minutes
             "warning_t": 10,  # s
-            "critical_t": 20, # s
+            "critical_t": 20,  # s
             "sub_tlms": []
         }
 
@@ -104,7 +101,6 @@ class Config:
         config = {}
         # TBD
         return config
-
 
     @property
     def udp_server(self):
@@ -206,11 +202,11 @@ class Config:
 
     def __str__(self):
         config_string = (
-            f"udp_server: {self.udp_server}" +
-            f", monitor_server: {self.monitor_server}" +
-            f", aviso_rest_reporter: {self.aviso_rest_reporter}" +
-            f", aviso_auth_reporter: {self.aviso_auth_reporter}" +
-            f", etcd_reporter: {self.etcd_reporter}"
+                f"udp_server: {self.udp_server}" +
+                f", monitor_server: {self.monitor_server}" +
+                f", aviso_rest_reporter: {self.aviso_rest_reporter}" +
+                f", aviso_auth_reporter: {self.aviso_auth_reporter}" +
+                f", etcd_reporter: {self.etcd_reporter}"
         )
         return config_string
 

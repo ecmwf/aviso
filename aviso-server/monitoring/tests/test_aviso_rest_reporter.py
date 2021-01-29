@@ -13,7 +13,6 @@ from aviso_monitoring.reporter.aviso_rest_reporter import AvisoRestReporter
 from aviso_monitoring.receiver import Receiver
 from aviso_monitoring.config import Config
 
-
 tlm_type = "test2"  # to be defined
 config = {
     "aviso_rest_reporter": {
@@ -61,7 +60,7 @@ def receiver():
             f"{tlm_type}_max": 4,
             f"{tlm_type}_min": 2
         }
-    }  
+    }
     receiver = Receiver()
     receiver._incoming_tlms[tlm_type] = [test_tlm1, test_tlm2]
     return receiver
@@ -73,6 +72,7 @@ def test_run_reporter():
     reporter = AvisoRestReporter(Config(**config), receiver())
     reporter.run()
 
+
 def test_process_tlms():
     logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
     reporter = AvisoRestReporter(Config(**config), receiver())
@@ -80,4 +80,3 @@ def test_process_tlms():
     assert len(metrics) == 1
     assert len(metrics[0].get("metrics")) == 3
     assert len(list(filter(lambda m: m["m_value"] == 4, metrics[0].get("metrics")))) == 1
-

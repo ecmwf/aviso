@@ -12,8 +12,8 @@ from aviso_rest import __version__
 
 setup(
     name='aviso-rest',
-    description='Aviso-rest is a REST interface that allows notification providers to submit notifications to the Aviso '
-                'service by a REST API',
+    description='Aviso-rest is a REST interface that allows notification providers to submit notifications to the '
+                'Aviso service by a REST API',
     version=__version__,
     url='https://git.ecmwf.int/projects/AVISO/repos/aviso/browse',
     author='ECMWF',

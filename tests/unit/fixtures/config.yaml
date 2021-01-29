@@ -21,9 +21,6 @@ quiet: true
 no_fail: true
 key_ttl: 10
 username: root
-frontend:
-  host: frontend.int
-  port: 80
-  server_type: gunicorn
-  workers: 4
+schema_parser: ecmwf
+remote_schema: True
 

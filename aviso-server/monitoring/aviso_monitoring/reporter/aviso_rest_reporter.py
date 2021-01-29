@@ -12,7 +12,6 @@ from .. import logger
 
 class AvisoRestReporter(Reporter):
 
-
     def __init__(self, config, *args, **kwargs):
         aviso_rest_config = config.aviso_rest_reporter
         self.frequency = aviso_rest_config["frequency"]
@@ -36,7 +35,7 @@ class AvisoRestReporter(Reporter):
         assert self.tlm_receiver, "TLM receiver is None"
         new_tlms = self.tlm_receiver.extract_incoming_tlms(self.tlm_type)
         if len(new_tlms):
-            
+
             # aggregate the telemetries
             agg_tlm = self.aggregate_tlms_stats(new_tlms)
 
@@ -49,14 +48,13 @@ class AvisoRestReporter(Reporter):
         logger.debug(f"Processing tlms {self.tlm_type} completed")
 
         return metrics
-      
 
     def to_metric(self, tlm=None):
         """
-        This method transforms the response time aggregated into a metric that inclides a status evaluation
+        This method transforms the response time aggregated into a metric that includes a status evaluation
 
         Args:
-            resp_time (Dict): TLM aggregated to evaluate and report
+            tlm (Dict): TLM aggregated to evaluate and report
 
         Returns:
             Dict: metric
@@ -64,7 +62,7 @@ class AvisoRestReporter(Reporter):
         status = 0
         message = f"Response time is nominal"
         if tlm:
-            resp_time_max = tlm.get(self.tlm_type+"_max") # we evaluate with the max value
+            resp_time_max = tlm.get(self.tlm_type + "_max")  # we evaluate with the max value
             if resp_time_max > self.critical_t:
                 status = 2
                 message = f"Response time of {resp_time_max}s"
@@ -79,24 +77,24 @@ class AvisoRestReporter(Reporter):
                 "message": message,
                 "metrics": [
                     {
-                        "m_name": self.tlm_type+"_avg",
-                        "m_value": tlm.get(self.tlm_type+"_avg"),
+                        "m_name": self.tlm_type + "_avg",
+                        "m_value": tlm.get(self.tlm_type + "_avg"),
                         "m_unit": "s"
                     },
                     {
-                        "m_name": self.tlm_type+"_max",
-                        "m_value": tlm.get(self.tlm_type+"_max"),
+                        "m_name": self.tlm_type + "_max",
+                        "m_value": tlm.get(self.tlm_type + "_max"),
                         "m_unit": "s"
                     },
                     {
-                        "m_name": self.tlm_type+"_min",
-                        "m_value": tlm.get(self.tlm_type+"_min"),
+                        "m_name": self.tlm_type + "_min",
+                        "m_value": tlm.get(self.tlm_type + "_min"),
                         "m_unit": "s"
                     }
 
                 ]
             }
-        else: # default metrics when no tlm have been received
+        else:  # default metrics when no tlm have been received
             m_status = {
                 "name": self.tlm_type,
                 "status": status,

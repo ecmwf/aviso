@@ -13,7 +13,8 @@ import logging.handlers
 import os
 import re
 import sys
-from typing import Optional, Dict
+from typing import Dict
+
 import yaml
 from aviso_monitoring.collector.config import Config as MonitoringConfig
 

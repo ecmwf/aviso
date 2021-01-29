@@ -8,7 +8,6 @@
 
 import atexit
 import collections.abc
-import getpass
 import logging
 import logging.config
 import logging.handlers
@@ -103,7 +102,8 @@ class UserConfig:
         """
         :param conf_path: path to the system configuration file. If not provided,
         the default location is HOME_FOLDER/config.yaml.
-        :param conf_from_file: system configuration dictionary. This will be treated as if read from file, in the same priority order.
+        :param conf_from_file: system configuration dictionary. This will be treated as if read from file, in the same
+        priority order.
         :param logging_path: path to the logging configuration file. If not provided,
         the default location is the logging section of the HOME_FOLDER/config.yaml.
         :param notification_engine: configuration object for the notification server
@@ -117,7 +117,8 @@ class UserConfig:
         :param auth_type: Authentication type
         :param key_ttl: Time to live of the keys submitted
         :param schema_parser: parser to use to build the listener schema
-        :param remote_schema: flag to activate the dynamic retrieval of the listener schema from the configuration server
+        :param remote_schema: flag to activate the dynamic retrieval of the listener schema from the configuration
+        server
         :param listeners: listeners configuration
         """
         try:
@@ -126,7 +127,7 @@ class UserConfig:
             self._config = self._create_default_config()
 
             # add the configuration files
-            if conf_from_file: # only one method is allowed
+            if conf_from_file:  # only one method is allowed
                 UserConfig.deep_update(self._config, conf_from_file)
             else:
                 UserConfig.deep_update(self._config, self._parse_config_files(conf_path))
@@ -142,7 +143,7 @@ class UserConfig:
             self.configuration_engine = configuration_engine
             self.debug = debug
             self.quiet = quiet
-            self.no_fail = no_fail            
+            self.no_fail = no_fail
             self.username = username
             self.username_file = username_file
             self.auth_type = auth_type
@@ -155,7 +156,7 @@ class UserConfig:
             self.schema_parser = schema_parser
             self.remote_schema = remote_schema
             self.listeners = listeners
-      
+
             logger.debug(f"Loading configuration completed")
 
         except Exception as e:
@@ -477,7 +478,7 @@ class UserConfig:
 
     @listeners.setter
     def listeners(self, listeners: Dict):
-        self._listeners = {"listeners":  self._configure_property(listeners, "listeners", nullable=True)}
+        self._listeners = {"listeners": self._configure_property(listeners, "listeners", nullable=True)}
 
     @property
     def no_fail(self) -> bool:

@@ -1,7 +1,0 @@
-listeners:
-  - event: dissemination
-    request:
-      destination: [FOO, FOO]
-      stream: [enfo, oper]
-    triggers:
-      - type: echo

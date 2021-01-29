@@ -13,11 +13,13 @@ from aviso_monitoring.collector.time_collector import TimeCollector
 from aviso_monitoring.collector.config import Config
 from aviso_monitoring import logger
 
+
 def take_some_time(seconds=0.1, flag=False, flag2=True):
     sleep(seconds)
     print(flag)
     print(flag2)
     return flag2
+
 
 collector_config = {
     "transmitter": {
@@ -25,10 +27,10 @@ collector_config = {
         "monitoring_server_port": 1111,
         "component_name": "test_component",
         "frequency": 2,
-        },
+    },
     "enabled": True,
     "telemetry_type": "test_time",
-    }
+}
 
 upd_server_config = {
     "host": "127.0.0.1",
@@ -66,23 +68,24 @@ def test_measure_time():
 
     # call the function
     for i in range(10):
-        timer(take_some_time, args=(0.1))
+        timer(take_some_time, args=0.1)
 
     # wait to receive it
     sleep(2)
     assert received
     udp_server.stop()
-    
+
+
 def test_calling_timer():
     logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
 
-     # create the collector
+    # create the collector
     timer = TimeCollector(Config(**collector_config))
 
     assert timer(take_some_time)
-    timer(take_some_time, args=(0.1))
+    timer(take_some_time, args=0.1)
     timer(take_some_time, args=[0.1])
     assert not timer(take_some_time, args=(0.1, True, False))
     timer(take_some_time, args=[0.1, False])
     timer(take_some_time, kwargs={"flag": True})
-    timer(take_some_time, args=(0.2), kwargs={"flag": True})
+    timer(take_some_time, args=0.2, kwargs={"flag": True})

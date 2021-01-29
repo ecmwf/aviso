@@ -54,7 +54,7 @@ class ServiceConfigManager:
             directory = directory + "/"
         logger.debug(f"Looking for file in the directory {directory}")
         service_key = self._build_service_key(service)
-        MAX_FILE_SIZE_SOFT = self._max_file_size * 1024  # convert KiB to B
+        max_file_size_soft = self._max_file_size * 1024  # convert KiB to B
         kvs: List[Dict[str, any]] = []
         pushed_files: List[str] = []
         for x in os.walk(directory):
@@ -70,8 +70,8 @@ class ServiceConfigManager:
                 if os.path.getsize(fp_path) > MAX_FILE_SIZE_HARD:
                     logger.warning(f"File {fp} exceeds hard limit of max file size allowed of {MAX_FILE_SIZE_HARD}B ")
                     continue
-                if os.path.getsize(fp_path) > MAX_FILE_SIZE_SOFT:
-                    logger.warning(f"File {fp} exceeds the configured max file size allowed of {MAX_FILE_SIZE_SOFT}B, "
+                if os.path.getsize(fp_path) > max_file_size_soft:
+                    logger.warning(f"File {fp} exceeds the configured max file size allowed of {max_file_size_soft}B, "
                                    f"try increasing the limit in the configuration")
                     continue
                 # prepare the value, read the file as binary

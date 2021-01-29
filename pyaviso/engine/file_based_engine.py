@@ -212,6 +212,7 @@ class FileBasedEngine(Engine):
 
             # create a watch manager
             wm = pyinotify.WatchManager()  # Watch Manager
+            # noinspection PyUnresolvedReferences
             mask = pyinotify.IN_CLOSE_WRITE  # watched events
 
             # define a class to handle the new events

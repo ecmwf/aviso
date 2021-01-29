@@ -8,6 +8,7 @@
 
 from . import logger
 
+
 class Receiver:
     """
     This class is in charge of processing the messages received
@@ -38,7 +39,7 @@ class Receiver:
         except AssertionError as e:
             logger.warn(f"Validation error in message received, {e}")
             return False
-        
+
         # adding to the right telemetry list
         tlm_type = message.get("telemetry_type")
         if tlm_type in self._incoming_tlms:
@@ -56,7 +57,6 @@ class Receiver:
             list: list of tlms received of the specific type
         """
         return self._incoming_tlms.get(tlm_type)
-        
 
     def extract_incoming_tlms(self, tlm_type):
         """
@@ -67,11 +67,9 @@ class Receiver:
             the original list has been cleared.
         """
         if tlm_type in self._incoming_tlms:
-            tlms =  self._incoming_tlms.get(tlm_type).copy()
+            tlms = self._incoming_tlms.get(tlm_type).copy()
             self._incoming_tlms.get(tlm_type).clear()
             logger.debug(f"Telemetry list {tlm_type} extracted, {len(tlms)} tlms")
             return tlms
         else:
             return []
-        
-        

@@ -1,0 +1,7 @@
+listeners:
+  - event: flight
+    request:
+      country: [italy, france, Germany]
+      number: [AZ203, AZ303]
+    triggers:
+      - type: echo

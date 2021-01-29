@@ -7,11 +7,8 @@
 # nor does it submit to any jurisdiction.
 
 import collections.abc
-import os
-import re
 import sys
 from typing import Dict
-import yaml
 
 from .. import logger
 
@@ -47,7 +44,7 @@ class Config:
 
     @staticmethod
     def _create_default_config() -> Dict:
-   
+
         transmitter = {
             "monitoring_server_host": "127.0.0.1",
             "monitoring_server_port": 1111,
@@ -67,7 +64,6 @@ class Config:
         # TBD
         return config
 
-
     @property
     def transmitter(self):
         return self._transmitter
@@ -86,7 +82,7 @@ class Config:
         assert t["component_name"] is not None, "transmitter component_name has not been configured"
         assert t["frequency"] is not None, "transmitter frequency has not been configured"
         self._transmitter = t
-    
+
     @property
     def enabled(self):
         return self._enabled
@@ -94,7 +90,7 @@ class Config:
     @enabled.setter
     def enabled(self, enabled):
         self._enabled = self._configure_property(enabled, "enabled")
-    
+
     @property
     def telemetry_type(self):
         return self._telemetry_type
@@ -105,9 +101,9 @@ class Config:
 
     def __str__(self):
         config_string = (
-            f"transmitter: {self.transmitter}" +
-            f", enabled: {self.enabled}" +
-            f", telemetry_type: {self.telemetry_type}"
+                f"transmitter: {self.transmitter}" +
+                f", enabled: {self.enabled}" +
+                f", telemetry_type: {self.telemetry_type}"
         )
         return config_string
 

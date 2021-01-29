@@ -195,6 +195,7 @@ class EtcdRestEngine(EtcdEngine):
             v = self._encode_to_str_base64(kv["value"])
             put = {"requestPut": {"key": k, "value": v}}
             if ttl:
+                # noinspection PyUnboundLocalVariable
                 put["requestPut"]["lease"] = lease
             ops.append(put)
 

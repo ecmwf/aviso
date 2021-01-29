@@ -20,7 +20,7 @@ class BackendAdapter:
         self.url = f"{backend_conf['url']}{backend_conf['route']}"
         self.req_timeout = backend_conf["req_timeout"]
 
-        # assign explicitly a decorator to monitor the fowarding
+        # assign explicitly a decorator to monitor the forwarding
         if backend_conf["monitor"]:
             self.timer = TimeCollector(config.monitoring, name="be")
             self.forward = self.timed_forward
@@ -31,7 +31,7 @@ class BackendAdapter:
         """
         This method is an explicit decorator of the forward_impl method to provide time performance monitoring
         """
-        return self.timer(self.forward_impl, args=(request))
+        return self.timer(self.forward_impl, args=request)
 
     def forward_impl(self, request):
         """

@@ -9,18 +9,19 @@
 import os
 import random
 import time
-import pytest
 from datetime import datetime
-import requests
 
+import pytest
+import requests
 from aviso_admin import config, logger
 from aviso_admin.compactor import Compactor
-from aviso_admin.utils import encode_to_str_base64, decode_to_bytes, incr_last_byte
+from aviso_admin.utils import encode_to_str_base64, incr_last_byte
 
 
 def conf() -> config.Config:  # this automatically configure the logging
     c = config.Config(conf_path="aviso-server/admin/tests/config.yaml")
     return c
+
 
 @pytest.fixture(scope="module", autouse=True)
 def clear_history():
@@ -35,6 +36,7 @@ def clear_history():
     }
     # make the call
     resp = requests.post(url, json=body)
+
 
 def test_get_current_server_rev():
     logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
@@ -53,7 +55,7 @@ def test_save_rev():
     assert res
 
     history = compactor.get_history()
-    rev_h = list(filter(lambda h: h["revision"]==rev, history))
+    rev_h = list(filter(lambda h: h["revision"] == rev, history))
     assert len(rev_h) == 1
 
 
@@ -93,7 +95,7 @@ def test_compact_run():
         time.sleep(1)
     rev_end = compactor.get_current_server_rev()
     # there are 2 revisions for every run: one for saving the rev and one for cleaning the history
-    assert rev_end-rev_init == 10
+    assert rev_end - rev_init == 10
     try:
         compactor.compact(rev_end - 6)
         assert False
@@ -105,4 +107,3 @@ def test_compact_run():
         assert True
     except AssertionError as e:
         assert False
-

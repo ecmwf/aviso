@@ -13,7 +13,6 @@ from aviso_monitoring.reporter.aviso_auth_reporter import AvisoAuthReporter
 from aviso_monitoring.receiver import Receiver
 from aviso_monitoring.config import Config
 
-
 tlm_type = "test2"  # to be defined
 config = {
     "aviso_auth_reporter": {
@@ -62,7 +61,7 @@ def receiver():
             f"{tlm_type}_max": 4,
             f"{tlm_type}_min": 2
         }
-    }  
+    }
     test_tlm1t1 = {
         "telemetry_type": tlm_type,
         "component_name": "test_comp",
@@ -86,7 +85,7 @@ def receiver():
             f"{tlm_type}_t1_max": 40,
             f"{tlm_type}_t1_min": 20
         }
-    }  
+    }
     test_tlm1t2 = {
         "telemetry_type": tlm_type,
         "component_name": "test_comp",
@@ -110,7 +109,7 @@ def receiver():
             f"{tlm_type}_t2_max": 400,
             f"{tlm_type}_t2_min": 200
         }
-    }  
+    }
     receiver = Receiver()
     receiver._incoming_tlms[tlm_type] = [test_tlm1, test_tlm2, test_tlm1t1, test_tlm2t1, test_tlm1t2, test_tlm2t2]
     return receiver
@@ -122,11 +121,11 @@ def test_run_reporter():
     reporter = AvisoAuthReporter(Config(**config), receiver())
     reporter.run()
 
+
 def test_process_tlms():
     logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
     reporter = AvisoAuthReporter(Config(**config), receiver())
     metrics = reporter.process_tlms()
     assert len(metrics) == 1
-    assert len(metrics[0].get("metrics")) == 3
+    assert len(metrics[0].get("metrics")) == 6
     assert len(list(filter(lambda m: m["m_value"] == 4, metrics[0].get("metrics")))) == 1
-
