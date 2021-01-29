@@ -17,9 +17,9 @@ Below a few steps to guide the development:
 
 * Unit tests can be run with `pytest <https://pytest.org>`_ with::
 
-    pytest -v --flakes --cov=aviso --cov-report=html --cache-clear
+    pytest -v --cov=pyaviso --cov-report=html --cache-clear
 
-* Coverage can be checked opening in a browser the file ``htmlcov/index.html`` . Please ensure the coverage at least stays the same before you submit a pull request.
+* Coverage can be checked opening in a browser the file ``htmlcov/index.html`` . Without the option ``--cov-report=html`` it will be printed to the console output. Please ensure the coverage at least stays the same before you submit a pull request.
 
 * Please ensure to comply with PEP8 code quality 
 

@@ -18,7 +18,6 @@ from flask import Flask
 from flask import request
 
 import pytest
-import yaml
 from click.testing import CliRunner
 
 from pyaviso import HOME_FOLDER
@@ -342,22 +341,6 @@ def test_command_json_path_listener(config: user_config.UserConfig, caplog, caps
         assert "Command Trigger completed" in caplog.text
 
 
-@pytest.mark.parametrize("config", configs)
-def test_wrong_command_listener(config: user_config.UserConfig, caplog, capsys):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
-    with caplog_for_logger(caplog):  # this allows to assert over the logging output
-        aviso._listen(config, ["tests/integration/fixtures/listeners/wrong_cmd_listener.yaml"])
-
-        time.sleep(1)
-
-        # create independent client to trigger the notification
-        send_notification_as_cli(config)
-        time.sleep(3)
-
-        # check if the change has been logged, the error does not appear in caplog but it would be logged normally
-        assert "No such file or directory" in caplog.text
-
-
 # test frontend
 test_frontend = Flask("Test_Frontend")
 @test_frontend.route('/test',  methods=['POST'])
@@ -376,7 +359,7 @@ def test_post_basic_listener(config: user_config.UserConfig, caplog, capsys):
     
         aviso._listen(config, ["tests/integration/fixtures/listeners/post_basic_listener.yaml"])
 
-        time.sleep(1)
+        time.sleep(2)
 
         # create independent client to trigger the notification
         send_notification_as_cli(config)
@@ -391,7 +374,7 @@ def test_post_basic_listener(config: user_config.UserConfig, caplog, capsys):
         # terminate frontend
         server.terminate()
         server.join()
-        time.sleep(1)
+        time.sleep(2)
 
 
 @pytest.mark.parametrize("config", configs)
@@ -404,7 +387,7 @@ def test_post_complete_listener(config: user_config.UserConfig, caplog, capsys):
         server = Process(target=test_frontend.run, kwargs={"host": "127.0.0.1", "port": 8001})
         server.start()
 
-        time.sleep(1)
+        time.sleep(2)
 
         # create independent client to trigger the notification
         send_notification_as_cli(config)
@@ -419,7 +402,7 @@ def test_post_complete_listener(config: user_config.UserConfig, caplog, capsys):
         # terminate frontend
         server.terminate()
         server.join()
-        time.sleep(1)
+        time.sleep(2)
 
 
 @pytest.mark.parametrize("config", configs)
