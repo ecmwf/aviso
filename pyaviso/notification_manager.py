@@ -191,6 +191,10 @@ class NotificationManager:
         """
         logger.debug(f"Calling notify with the following notification {notification}...")
 
+        # first check the config
+        if config is None:
+            config = user_config.UserConfig()
+            
         # retrieve listener schema
         logger.debug("Getting schema...")
         listener_schema = config.schema_parser.parser().load(config)
