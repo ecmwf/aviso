@@ -114,6 +114,7 @@ class EtcdEngine(Engine, ABC):
                     trigger_callback(kvs)
                 # de-register this pooling thread as we have finished
                 self.stop(key)
+                logger.info("Search and retrieval completed")
                 if len(self._listeners) == 0:  # this is the last pooling thread
                     # terminate the main execution
                     channel.put(True)
@@ -140,7 +141,7 @@ class EtcdEngine(Engine, ABC):
         except Exception as e:
             logger.error(f"Error while listening to key {key}: {e}")
             logger.debug("", exc_info=True)
-            channel.put(True)
+            channel.put(False)
 
     def _last_saved_revision(self) -> int:
         """

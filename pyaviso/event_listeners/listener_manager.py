@@ -116,7 +116,7 @@ class ListenerManager:
                listener_schema: Dict[str, any],
                config: user_config.UserConfig = None,
                from_date: datetime = None,
-               to_date: datetime = None):
+               to_date: datetime = None) -> int :
         """
         This method implements the main workflow to instantiate and execute new listeners
         :param listeners: listeners as list of dictionaries
@@ -124,7 +124,7 @@ class ListenerManager:
         :param config: UserConfig object
         :param from_date: date from when to request notifications, if None it will be from now
         :param to_date: date until when to request notifications, if None it will be until now
-        :return:
+        :return: number of listeners running
         """
         logger.debug("Calling listen in ListenerManager...")
 
@@ -158,3 +158,6 @@ class ListenerManager:
                 raise EventListenerException("Listeners could not start, please check logs")
             else:
                 logger.error("One or more listeners were not able to start")
+                
+        # return the number of listeners running        
+        return len(self.listeners)

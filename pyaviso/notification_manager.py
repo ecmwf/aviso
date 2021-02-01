@@ -32,7 +32,7 @@ class NotificationManager:
                 listeners_file_paths: List[str] = None,
                 listeners: Dict[str, any] = None,
                 from_date: datetime = None,
-                to_date: datetime = None):
+                to_date: datetime = None) -> int:
         """
         This method parses the inputs and calls the listener manager to create the listeners
         :param config: UserConfig object
@@ -40,7 +40,7 @@ class NotificationManager:
         :param listeners: listeners as dictionaries
         :param from_date: date from when to request notifications, if None it will be from now
         :param to_date: date until when to request notifications, if None it will be until now
-        :return:
+        :return: number of listeners running
         """
         # check we have listeners
         listeners_list = []
@@ -58,7 +58,7 @@ class NotificationManager:
         listener_schema = config.schema_parser.parser().load(config)
 
         # Call the listener manager
-        self.listener_manager.listen(listeners_list, listener_schema, config, from_date, to_date)
+        return self.listener_manager.listen(listeners_list, listener_schema, config, from_date, to_date)
 
     def listen(self, config: user_config.UserConfig = None,
                listeners_file_paths: List[str] = None,
@@ -104,14 +104,13 @@ class NotificationManager:
 
         # Call the listener manager
         self._listen(config, listeners_file_paths, listeners, from_date, to_date)
-
-        logger.info("Type CTRL+C, CTRL+D or CTRL+\\ to terminate the process")
-        # keep the main process running
-        while True:
-            if exit_channel.get():
-                break
-            else:
-                time.sleep(1)
+        
+        # keep the main process running and wait for the listening thread to terminate
+        l_exit =  exit_channel.get()  # this is blocking until all listener ends or there is an error
+        if l_exit: # it exits successful
+            return
+        else: # it exits with errors
+            raise EventListenerException("Error in one of the listening process")
 
     def key(self, params: Dict, config: user_config.UserConfig = None, listener_schema: Dict = None) \
             -> Tuple[str, str, str]:
