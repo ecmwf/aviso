@@ -172,6 +172,7 @@ def test_echo_listener(config: user_config.UserConfig, caplog):
         time.sleep(2)
 
         # check if the change has been logged
+        
         for record in caplog.records:
             assert record.levelname != "ERROR"
         # check  the trigger has logged the notification on the system log
@@ -260,6 +261,25 @@ def test_echo_listener_with_dates(config: user_config.UserConfig, caplog):
             assert record.levelname != "ERROR"
         # check  the trigger has logged the notifications
         assert caplog.text.count("Echo Trigger completed") == 2
+
+
+@pytest.mark.skip
+@pytest.mark.parametrize("config", [c1])
+def test_history_on_server(config: user_config.UserConfig, caplog):
+    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    with caplog_for_logger(caplog):  # this allows to assert over the logging output
+        config.notification_engine.host = "aviso.ecmwf.int"
+        config.notification_engine.port = 80
+        config.configuration_engine.host = "aviso.ecmwf.int"
+        config.configuration_engine.port = 80
+        config.auth_type = "ecmwf"
+        config.username = "xxxx"
+        config.key_file = "xxxx"
+        config.password = config._read_key()
+        from_d = datetime.strptime("2020-09-02T10:12:50.0Z", "%Y-%m-%dT%H:%M:%S.%fZ")
+        to_d = datetime.strptime("2020-09-02T10:12:51.0Z", "%Y-%m-%dT%H:%M:%S.%fZ")
+        aviso._listen(config, ["tests/integration/fixtures/listeners/echoListenerTest.yaml"], from_date=from_d, to_date=to_d)
+        time.sleep(1000)
 
 
 @pytest.mark.parametrize("config", configs)
