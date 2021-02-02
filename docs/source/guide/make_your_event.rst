@@ -52,7 +52,7 @@ What to put in ``base`` and what in ``stem`` is a design choice as each of them 
 Request
 -------
 
-When Aviso reads a listener request each key value is validated and formatted accordingly with the schema. Each key is associated to a type that provides a number of properties used during its validation. The table below provides the full list of key types and the corresponding properties that can be used.
+When Aviso reads a listener request each key value is validated and formatted accordingly with the schema. Each key is associated to a type that provides a number of properties used during its validation. Multiple types can be defined for the same key. In this case the validation process will consider one type at a time and it will fail only if the value is not valid for any of the types listed. The table below provides the full list of types and the corresponding properties that can be used.
 
 +-------------+----------+--------------+-----------+-----------+--------+-------+
 |type         |required  | canonic      | values    |  default  |  range | regex |
