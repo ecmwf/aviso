@@ -5,11 +5,11 @@ listeners:
     triggers:
       - type: post
         protocol: 
-          type: cloudevent
+          type: cloudevents
           url: http://my.endpoint.com/
           headers:
             Content-type: "application/json"
           timeout: 30
-          cloudevent: 
-            type: aviso_cloudevent
+          cloudevents: 
+            type: aviso_cloudevents
             source: my_test

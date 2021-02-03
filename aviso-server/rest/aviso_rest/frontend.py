@@ -141,11 +141,11 @@ class Frontend:
         :return: notification as dictionary
         """
         try:
-            cloudevent = from_http(req.headers, req.get_data())
+            cloudevents = from_http(req.headers, req.get_data())
 
             # extract the notification
-            assert cloudevent.data is not None, "Invalid notification, 'data' could not be located"
-            notification = cloudevent.data
+            assert cloudevents.data is not None, "Invalid notification, 'data' could not be located"
+            notification = cloudevents.data
             assert notification.get("event") is not None, "Invalid notification, 'event' could not be located"
             assert notification.get("request") is not None, "Invalid notification, 'request' could not be located"
             r = notification.pop("request")

@@ -1,7 +1,7 @@
 .*
 !.gitignore
 !.dockerignore
-venv*/*
+venvDev*/*
 __pycache*
 htmlcov
 aviso.egg-info/*
@@ -9,9 +9,4 @@ aviso-server/admin/aviso_admin.egg-info/*
 aviso-server/rest/aviso_rest.egg-info/*
 aviso-server/auth/aviso_auth.egg-info/*
 aviso-server/monitoring/aviso_monitoring.egg-info/*
-tests/stress/*
-aviso-server/auth/tests/*
-Dockerfile
-aviso-server/admin/Dockerfile
-aviso-server/auth/Dockerfile
 docs/build/*

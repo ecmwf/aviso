@@ -80,7 +80,7 @@ This trigger basically turns Aviso client in a proxy
 forwarding the notification to the user's notification system compatible with CloudEvent_ specification, as shown 
 by the figure below:
 
-.. image:: ../_static/cloudEvent.png
+.. image:: ../_static/cloudEvents.png
 
 Here is a basic example of a Post trigger:
 
@@ -89,12 +89,12 @@ Here is a basic example of a Post trigger:
   triggers:
     - type: post
       protocol:
-        type: cloudevent
+        type: cloudevents
         url: http://my.endpoint.com/api
 
-This is the basic configuration. More parameters can be specified to customise the CloudEvent message. More info the reference documentation.
+This is the basic configuration. More parameters can be specified to customise the CloudEvents message. More info the reference documentation.
 
-The CloudEvent message sent would look like the following: 
+The CloudEvents message sent would look like the following: 
 
 .. code-block:: json
 
@@ -117,19 +117,19 @@ The CloudEvent message sent would look like the following:
     "time": "2020-03-02T13:34:40.245Z",            # Timestamp of when this message is created
   }
 
-Here is a complete example showing how to customise the CloudEvent fields as well as the HTTP headers:
+Here is a complete example showing how to customise the CloudEvents fields as well as the HTTP headers:
 
 .. code-block:: yaml
 
   triggers:
     - type: post
       protocol: 
-        type: cloudevent
+        type: cloudevents
         url: http://my.endpoint.com/api
         headers:
           HTTP_TEST: "test"
         timeout: 30
-        cloudevent: 
+        cloudevents: 
           type: test_cloudevent
           source: my_test
 

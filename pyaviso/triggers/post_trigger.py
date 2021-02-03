@@ -23,7 +23,7 @@ class ProtocolType(Enum):
     """
     Enum for the various protocols accepted by the post triggers
     """
-    cloudevent = ("post_trigger", "PostCloudEvent")
+    cloudevents = ("post_trigger", "PostCloudEvent")
 
     def get_class(self):
         module = importlib.import_module("pyaviso.triggers." + self.value[0])
@@ -54,7 +54,7 @@ class PostTrigger(trigger.Trigger):
 
 class PostCloudEvent:
     """
-    This class implements a trigger in charge of translating the notification in a CloudEvent message and 
+    This class implements a trigger in charge of translating the notification in a CloudEvents message and 
     POST it to the URL specified by the user.
     This class expects the params to contain the URL where to send the message to. The remaining fields are optional.
     """
@@ -69,17 +69,17 @@ class PostCloudEvent:
         self.timeout = params.get("timeout", self.TIMEOUT_DEFAULT)
         self.headers = params.get("headers", {})
 
-        # cloudEvent specific fields
-        if params.get("cloudevent"):
-            self.type = params.get("cloudevent").get("type", self.TYPE_DEFAULT)
-            self.source = params.get("cloudevent").get("source", self.SOURCE_DEFAULT)
+        # cloudEvents specific fields
+        if params.get("cloudevents"):
+            self.type = params.get("cloudevents").get("type", self.TYPE_DEFAULT)
+            self.source = params.get("cloudevents").get("source", self.SOURCE_DEFAULT)
         else:
             self.type = self.TYPE_DEFAULT
             self.source = self.SOURCE_DEFAULT
 
     def execute(self):
 
-        # prepare the CloudEvent message
+        # prepare the CloudEvents message
 
         attributes = {
             "type": self.type,
@@ -89,20 +89,20 @@ class PostCloudEvent:
         data = self.notification
         event = CloudEvent(attributes, data)
 
-        # Creates the HTTP request representation of the CloudEvent in structured content mode
+        # Creates the HTTP request representation of the CloudEvents in structured content mode
         headers, body = to_structured(event)
         self.headers.update(headers)
 
-        logger.debug(f"Sending CloudEvent notification {data}")
+        logger.debug(f"Sending CloudEvents notification {data}")
 
         # send the message
         try:
             resp = requests.post(self.url, data=body, headers=self.headers, verify=False, timeout=self.timeout)
         except Exception as e:
-            logger.error("Not able to POST CloudEvent notification")
+            logger.error("Not able to POST CloudEvents notification")
             raise TriggerException(e)
         if resp.status_code != 200:
-            raise TriggerException(f"Not able to POST CloudEvent notification to {self.url}, "
+            raise TriggerException(f"Not able to POST CloudEvents notification to {self.url}, "
                                    f"status {resp.status_code}, {resp.reason}, {resp.content.decode()}")
 
-        logger.debug(f"CloudEvent notification sent successfully")
+        logger.debug(f"CloudEvents notification sent successfully")

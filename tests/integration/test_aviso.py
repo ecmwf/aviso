@@ -389,7 +389,7 @@ def test_post_basic_listener(config: user_config.UserConfig, caplog, capsys):
         for record in caplog.records:
             assert record.levelname != "ERROR"
         assert "Post Trigger completed" in caplog.text
-        assert "CloudEvent notification sent successfully" in caplog.text
+        assert "CloudEvents notification sent successfully" in caplog.text
 
         # terminate frontend
         server.terminate()
@@ -417,7 +417,7 @@ def test_post_complete_listener(config: user_config.UserConfig, caplog, capsys):
         for record in caplog.records:
             assert record.levelname != "ERROR"
         assert "Post Trigger completed" in caplog.text
-        assert "CloudEvent notification sent successfully" in caplog.text
+        assert "CloudEvents notification sent successfully" in caplog.text
 
         # terminate frontend
         server.terminate()
