@@ -101,6 +101,9 @@ class EtcdEngine(Engine, ABC):
                 next_rev, final_rev = self._from_to_revisions(key, from_date=from_date, to_date=to_date)
                 if next_rev:
                     logger.info("Search completed, retrieving...")
+                else:
+                    logger.error(f"Error in retrieving the history")
+                    channel.put(False)
 
             if to_date:  # retrieve only past notifications
                 if final_rev:
