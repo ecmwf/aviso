@@ -15,7 +15,11 @@ Below a few steps to guide the development:
 
     git clone https://github.com/ecmwf/aviso.git
 
-* Install Aviso following :ref:`getting_started` and then install development dependencies::
+* Install pyaviso for development, from inside the main aviso folder::
+
+    pip install -e .
+
+* Install development dependencies::
 
     pip install -U -r tests/requirements-dev.txt
 
