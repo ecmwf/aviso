@@ -27,9 +27,9 @@ setup(
     author_email="software.support@ecmwf.int",
     license="Apache 2.0",
     url='https://github.com/ecmwf/aviso',
-    description='Aviso is a notification application allowing users to send and receive custom events and to trigger '
-                'users workflows',
+    description="Time-critical notification system designed to trigger users' workflows across HPC and Cloud systems",
     long_description=long_description,
+    long_description_content_type="text/markdown",
     version=__version__,
     packages=find_packages(exclude=("tests", "aviso-server")),
     include_package_data=True,

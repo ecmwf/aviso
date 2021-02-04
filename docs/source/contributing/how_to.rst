@@ -11,6 +11,10 @@ Please report any issues on GitHub at https://github.com/ecmwf/aviso/issues
 
 Below a few steps to guide the development:
 
+* Clone Aviso repository::
+
+    git clone https://github.com/ecmwf/aviso.git
+
 * Install Aviso following :ref:`getting_started` and then install development dependencies::
 
     pip install -U -r tests/requirements-dev.txt
