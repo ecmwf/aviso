@@ -8,7 +8,7 @@
 
 import io
 import re
-
+import pathlib
 from setuptools import setup, find_packages
 
 __version__ = re.search(
@@ -16,25 +16,37 @@ __version__ = re.search(
     io.open('pyaviso/version.py', encoding='utf_8_sig').read()
 ).group(1)
 
+with open("README.md", "r", encoding="utf-8") as fh:
+    long_description = fh.read()
+
+INSTALL_REQUIRES = (pathlib.Path(__file__).parent / "requirements.txt").read_text().splitlines()
+
 setup(
-    name='aviso',
+    name='pyaviso',
+    author="ECMWF",
+    author_email="software.support@ecmwf.int",
+    license="Apache 2.0",
+    url='https://github.com/ecmwf/aviso',
     description='Aviso is a notification application allowing users to send and receive custom events and to trigger '
                 'users workflows',
+    long_description=long_description,
     version=__version__,
-    url='https://git.ecmwf.int/projects/AVISO/repos/aviso/browse',
-    author='ECMWF',
-    packages=find_packages(exclude=("tests", "frontend", "admin", "auth")),
-    zip_safe=False,
+    packages=find_packages(exclude=("tests", "aviso-server")),
     include_package_data=True,
-    install_requires=[
-        'Click>=7.0',
-        'etcd3>=0.11.1',
-        'PyYAML>=5.1.2',
-        'python-json-logger>=0.1.11',
-        'requests>=2.23.0',
-        'parse>=1.12.1',
-        'pyinotify>=0.9.6',
-        'cloudevents>=1.2.0'
+    install_requires=INSTALL_REQUIRES,
+    classifiers=[
+        "Development Status :: 4 - Beta",
+        "Intended Audience :: Developers",
+        "Intended Audience :: Science/Research",
+        "License :: OSI Approved :: Apache Software License",
+        "Natural Language :: English",
+        "Operating System :: POSIX :: Linux",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 3 :: Only",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
     ],
     entry_points={
         'console_scripts': [

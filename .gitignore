@@ -4,7 +4,7 @@
 venvDev*/*
 __pycache*
 htmlcov
-aviso.egg-info/*
+pyaviso.egg-info/*
 aviso-server/admin/aviso_admin.egg-info/*
 aviso-server/rest/aviso_rest.egg-info/*
 aviso-server/auth/aviso_auth.egg-info/*
