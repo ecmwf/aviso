@@ -297,7 +297,3 @@ def test_notify_bad_server(conf):
         "-Hhost"])
 
     assert result.exit_code == -1
-    if conf.notification_engine.type == EngineType.ETCD_REST:
-        assert result.output.find("Not able to pull key") != -1
-    if conf.notification_engine.type == EngineType.ETCD_GRPC:
-        assert result.output.find("Socket closed") != -1

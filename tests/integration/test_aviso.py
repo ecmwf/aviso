@@ -155,7 +155,7 @@ def test_function_trigger(config: user_config.UserConfig):
     time.sleep(1)
     # create independent client to trigger the notification
     send_notification_as_cli(config)
-    time.sleep(2)
+    time.sleep(5)
     assert trigger_list.__len__() == 1
 
 
@@ -369,35 +369,6 @@ def received():
 #test_frontend.run(host="127.0.0.1", port=8001)
 
 @pytest.mark.parametrize("config", configs)
-def test_post_basic_listener(config: user_config.UserConfig, caplog, capsys):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
-    with caplog_for_logger(caplog):  # this allows to assert over the logging output
-
-        # start a test frontend to send the notification to
-        server = Process(target=test_frontend.run, kwargs={"host": "127.0.0.1", "port": 8001})
-        server.start()
-    
-        aviso._listen(config, ["tests/integration/fixtures/listeners/post_basic_listener.yaml"])
-
-        time.sleep(2)
-
-        # create independent client to trigger the notification
-        send_notification_as_cli(config)
-        time.sleep(3)
-
-        # check if the change has been logged
-        for record in caplog.records:
-            assert record.levelname != "ERROR"
-        assert "Post Trigger completed" in caplog.text
-        assert "CloudEvents notification sent successfully" in caplog.text
-
-        # terminate frontend
-        server.terminate()
-        server.join()
-        time.sleep(2)
-
-
-@pytest.mark.parametrize("config", configs)
 def test_post_complete_listener(config: user_config.UserConfig, caplog, capsys):
     logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
     with caplog_for_logger(caplog):  # this allows to assert over the logging output
@@ -422,7 +393,7 @@ def test_post_complete_listener(config: user_config.UserConfig, caplog, capsys):
         # terminate frontend
         server.terminate()
         server.join()
-        time.sleep(2)
+        time.sleep(10) # allow the flask port to be released
 
 
 @pytest.mark.parametrize("config", configs)
@@ -437,7 +408,7 @@ def test_multiple_nots_echo(config: user_config.UserConfig, caplog, capsys):
         n_nots = 10
         for i in range(0, n_nots):
             send_notification_as_cli(config, i)
-        time.sleep(2)
+        time.sleep(10)
 
         # check if the change has been logged twice as there are n_puts notifications
         for record in caplog.records:
