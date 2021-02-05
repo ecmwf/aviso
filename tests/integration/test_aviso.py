@@ -53,7 +53,7 @@ c2 = create_conf()
 c2.notification_engine.type = EngineType.ETCD_GRPC
 c3 = create_conf()
 c3.notification_engine.type = EngineType.FILE_BASED
-configs = [c1, c2]
+configs = [c1, c2, c3]
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -134,7 +134,7 @@ def caplog_for_logger(caplog):  # this is needed to assert over the logging outp
     lo.removeHandler(caplog.handler)
 
 
-@pytest.mark.parametrize("config", configs)
+@pytest.mark.parametrize("config", [c1, c2])
 def test_function_trigger(config: user_config.UserConfig):
     logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
     # create a list that increments every time there is a new event
@@ -159,7 +159,7 @@ def test_function_trigger(config: user_config.UserConfig):
     assert trigger_list.__len__() == 1
 
 
-@pytest.mark.parametrize("config", configs)
+@pytest.mark.parametrize("config", [c1, c2])
 def test_echo_listener(config: user_config.UserConfig, caplog):
     logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
     with caplog_for_logger(caplog):  # this allows to assert over the logging output
@@ -189,7 +189,7 @@ def test_echo_listener(config: user_config.UserConfig, caplog):
         assert "Echo Trigger completed" in caplog.text
 
 
-@pytest.mark.parametrize("config", configs)
+@pytest.mark.parametrize("config", [c1, c2])
 def test_echo_listener_from_date(config: user_config.UserConfig, caplog):
     logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
     with caplog_for_logger(caplog):  # this allows to assert over the logging output
@@ -222,7 +222,7 @@ def test_echo_listener_from_date(config: user_config.UserConfig, caplog):
         assert caplog.text.count("Echo Trigger completed") == 2
 
 
-@pytest.mark.parametrize("config", configs)
+@pytest.mark.parametrize("config", [c1, c2])
 def test_echo_listener_with_dates(config: user_config.UserConfig, caplog):
     logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
     with caplog_for_logger(caplog):  # this allows to assert over the logging output
@@ -282,7 +282,7 @@ def test_history_on_server(config: user_config.UserConfig, caplog):
         time.sleep(1000)
 
 
-@pytest.mark.parametrize("config", configs)
+@pytest.mark.parametrize("config", [c1, c2])
 def test_logger_listener(config: user_config.UserConfig, caplog):
     logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
     with caplog_for_logger(caplog):  # this allows to assert over the logging output
@@ -308,7 +308,7 @@ def test_logger_listener(config: user_config.UserConfig, caplog):
             os.remove("testLog.log")
 
 
-@pytest.mark.parametrize("config", configs)
+@pytest.mark.parametrize("config", [c1, c2])
 def test_command_listener(config: user_config.UserConfig, caplog, capsys):
     logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
     with caplog_for_logger(caplog):  # this allows to assert over the logging output
@@ -326,7 +326,7 @@ def test_command_listener(config: user_config.UserConfig, caplog, capsys):
         assert "Command Trigger completed" in caplog.text
 
 
-@pytest.mark.parametrize("config", configs)
+@pytest.mark.parametrize("config", [c1, c2])
 def test_command_json_listener(config: user_config.UserConfig, caplog, capsys):
     logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
     with caplog_for_logger(caplog):  # this allows to assert over the logging output
@@ -343,7 +343,7 @@ def test_command_json_listener(config: user_config.UserConfig, caplog, capsys):
             assert record.levelname != "ERROR"
         assert "Command Trigger completed" in caplog.text
 
-@pytest.mark.parametrize("config", configs)
+@pytest.mark.parametrize("config", [c1, c2])
 def test_command_json_path_listener(config: user_config.UserConfig, caplog, capsys):
     logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
     with caplog_for_logger(caplog):  # this allows to assert over the logging output
@@ -368,7 +368,7 @@ def received():
     return f"Received {request.json}"
 #test_frontend.run(host="127.0.0.1", port=8001)
 
-@pytest.mark.parametrize("config", configs)
+@pytest.mark.parametrize("config", [c1, c2])
 def test_post_complete_listener(config: user_config.UserConfig, caplog, capsys):
     logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
     with caplog_for_logger(caplog):  # this allows to assert over the logging output
@@ -396,7 +396,7 @@ def test_post_complete_listener(config: user_config.UserConfig, caplog, capsys):
         time.sleep(10) # allow the flask port to be released
 
 
-@pytest.mark.parametrize("config", configs)
+@pytest.mark.parametrize("config", [c1, c2])
 def test_multiple_nots_echo(config: user_config.UserConfig, caplog, capsys):
     logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
     with caplog_for_logger(caplog):  # this allows to assert over the logging output
@@ -416,7 +416,7 @@ def test_multiple_nots_echo(config: user_config.UserConfig, caplog, capsys):
         assert caplog.text.count("Echo Trigger completed") == n_nots
 
 
-@pytest.mark.parametrize("config", configs)
+@pytest.mark.parametrize("config", [c1, c2])
 def test_multiple_nots_cmd(config: user_config.UserConfig, caplog, capsys):
     logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
     with caplog_for_logger(caplog):  # this allows to assert over the logging output
@@ -436,7 +436,7 @@ def test_multiple_nots_cmd(config: user_config.UserConfig, caplog, capsys):
         assert caplog.text.count("Command Trigger completed") == n_nots
 
 
-@pytest.mark.parametrize("config", configs)
+@pytest.mark.parametrize("config", [c1, c2])
 def test_multiple_listeners(config: user_config.UserConfig, caplog, capsys):
     logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
     with caplog_for_logger(caplog):  # this allows to assert over the logging output
@@ -454,7 +454,7 @@ def test_multiple_listeners(config: user_config.UserConfig, caplog, capsys):
         assert caplog.text.count("Echo Trigger completed") == 3
 
 
-@pytest.mark.parametrize("config", configs)
+@pytest.mark.parametrize("config", [c1, c2])
 def test_multiple_triggers(config: user_config.UserConfig, caplog, capsys):
     logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
     with caplog_for_logger(caplog):  # this allows to assert over the logging output
