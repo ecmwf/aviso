@@ -28,7 +28,7 @@ jobs:
           curl -L ${DOWNLOAD_URL}/${ETCD_VER}/etcd-${ETCD_VER}-linux-amd64.tar.gz -o /tmp/etcd-${ETCD_VER}-linux-amd64.tar.gz
           mkdir /tmp/etcd-download-test
           tar xzvf /tmp/etcd-${ETCD_VER}-linux-amd64.tar.gz -C /tmp/etcd-download-test --strip-components=1
-          /tmp/etcd-download-test/etcd
+          /tmp/etcd-download-test/etcd &
 
       - name: Install packages
         run: |
@@ -37,7 +37,7 @@ jobs:
           pip install .
           pip install -U -r tests/requirements-dev.txt
           pip install -r docs/requirements.txt
-          
+
       - name: Tests
         run: |
           pytest -v --cov=pyaviso --cache-clear
