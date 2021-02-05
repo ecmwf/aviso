@@ -1,6 +1,6 @@
 .*
 !.gitignore
-!.dockerignore
+!.github
 venvDev*/*
 __pycache*
 htmlcov
