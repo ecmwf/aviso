@@ -134,7 +134,7 @@ def caplog_for_logger(caplog):  # this is needed to assert over the logging outp
     lo.removeHandler(caplog.handler)
 
 
-@pytest.mark.parametrize("config", configs)
+@pytest.mark.parametrize("config", [c1, c2])
 def test_function_trigger(config: user_config.UserConfig):
     logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
     # create a list that increments every time there is a new event
@@ -155,7 +155,7 @@ def test_function_trigger(config: user_config.UserConfig):
     time.sleep(1)
     # create independent client to trigger the notification
     send_notification_as_cli(config)
-    time.sleep(5)
+    time.sleep(2)
     assert trigger_list.__len__() == 1
 
 
@@ -368,7 +368,7 @@ def received():
     return f"Received {request.json}"
 #test_frontend.run(host="127.0.0.1", port=8001)
 
-@pytest.mark.parametrize("config", configs)
+@pytest.mark.parametrize("config", [c1, c2])
 def test_post_complete_listener(config: user_config.UserConfig, caplog, capsys):
     logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
     with caplog_for_logger(caplog):  # this allows to assert over the logging output
@@ -396,7 +396,7 @@ def test_post_complete_listener(config: user_config.UserConfig, caplog, capsys):
         time.sleep(10) # allow the flask port to be released
 
 
-@pytest.mark.parametrize("config", configs)
+@pytest.mark.parametrize("config", [c1, c2])
 def test_multiple_nots_echo(config: user_config.UserConfig, caplog, capsys):
     logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
     with caplog_for_logger(caplog):  # this allows to assert over the logging output
@@ -408,7 +408,7 @@ def test_multiple_nots_echo(config: user_config.UserConfig, caplog, capsys):
         n_nots = 10
         for i in range(0, n_nots):
             send_notification_as_cli(config, i)
-        time.sleep(10)
+        time.sleep(2)
 
         # check if the change has been logged twice as there are n_puts notifications
         for record in caplog.records:
