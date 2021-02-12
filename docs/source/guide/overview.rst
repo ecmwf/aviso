@@ -13,6 +13,8 @@ Aviso is a scalable notification system designed for high-throughput. It is deve
 * **Protocol agnostic**
 * Highly reliable - built for **time-critical** applications.
 
+Aviso is not designed to deliver data with the notifications. The payload is designed to provide lightweight message. If the intent is to provide notifications about data availability for example, then we suggest using the payload to inform about the data location (e.g. URL).
+
 Aviso is a client-server application. We refer to the notification server as Aviso Server while to the client application as Aviso Client or just Aviso. 
 This user guide and the reference are focused on Aviso client. More info on its architecture is available in :ref:`aviso_client`.
 
