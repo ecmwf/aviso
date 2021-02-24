@@ -14,7 +14,7 @@ import os
 import re
 import sys
 from typing import Dict
-
+import socket
 import yaml
 from aviso_monitoring.config import Config as MonitoringConfig
 
@@ -192,6 +192,15 @@ class Config:
             # Configure the logging with the default configuration
             self._configure_default_log()
             return
+
+        # add hostname to formatter if requested
+        hostname = socket.gethostname()
+        formatters = log_config.get("formatters")
+        if formatters and len(formatters) > 0:
+            for f in formatters:
+                format = formatters[f].get("format")
+                if format:
+                    formatters[f]["format"] = format.replace("(hostname)", hostname)
 
         # initialise the logging with the user configuration
         try:

@@ -15,7 +15,7 @@ import re
 import sys
 from typing import Dict
 import yaml
-
+import socket
 from . import logger, HOME_FOLDER, SYSTEM_FOLDER
 from pyaviso.user_config import UserConfig as AvisoConfig
 from aviso_monitoring.collector.config import Config as MonitoringConfig
@@ -176,6 +176,15 @@ class Config:
             # Configure the logging with the default configuration
             self._configure_default_log()
             return
+
+        # add hostname to formatter if requested
+        hostname = socket.gethostname()
+        formatters = log_config.get("formatters")
+        if formatters and len(formatters) > 0:
+            for f in formatters:
+                format = formatters[f].get("format")
+                if format:
+                    formatters[f]["format"] = format.replace("(hostname)", hostname)
 
         # initialise the logging with the user configuration
         try:
