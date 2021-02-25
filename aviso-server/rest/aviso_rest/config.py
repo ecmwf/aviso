@@ -177,15 +177,6 @@ class Config:
             self._configure_default_log()
             return
 
-        # add hostname to formatter if requested
-        hostname = socket.gethostname()
-        formatters = log_config.get("formatters")
-        if formatters and len(formatters) > 0:
-            for f in formatters:
-                format = formatters[f].get("format")
-                if format:
-                    formatters[f]["format"] = format.replace("(hostname)", hostname)
-
         # initialise the logging with the user configuration
         try:
             logging.config.dictConfig(log_config)
@@ -328,3 +319,11 @@ class HomeFolderLoader(yaml.SafeLoader):
 
 HomeFolderLoader.add_implicit_resolver('!path', HomeFolderLoader.path_matcher, None)
 HomeFolderLoader.add_constructor('!path', HomeFolderLoader.path_constructor)
+
+# class to add hostname to the possible attributes to use in the logging
+class HostnameFilter(logging.Filter):
+    hostname = socket.gethostname()
+
+    def filter(self, record):
+        record.hostname = HostnameFilter.hostname
+        return True
