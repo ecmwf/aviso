@@ -9,7 +9,7 @@
 import json
 import logging
 from typing import Dict
-
+from logging import Formatter
 import gunicorn.app.base
 from flask import Flask
 from flask import request
@@ -127,7 +127,7 @@ class Frontend:
             self.handler.run(debug=self.config.debug, host=self.config.host,
                              port=self.config.port, use_reloader=False)
         elif self.config.server_type == "gunicorn":
-            options = {"bind": f"{self.config.host}:{self.config.port}",
+            options = {"bind": f"{self.config.host}:{self.config.port}", 
                        "workers": self.config.workers, "post_worker_init": self.post_worker_init}
             GunicornServer(self.handler, options).run()
         else:
@@ -189,7 +189,8 @@ class GunicornServer(gunicorn.app.base.BaseApplication):
         for key, value in iteritems(config):
             self.cfg.set(key.lower(), value)
 
-        self.cfg.set('logger_class', GunicornServer.CustomLogger)
+        #this approach does not support custom filters, therefore it's better to disable it
+        #self.cfg.set('logger_class', GunicornServer.CustomLogger)
 
     def load(self):
         return self.application

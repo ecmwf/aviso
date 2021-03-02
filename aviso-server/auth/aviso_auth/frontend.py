@@ -176,7 +176,8 @@ class GunicornServer(gunicorn.app.base.BaseApplication):
         for key, value in iteritems(config):
             self.cfg.set(key.lower(), value)
 
-        self.cfg.set('logger_class', GunicornServer.CustomLogger)
+        #this approach does not support custom filters, therefore it's better to disable it
+        #self.cfg.set('logger_class', GunicornServer.CustomLogger)
 
     def load(self):
         return self.application
