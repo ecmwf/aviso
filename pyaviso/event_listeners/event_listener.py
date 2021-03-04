@@ -235,7 +235,7 @@ class EventListener:
                 # create the trigger
                 trigger = self.trigger_factory.create_trigger(notification, t)
             except Exception as e:
-                logger.error(f"Trigger {t} could not be created,  {e}")
+                logger.error(f"Trigger {t} could not be created, {type(e)}: {e}")
                 logger.debug("", exc_info=True)
                 break  # the whole triggers execution stop
             else:  # run the trigger
