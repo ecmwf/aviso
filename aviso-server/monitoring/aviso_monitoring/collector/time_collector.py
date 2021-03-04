@@ -33,8 +33,9 @@ class TimeCollector(Collector):
         if not kwargs:
             kwargs = {}
         res = f(*args, **kwargs)
-        self.tlm_buffer.append(timer()-start)
-        logger.debug("Time collected")
+        if self.enabled:
+            self.tlm_buffer.append(timer()-start)
+            logger.debug("Time collected")
         return res
 
     def aggregate_tlms(self, tlms):
