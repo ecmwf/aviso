@@ -105,7 +105,7 @@ class Frontend:
                 self.timed_notify(notification, config=self.config.aviso)
             except InvalidInputError as e:
                 return bad_request(e)
-            logger.debug("Notification successfully submitted")
+            logger.info("Notification successfully submitted")
             return ok("Notification successfully submitted")
 
         return handler

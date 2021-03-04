@@ -90,7 +90,7 @@ class Frontend:
 
         @handler.route(self.config.backend['route'], methods=["POST"])
         def root():
-            logger.debug("New request received")
+            logger.info(f"New request received: {request.data}")
             try:
                 resp_content = timed_process_request()
 
@@ -112,7 +112,7 @@ class Frontend:
 
             # forward request to backend
             resp_content = self.backend.forward(request)
-            logger.debug("Request successfully forwarded to Aviso server")
+            logger.info("Request completed")
 
             return resp_content
 
