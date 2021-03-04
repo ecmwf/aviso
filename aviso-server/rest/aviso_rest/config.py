@@ -135,6 +135,11 @@ class Config:
             # noinspection PyTypeChecker
             current_config["aviso"] = AvisoConfig(conf_from_file=current_config["aviso"])
 
+        # instantiate Aviso Monitoring config
+        if "monitoring" in current_config:
+            # noinspection PyTypeChecker
+            current_config["monitoring"] = MonitoringConfig(conf_from_file=current_config["monitoring"])
+
         return current_config
 
     def _read_env_variables(self) -> Dict[str, any]:
@@ -192,13 +197,11 @@ class Config:
     @monitoring.setter
     def monitoring(self, monitoring: Dict):
         m = self._config.get("monitoring")
-        if monitoring is not None and m is not None:
-            Config.deep_update(m, monitoring)
-        elif monitoring is not None:
-            m = monitoring
+        if monitoring is not None: 
+            m = MonitoringConfig(**m)   
         # verify is valid
         assert m is not None, "monitoring has not been configured"
-        self._monitoring = MonitoringConfig(**m)
+        self._monitoring = m
 
     @property
     def aviso(self) -> AvisoConfig:

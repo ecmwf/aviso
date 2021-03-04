@@ -20,6 +20,9 @@ class Collector(ABC):
 
     def __init__(self, config: Config, name=None) -> None:
         self.enabled = config.enabled
+        if type(self.enabled) is str:
+            self.enabled = self.enabled.casefold() == "true".casefold()
+            
         self.telemetry_type = config.telemetry_type
         # this is used to create sub tlms under the same tlm type
         self.telemetry_name = f"{self.telemetry_type}_{name}" if name else self.telemetry_type

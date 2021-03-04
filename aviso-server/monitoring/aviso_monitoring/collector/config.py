@@ -9,6 +9,7 @@
 import collections.abc
 import sys
 from typing import Dict
+import os
 
 from .. import logger
 
@@ -22,14 +23,30 @@ class Config:
     def __init__(self,
                  transmitter=None,
                  enabled=None,
-                 telemetry_type=None):
+                 telemetry_type=None,
+                 conf_from_file=None):
+        """[summary]
+
+        Args:
+            transmitter ([Dict], optional): [configuration dictionary for the transmitter]. Defaults to None.
+            enabled ([Bool], optional): [if False the component does not send any telemetry]. Defaults to None.
+            telemetry_type ([String], optional): [string type to include in the telemetry]. Defaults to None.
+            conf_from_file ([Dict], optional): [system configuration dictionary. This will be treated as if read from file, in the same
+        priority order]. Defaults to None.
+        """
 
         try:
             # we build the configuration in priority order from the lower to the higher
             # start from the defaults
             self._config = self._create_default_config()
+
+             # add the configuration from file
+            if conf_from_file:
+                Config.deep_update(self._config, conf_from_file)
+
             # add environment variables
             Config.deep_update(self._config, self._read_env_variables())
+
             # add constructor parameters
             self.transmitter = transmitter
             self.enabled = enabled
@@ -60,8 +77,13 @@ class Config:
         return config
 
     def _read_env_variables(self) -> Dict:
-        config = {}
-        # TBD
+        config = {"transmitter": {}}
+        if "AVISO_MONITORING_ENABLED" in os.environ:
+            config["enabled"] = os.environ["AVISO_MONITORING_ENABLED"]
+        if "AVISO_MONITORING_SERVER_HOST" in os.environ:
+            config["transmitter"]["monitoring_server_host"] = os.environ["AVISO_MONITORING_SERVER_HOST"]
+        if "AVISO_MONITORING_SERVER_PORT" in os.environ:
+            config["transmitter"]["monitoring_server_port"] = int(os.environ["AVISO_MONITORING_SERVER_PORT"])
         return config
 
     @property

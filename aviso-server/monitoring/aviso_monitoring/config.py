@@ -155,6 +155,8 @@ class Config:
         assert ar is not None, "aviso_rest_reporter has not been configured"
         assert ar.get("tlm_type") is not None, "aviso_rest_reporter tlm_type has not been configured"
         assert ar.get("enabled") is not None, "aviso_rest_reporter enabled has not been configured"
+        if type(ar["enabled"]) is str:
+            ar["enabled"] = ar["enabled"].casefold() == "true".casefold()
         assert ar.get("frequency") is not None, "aviso_rest_reporter frequency has not been configured"
         assert ar.get("warning_t") is not None, "aviso_rest_reporter warning_t has not been configured"
         assert ar.get("critical_t") is not None, "aviso_rest_reporter critical_t has not been configured"
@@ -175,6 +177,8 @@ class Config:
         assert aa is not None, "aviso_auth_reporter has not been configured"
         assert aa.get("tlm_type") is not None, "aviso_auth_reporter tlm_type has not been configured"
         assert aa.get("enabled") is not None, "aviso_auth_reporter enabled has not been configured"
+        if type(aa["enabled"]) is str:
+            aa["enabled"] = aa["enabled"].casefold() == "true".casefold()
         assert aa.get("frequency") is not None, "aviso_auth_reporter frequency has not been configured"
         assert aa.get("warning_t") is not None, "aviso_auth_reporter warning_t has not been configured"
         assert aa.get("critical_t") is not None, "aviso_auth_reporter critical_t has not been configured"
@@ -195,6 +199,8 @@ class Config:
         assert e is not None, "etcd_reporter has not been configured"
         assert e.get("tlm_type") is not None, "etcd_reporter tlm_type has not been configured"
         assert e.get("enabled") is not None, "etcd_reporter enabled has not been configured"
+        if type(e["enabled"]) is str:
+            e["enabled"] = e["enabled"].casefold() == "true".casefold()
         assert e.get("frequency") is not None, "etcd_reporter frequency has not been configured"
         assert e.get("member_urls") is not None, "etcd_reporter member_urls has not been configured"
         assert e.get("req_timeout") is not None, "etcd_reporter req_timeout has not been configured"
