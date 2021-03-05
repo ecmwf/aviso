@@ -44,10 +44,13 @@ class AvisoAuthReporter(Reporter):
             if len(self.sub_tlms) > 0:
                 for sub_tlm in self.sub_tlms:
                     s_tlms = list(filter(lambda tlm: ("_" + sub_tlm in list(tlm.get("telemetry").keys())[0]), new_tlms))
-                    # aggregate the telemetries
-                    agg_tlms.append(self.aggregate_tlms_stats(s_tlms))
-                    # remove these tlms from the main list
-                    new_tlms = [tlm for tlm in new_tlms if tlm not in s_tlms]
+                    if len(s_tlms)==0:
+                        logger.warning(f("No {sub_tlm} found in {new_tlms}"))
+                    else:
+                        # aggregate the telemetries
+                        agg_tlms.append(self.aggregate_tlms_stats(s_tlms))
+                        # remove these tlms from the main list
+                        new_tlms = [tlm for tlm in new_tlms if tlm not in s_tlms]
 
             # process the main tlms
             agg_tlms.append(self.aggregate_tlms_stats(new_tlms))
