@@ -39,7 +39,8 @@ class Config:
                  server_type=None,
                  workers=None,
                  aviso=None,
-                 monitoring=None):
+                 monitoring=None,
+                 skips=None):
         """
         
         :param conf_path: path to the system configuration file. If not provided,
@@ -49,6 +50,7 @@ class Config:
         :param debug: flag to activate the debug log to the console output
         :param aviso: configuration related to the aviso module
         :param monitoring: configuration related to the monitoring of this component
+        :param skips: dict of request fields to use to identify requests we want to ignore - {field1: [value1, value2]}
         """
         try:
             # we build the configuration in priority order from the lower to the higher
@@ -68,6 +70,7 @@ class Config:
             self.workers = workers
             self.aviso = aviso
             self.monitoring = monitoring
+            self.skips = skips
 
             logger.debug(f"Loading configuration completed")
 
@@ -88,6 +91,7 @@ class Config:
         config["port"] = 8080
         config["server_type"] = "flask"
         config["workers"] = "1"
+        config["skips"] = {}
         return config
 
     def _parse_config_files(self, user_conf_path: str) -> Dict[str, any]:
@@ -269,6 +273,14 @@ class Config:
                 # set the general logger - Note this will affect also the logging file
                 logging.getLogger().setLevel(logging_level)
 
+    @property
+    def skips(self):
+        return self._skips
+
+    @skips.setter
+    def skips(self, skips: str):
+        self._skips = self._configure_property(skips, "skips")
+
     def __str__(self):
         config_string = (
                 f"host: {self.host}" +
@@ -277,7 +289,8 @@ class Config:
                 f", debug: {self.debug}" +
                 f", workers: {self.workers}" +
                 f", aviso: {self.aviso}" +
-                f", monitoring: {self.monitoring}"
+                f", monitoring: {self.monitoring}" +
+                f", skips: {self.skips}"
         )
         return config_string
 

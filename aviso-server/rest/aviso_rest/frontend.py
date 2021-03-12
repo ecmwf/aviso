@@ -23,6 +23,9 @@ from pyaviso.notification_manager import NotificationManager
 from pyaviso.version import __version__ as aviso_version
 from aviso_rest.config import Config
 from aviso_monitoring.collector.time_collector import TimeCollector
+from aviso_monitoring import __version__ as monitoring_version
+from aviso_monitoring.reporter.aviso_rest_reporter import AvisoRestMetricType
+
 
 SWAGGER_URL = '/openapi'
 API_URL = 'frontend/web/openapi.yaml'
@@ -43,7 +46,7 @@ class Frontend:
         """
         This method initialise the timer that is valid globally at application level or per worker
         """
-        self.timer = TimeCollector(self.config.monitoring)
+        self.timer = TimeCollector(self.config.monitoring, tlm_type=AvisoRestMetricType.rest_resp_time.name)
 
     def create_handler(self) -> Flask:
         handler = Flask(__name__)
@@ -100,6 +103,11 @@ class Frontend:
                 # parse the body as cloud event
                 notification = self._parse_cloud_event(request)
                 logger.info(f"New event received: {notification}")
+                
+                # check the skips
+                if(self._skip_request(notification, self.config.skips)):
+                    logger.info("Notification skipped")
+                    return ok("Notification skipped") 
 
                 # send the notification and time it
                 self.timed_notify(notification, config=self.config.aviso)
@@ -115,10 +123,19 @@ class Frontend:
         This method allows to submit a notification to the store and to time it
         """
         return self.timer(self.notification_manager.notify, args=(notification, config))
+    
+    def _skip_request(self, notification, skips) -> bool:
+        """
+        This method looks at the skips dict and check the notification against each entry
+        :return: True if to be skipped
+        """
+        for s in skips:
+            if s in notification and notification[s] in skips[s]:
+                return True
+        return False
 
     def run_server(self):
-        logger.info(f"Running AVISO Frontend - version {__version__} with Aviso version {aviso_version} on server "
-                    f"{self.config.server_type}")
+        logger.info(f"Running AVISO Frontend - version {__version__} with Aviso version {aviso_version}, aviso_monitoring module v.{monitoring_version} on server {self.config.server_type}")
         logger.info(f"Configuration loaded: {self.config}")
 
         if self.config.server_type == "flask":
