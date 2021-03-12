@@ -9,14 +9,12 @@
 import os
 import datetime
 from aviso_monitoring import logger
-from aviso_monitoring.reporter.aviso_rest_reporter import AvisoRestReporter
-from aviso_monitoring.receiver import Receiver
+from aviso_monitoring.reporter.aviso_rest_reporter import AvisoRestReporter, AvisoRestMetricType
+from aviso_monitoring.receiver import Receiver, AVISO_REST_APP_ID
 from aviso_monitoring.config import Config
 
-tlm_type = "test2"  # to be defined
 config = {
     "aviso_rest_reporter": {
-        "tlm_type": tlm_type,
         "enabled": True,
         "frequency": 2,  # in minutes
 
@@ -31,38 +29,41 @@ config = {
     },
     "udp_server": {
         "host": "127.0.0.1",
-        "port": 1111
+        "port": 1112
     }
 }
 
+tlm_type = AvisoRestMetricType.rest_resp_time.name
 
 def receiver():
-    test_tlm1 = {
-        "telemetry_type": tlm_type,
-        "component_name": "test_comp",
-        "hostname": "me",
-        "time": datetime.datetime.timestamp(datetime.datetime.utcnow()),
-        "telemetry": {
-            f"{tlm_type}_counter": 2,
-            f"{tlm_type}_avg": 2,
-            f"{tlm_type}_max": 3,
-            f"{tlm_type}_min": 1
-        }
-    }
-    test_tlm2 = {
-        "telemetry_type": tlm_type,
-        "component_name": "test_comp",
-        "hostname": "me",
-        "time": datetime.datetime.timestamp(datetime.datetime.utcnow()),
-        "telemetry": {
-            f"{tlm_type}_counter": 2,
-            f"{tlm_type}_avg": 3,
-            f"{tlm_type}_max": 4,
-            f"{tlm_type}_min": 2
-        }
-    }
+    tlms = [
+        {'telemetry_type': tlm_type, 
+        'component_name': 'aviso-rest', 
+        'hostname': 'aviso-rest-blue-55f6dd8876-6kg5k', 
+        'time': 1615206256.11515, 
+        'telemetry': {
+            tlm_type+'_counter': 2, 
+            tlm_type+'_avg': 2, 
+            tlm_type+'_max': 3, 
+            tlm_type+'_min': 1
+        }}, 
+        {'telemetry_type': tlm_type, 
+        'component_name': 'aviso-rest', 
+        'hostname': 'aviso-rest-blue-55f6dd8876-6kg5k', 
+        'time': 1615206256.889785, 
+        'telemetry': {
+            tlm_type+'_counter': 2, 
+            tlm_type+'_avg': 3, 
+            tlm_type+'_max': 4, 
+            tlm_type+'_min': 2
+        }}
+    ]
+
+    err_rest_log = 'Mar  9 07:18:34 10-44-0-29 {"asctime": "2021-03-09 07:18:34,385", "hostname": "aviso-rest-blue-56698cb9bc-4s2z7", "process": 42, "thread": 140026491313032, "name": "root", "filename": "frontend.py", "lineno": 73, "levelname": "ERROR", "message": "Value tc3_lace is not valid"}'
+
     receiver = Receiver()
-    receiver._incoming_tlms[tlm_type] = [test_tlm1, test_tlm2]
+    receiver._incoming_tlms[tlm_type] = tlms
+    receiver._incoming_errors[AVISO_REST_APP_ID] = [err_rest_log]
     return receiver
 
 
@@ -76,7 +77,9 @@ def test_run_reporter():
 def test_process_tlms():
     logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
     reporter = AvisoRestReporter(Config(**config), receiver())
-    metrics = reporter.process_tlms()
-    assert len(metrics) == 1
+    metrics = reporter.process_messages()
+    assert len(metrics) == 2
     assert len(metrics[0].get("metrics")) == 3
     assert len(list(filter(lambda m: m["m_value"] == 4, metrics[0].get("metrics")))) == 1
+    errors = list(filter(lambda m: m["name"] == "rest_error_log", metrics))[0]
+    assert errors["status"] == 2

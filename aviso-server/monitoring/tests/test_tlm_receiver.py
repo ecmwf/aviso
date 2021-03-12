@@ -19,7 +19,7 @@ test_message = {
 
 upd_server_config = {
     "host": "127.0.0.1",
-    "port": 1111,
+    "port": 1117,
     "buffer_size": 64 * 1024
 }
 

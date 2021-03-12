@@ -8,25 +8,27 @@
 
 from time import sleep
 import json
+from random import random
 import os
 from aviso_monitoring.udp_server import UdpServer
-from aviso_monitoring.collector.time_collector import TimeCollector
+from aviso_monitoring.collector.count_collector import UniqueCountCollector
 from aviso_monitoring.collector.config import Config
 from aviso_monitoring import logger
 
 
-def take_some_time(seconds=0.1, flag=False, flag2=True):
-    sleep(seconds)
-    print(flag)
-    print(flag2)
-    return flag2
 
-telemetry_type = "test_time"
+def do_something(fix=False):
+    if fix:
+        return 0
+    else:
+        return random()
+
+telemetry_type = "test_counter"
 
 collector_config = {
     "transmitter": {
         "monitoring_server_host": "127.0.0.1",
-        "monitoring_server_port": 1116,
+        "monitoring_server_port": 1113,
         "component_name": "test_component",
         "frequency": 2,
     },
@@ -35,7 +37,7 @@ collector_config = {
 
 upd_server_config = {
     "host": "127.0.0.1",
-    "port": 1116,
+    "port": 1113,
     "buffer_size": 64 * 1024
 }
 
@@ -52,13 +54,13 @@ class ReceiverMock:
         assert message.get("hostname")
         assert message.get("time")
         assert message.get("telemetry")
-        assert message.get("telemetry").get(f"{telemetry_type}_avg") > 0
-        assert message.get("telemetry").get(f"{telemetry_type}_counter") == 10
+        assert message.get("telemetry").get(f"{telemetry_type}_counter") == 6
+        assert message.get("telemetry").get(f"{telemetry_type}_values")
         global received
         received = True
 
 
-def test_measure_time():
+def test_count():
     logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
 
     # create the UDP server with mock ServiceRegister
@@ -66,11 +68,14 @@ def test_measure_time():
     udp_server.start()
 
     # create the collector
-    timer = TimeCollector(Config(**collector_config), tlm_type=telemetry_type)
+    counter = UniqueCountCollector(Config(**collector_config), tlm_type=telemetry_type)
 
     # call the function
-    for i in range(10):
-        timer(take_some_time, args=0.1)
+    for i in range(5):
+        counter(do_something)
+
+    for i in range(5):
+        counter(do_something, args=True) # this will return always only the same
 
     # wait to receive it
     sleep(2)
@@ -78,16 +83,3 @@ def test_measure_time():
     udp_server.stop()
 
 
-def test_calling_timer():
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
-
-    # create the collector
-    timer = TimeCollector(Config(**collector_config), tlm_type=telemetry_type)
-
-    assert timer(take_some_time)
-    timer(take_some_time, args=0.1)
-    timer(take_some_time, args=[0.1])
-    assert not timer(take_some_time, args=(0.1, True, False))
-    timer(take_some_time, args=[0.1, False])
-    timer(take_some_time, kwargs={"flag": True})
-    timer(take_some_time, args=0.2, kwargs={"flag": True})

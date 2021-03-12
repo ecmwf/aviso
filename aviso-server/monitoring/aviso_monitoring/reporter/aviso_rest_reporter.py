@@ -5,7 +5,9 @@
 # In applying this licence, ECMWF does not waive the privileges and immunities
 # granted to it by virtue of its status as an intergovernmental organisation
 # nor does it submit to any jurisdiction.
+from enum import Enum
 
+from ..receiver import AVISO_REST_APP_ID
 from .reporter import Reporter
 from .. import logger
 
@@ -16,38 +18,85 @@ class AvisoRestReporter(Reporter):
         aviso_rest_config = config.aviso_rest_reporter
         self.frequency = aviso_rest_config["frequency"]
         self.enabled = aviso_rest_config["enabled"]
-        self.warning_t = aviso_rest_config["warning_t"]
-        self.critical_t = aviso_rest_config["critical_t"]
-        self.tlm_type = aviso_rest_config["tlm_type"]
+        self.tlms = aviso_rest_config["tlms"]
         super().__init__(config, *args, **kwargs)
 
-    def process_tlms(self):
+    def process_messages(self):
         """
         This method searches in the receiver incoming tlm lists for tlms of tlm_type it aggregates them and 
         return the resulting metric.
         Returns:
             list: list of the metrics aggregated
         """
-        logger.debug(f"Processing tlms {self.tlm_type}...")
+        logger.debug(f"Processing tlms for aviso-rest...")
 
         # array of metrics to return
         metrics = []
-        assert self.tlm_receiver, "TLM receiver is None"
-        new_tlms = self.tlm_receiver.extract_incoming_tlms(self.tlm_type)
-        if len(new_tlms):
 
-            # aggregate the telemetries
-            agg_tlm = self.aggregate_tlms_stats(new_tlms)
+        # check for each tlm
+        for tlm_type in self.tlms.keys():
+            # create the relative metric checker
+            m_type = AvisoRestMetricType[tlm_type.lower()]
+            checker = eval(m_type.value + "(tlm_type, msg_receiver=self.msg_receiver, **self.tlms[tlm_type])")
 
-            # translate to metric
-            metrics.append(self.to_metric(agg_tlm))
-        else:
-            # create a default metric
-            metrics.append(self.to_metric())
+            # retrieve metric
+            metrics.append(checker.metric())
 
-        logger.debug(f"Processing tlms {self.tlm_type} completed")
+        logger.debug("Aviso REST metrics completed")
 
         return metrics
+
+
+class AvisoRestMetricType(Enum):
+    """
+    This Enum describes the various metrics that can be used and link the name to the relative checker
+    """
+
+    rest_resp_time = "ResponseTime"
+    rest_error_log = "ErrorLog"
+
+
+class AvisoRestChecker:
+    """
+    Base class for aviso rest checkers
+    """
+
+    def __init__(self, tlm_type, *args, **kwargs):
+        self.metric_name = tlm_type
+        self.msg_receiver = kwargs["msg_receiver"]
+
+    def metric(self):
+        pass
+
+class ResponseTime(AvisoRestChecker):
+
+    def __init__(self, *args, **kwargs):
+        self.warning_t = kwargs["warning_t"]
+        self.critical_t = kwargs["critical_t"]
+        super().__init__(*args, **kwargs)
+
+    def metric(self):
+
+        logger.debug(f"Processing tlms {self.metric_name}...")
+
+        assert self.msg_receiver, "Msg receiver is None"
+        new_tlms = self.msg_receiver.extract_incoming_tlms(self.metric_name)
+
+        if len(new_tlms):
+            logger.debug(f"Processing {len(new_tlms)} tlms {self.metric_name}...")
+
+            # aggregate the telemetries
+            agg_tlm = Reporter.aggregate_time_tlms(new_tlms)
+
+            # translate to metric
+            metric = self.to_metric(agg_tlm)
+        else:
+            # create a default metric
+            metric = self.to_metric()
+
+        logger.debug(f"Processing tlms {self.metric_name} completed")
+
+        return metric
 
     def to_metric(self, tlm=None):
         """
@@ -62,33 +111,33 @@ class AvisoRestReporter(Reporter):
         status = 0
         message = f"Response time is nominal"
         if tlm:
-            resp_time_max = tlm.get(self.tlm_type + "_max")  # we evaluate with the max value
+            resp_time_max = tlm.get(self.metric_name + "_max")  # we evaluate with the max value
             if resp_time_max > self.critical_t:
                 status = 2
-                message = f"Response time of {resp_time_max}s"
+                message = f"Response time of {resp_time_max}s > than threshold {self.critical_t}"
             elif resp_time_max > self.warning_t:
                 status = 1
-                message = f"Response time of {resp_time_max}s"
+                message = f"Response time of {resp_time_max}s > than threshold {self.warning_t}"
 
             # build metric payload
             m_status = {
-                "name": self.tlm_type,
+                "name": self.metric_name,
                 "status": status,
                 "message": message,
                 "metrics": [
                     {
-                        "m_name": self.tlm_type + "_avg",
-                        "m_value": tlm.get(self.tlm_type + "_avg"),
+                        "m_name": self.metric_name + "_avg",
+                        "m_value": tlm.get(self.metric_name + "_avg"),
                         "m_unit": "s"
                     },
                     {
-                        "m_name": self.tlm_type + "_max",
-                        "m_value": tlm.get(self.tlm_type + "_max"),
+                        "m_name": self.metric_name + "_max",
+                        "m_value": tlm.get(self.metric_name + "_max"),
                         "m_unit": "s"
                     },
                     {
-                        "m_name": self.tlm_type + "_min",
-                        "m_value": tlm.get(self.tlm_type + "_min"),
+                        "m_name": self.metric_name + "_min",
+                        "m_value": tlm.get(self.metric_name + "_min"),
                         "m_unit": "s"
                     }
 
@@ -96,9 +145,51 @@ class AvisoRestReporter(Reporter):
             }
         else:  # default metrics when no tlm have been received
             m_status = {
-                "name": self.tlm_type,
+                "name": self.metric_name,
                 "status": status,
-                "message": message
+                "message": ""
             }
-        logger.debug(f"Response time metric: {m_status}")
+        logger.debug(f"{self.metric_name} metric: {m_status}")
+        return m_status
+
+
+class ErrorLog(AvisoRestChecker):
+    """
+    Collect the errors received
+    """
+
+    def metric(self):
+        # defaults
+        status = 0
+        message = f"No error to report"
+
+        # fetch the error log
+        assert self.msg_receiver, "Msg receiver is None"
+        new_errs = self.msg_receiver.extract_incoming_errors(AVISO_REST_APP_ID)
+
+        if len(new_errs):
+            logger.debug(f"Processing {len(new_errs)} tlms {self.metric_name}...")
+
+            # remove the header bits if any
+            header = '[meta sequenceId="1"] '
+            new_errs = list(map(lambda log: log.split(header,1)[1] if header in log else log, new_errs))
+
+            # select warnings and errors
+            warns = list(filter(lambda log: ("WARNING" in log), new_errs))
+            errs = list(filter(lambda log: ("ERROR" in log), new_errs))
+
+            if len(errs):
+                status = 2
+                message = f"Errors received: {errs}"
+            elif len(warns):
+                status = 1
+                message = f"Warnings received: {warns}"
+
+        # build metric payload
+        m_status = {
+            "name": self.metric_name,
+            "status": status,
+            "message": message
+        }
+        logger.debug(f"{self.metric_name} metric: {m_status}")
         return m_status

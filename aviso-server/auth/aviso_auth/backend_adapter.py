@@ -8,6 +8,7 @@
 
 import requests
 from aviso_monitoring.collector.time_collector import TimeCollector
+from aviso_monitoring.reporter.aviso_auth_reporter import AvisoAuthMetricType
 
 from . import logger
 from .custom_exceptions import InvalidInputError, InternalSystemError
@@ -22,7 +23,7 @@ class BackendAdapter:
 
         # assign explicitly a decorator to monitor the forwarding
         if backend_conf["monitor"]:
-            self.timer = TimeCollector(config.monitoring, name="be")
+            self.timer = TimeCollector(config.monitoring, tlm_type=AvisoAuthMetricType.auth_resp_time.name, tlm_name="be")
             self.forward = self.timed_forward
         else:
             self.forward = self.forward_impl

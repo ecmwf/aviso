@@ -23,14 +23,12 @@ class Config:
     def __init__(self,
                  transmitter=None,
                  enabled=None,
-                 telemetry_type=None,
                  conf_from_file=None):
         """[summary]
 
         Args:
             transmitter ([Dict], optional): [configuration dictionary for the transmitter]. Defaults to None.
             enabled ([Bool], optional): [if False the component does not send any telemetry]. Defaults to None.
-            telemetry_type ([String], optional): [string type to include in the telemetry]. Defaults to None.
             conf_from_file ([Dict], optional): [system configuration dictionary. This will be treated as if read from file, in the same
         priority order]. Defaults to None.
         """
@@ -50,7 +48,6 @@ class Config:
             # add constructor parameters
             self.transmitter = transmitter
             self.enabled = enabled
-            self.telemetry_type = telemetry_type
 
             logger.debug(f"Loading configuration completed")
 
@@ -66,14 +63,13 @@ class Config:
             "monitoring_server_host": "127.0.0.1",
             "monitoring_server_port": 1111,
             "component_name": "TBD",
-            "frequency": 2,
+            "frequency": 2, # in minutes
         }
 
         # main config
         config = {}
         config["transmitter"] = transmitter
         config["enabled"] = False
-        config["telemetry_type"] = "TBD"
         return config
 
     def _read_env_variables(self) -> Dict:
@@ -113,19 +109,10 @@ class Config:
     def enabled(self, enabled):
         self._enabled = self._configure_property(enabled, "enabled")
 
-    @property
-    def telemetry_type(self):
-        return self._telemetry_type
-
-    @telemetry_type.setter
-    def telemetry_type(self, telemetry_type):
-        self._telemetry_type = self._configure_property(telemetry_type, "telemetry_type")
-
     def __str__(self):
         config_string = (
                 f"transmitter: {self.transmitter}" +
-                f", enabled: {self.enabled}" +
-                f", telemetry_type: {self.telemetry_type}"
+                f", enabled: {self.enabled}" 
         )
         return config_string
 

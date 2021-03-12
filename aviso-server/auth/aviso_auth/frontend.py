@@ -23,6 +23,10 @@ from aviso_auth.config import Config
 from aviso_auth.custom_exceptions import InvalidInputError, NotFoundException, InternalSystemError, \
     AuthenticationException, ForbiddenRequestException
 from aviso_monitoring.collector.time_collector import TimeCollector
+from aviso_monitoring import __version__ as monitoring_version
+from aviso_monitoring.collector.count_collector import UniqueCountCollector
+from aviso_monitoring.reporter.aviso_auth_reporter import AvisoAuthMetricType
+
 
 
 class Frontend:
@@ -45,7 +49,8 @@ class Frontend:
         self.authoriser = Authoriser(self.config, self.handler.cache)
         self.backend = BackendAdapter(self.config)
         # this is a time collector for the whole request
-        self.timer = TimeCollector(self.config.monitoring)
+        self.timer = TimeCollector(self.config.monitoring, tlm_type=AvisoAuthMetricType.auth_resp_time.name)
+        self.user_counter = UniqueCountCollector(self.config.monitoring, tlm_type=AvisoAuthMetricType.auth_users_counter.name)
 
     def create_handler(self) -> Flask:
         handler = Flask(__name__)
@@ -100,8 +105,8 @@ class Frontend:
                 return forbidden_request("User not allowed to access to the resource")
 
         def process_request():
-            # authenticate request
-            username = self.authenticator.authenticate(request)
+            # authenticate request and count the users
+            username = self.user_counter(self.authenticator.authenticate, args=request)
             logger.debug("Request successfully authenticated")
 
             # authorise request
@@ -125,7 +130,7 @@ class Frontend:
         return handler
 
     def run_server(self):
-        logger.info(f"Running aviso-auth - version {__version__} on server {self.config.frontend['server_type']}")
+        logger.info(f"Running aviso-auth - version {__version__} on server {self.config.frontend['server_type']}, aviso_monitoring module v.{monitoring_version}")
         logger.info(f"Configuration loaded: {self.config}")
 
         if self.config.frontend["server_type"] == "flask":

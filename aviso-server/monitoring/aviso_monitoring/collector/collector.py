@@ -18,14 +18,14 @@ class Collector(ABC):
     that the details on how and what to collect are in its specialisation.
     """
 
-    def __init__(self, config: Config, name=None) -> None:
+    def __init__(self, config: Config, tlm_type, tlm_name=None) -> None:
         self.enabled = config.enabled
         if type(self.enabled) is str:
             self.enabled = self.enabled.casefold() == "true".casefold()
             
-        self.telemetry_type = config.telemetry_type
+        self.tlm_type = tlm_type
         # this is used to create sub tlms under the same tlm type
-        self.telemetry_name = f"{self.telemetry_type}_{name}" if name else self.telemetry_type
+        self.telemetry_name = f"{self.tlm_type}_{tlm_name}" if tlm_name else self.tlm_type
 
         # create a buffer for the measurements collected
         self.tlm_buffer = []
@@ -33,7 +33,7 @@ class Collector(ABC):
             config.transmitter,
             self.tlm_buffer,
             self.aggregate_tlms,
-            self.telemetry_type)
+            self.tlm_type)
         # start the transmitter
         if self.enabled:
             self.transmitter.start()

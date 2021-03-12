@@ -60,32 +60,47 @@ class Config:
             "username": "TBD",
             "password": "TBD",
             "service_host": "aviso",
-            "req_timeout": 60,  # seconds
+            "req_timeout": 60,  # s
 
         }
         aviso_rest_reporter = {
-            "tlm_type": "rest_resp_time",
             "enabled": False,
-            "frequency": 1,  # in minutes
-            "warning_t": 10,  # s
-            "critical_t": 20,  # s
+            "frequency": 1,  # min
+            "tlms": {
+                "rest_resp_time": {
+                    "warning_t": 10,  # s
+                    "critical_t": 20,  # s
+                },
+                "rest_error_log": {}
+            }
         }
 
         aviso_auth_reporter = {
-            "tlm_type": "auth_resp_time",
             "enabled": False,
             "frequency": 1,  # in minutes
-            "warning_t": 10,  # s
-            "critical_t": 20,  # s
-            "sub_tlms": []
+            "tlms": {
+                "auth_resp_time": {
+                    "warning_t": 10,  # s
+                    "critical_t": 20,  # s
+                    "sub_tlms": []
+                },
+                "auth_users_counter": {
+                    "retention_window": 24  # h
+                },
+                "auth_error_log": {}
+            }
         }
 
         etcd_reporter = {
             "enabled": False,
-            "frequency": 5,  # in minutes
+            "frequency": 5,  # min
             "member_urls": ["http://localhost:2379"],
-            "tlm_type": ["etcd_store_size", "etcd_cluster_status", "etcd_total_keys"],
-            "req_timeout": 60,  # seconds
+            "req_timeout": 60,  # s
+            "tlms": {
+                "etcd_store_size": {},
+                "etcd_cluster_status": {},
+                "etcd_error_log": {}
+            }
         }
 
         # main config
@@ -153,13 +168,11 @@ class Config:
             ar = aviso_rest_reporter
         # verify is valid
         assert ar is not None, "aviso_rest_reporter has not been configured"
-        assert ar.get("tlm_type") is not None, "aviso_rest_reporter tlm_type has not been configured"
+        assert ar.get("tlms") is not None, "aviso_rest_reporter tlms has not been configured"
         assert ar.get("enabled") is not None, "aviso_rest_reporter enabled has not been configured"
         if type(ar["enabled"]) is str:
             ar["enabled"] = ar["enabled"].casefold() == "true".casefold()
         assert ar.get("frequency") is not None, "aviso_rest_reporter frequency has not been configured"
-        assert ar.get("warning_t") is not None, "aviso_rest_reporter warning_t has not been configured"
-        assert ar.get("critical_t") is not None, "aviso_rest_reporter critical_t has not been configured"
         self._aviso_rest_reporter = ar
 
     @property
@@ -175,13 +188,11 @@ class Config:
             aa = aviso_auth_reporter
         # verify is valid
         assert aa is not None, "aviso_auth_reporter has not been configured"
-        assert aa.get("tlm_type") is not None, "aviso_auth_reporter tlm_type has not been configured"
+        assert aa.get("tlms") is not None, "aviso_auth_reporter tlms has not been configured"
         assert aa.get("enabled") is not None, "aviso_auth_reporter enabled has not been configured"
         if type(aa["enabled"]) is str:
             aa["enabled"] = aa["enabled"].casefold() == "true".casefold()
         assert aa.get("frequency") is not None, "aviso_auth_reporter frequency has not been configured"
-        assert aa.get("warning_t") is not None, "aviso_auth_reporter warning_t has not been configured"
-        assert aa.get("critical_t") is not None, "aviso_auth_reporter critical_t has not been configured"
         self._aviso_auth_reporter = aa
 
     @property
@@ -197,7 +208,7 @@ class Config:
             e = etcd_reporter
         # verify is valid
         assert e is not None, "etcd_reporter has not been configured"
-        assert e.get("tlm_type") is not None, "etcd_reporter tlm_type has not been configured"
+        assert e.get("tlms") is not None, "etcd_reporter tlms has not been configured"
         assert e.get("enabled") is not None, "etcd_reporter enabled has not been configured"
         if type(e["enabled"]) is str:
             e["enabled"] = e["enabled"].casefold() == "true".casefold()

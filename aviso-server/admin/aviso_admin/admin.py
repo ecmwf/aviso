@@ -18,12 +18,14 @@ from aviso_monitoring.reporter.aviso_auth_reporter import AvisoAuthReporter
 from aviso_monitoring.reporter.etcd_reporter import EtcdReporter
 from aviso_monitoring.receiver import Receiver
 from aviso_monitoring.udp_server import UdpServer
+from aviso_monitoring import __version__ as monitoring_version
 
 
 def main():
     # load the configuration
     config = Config()
     logger.info(f"Running Aviso-admin v.{__version__}")
+    logger.info(f"aviso_monitoring module v.{monitoring_version}")
     logger.info(f"Configuration loaded: {config}")
 
     # instantiate the compactor and cleaner
@@ -50,7 +52,7 @@ def main():
     auth_reporter = AvisoAuthReporter(config.monitoring, receiver)
     if auth_reporter.enabled:
         schedule.every(auth_reporter.frequency).minutes.do(auth_reporter.run)
-    etcd_reporter = EtcdReporter(config.monitoring)
+    etcd_reporter = EtcdReporter(config.monitoring, receiver)
     if etcd_reporter.enabled:
         schedule.every(etcd_reporter.frequency).minutes.do(etcd_reporter.run)
 

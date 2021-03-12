@@ -10,6 +10,7 @@ import base64
 
 import requests
 from aviso_monitoring.collector.time_collector import TimeCollector
+from aviso_monitoring.reporter.aviso_auth_reporter import AvisoAuthMetricType
 from requests.auth import HTTPBasicAuth
 
 from . import logger
@@ -36,7 +37,7 @@ class Authoriser:
 
         # assign explicitly a decorator to monitor the authorisation
         if auth_conf["monitor"]:
-            self.timer = TimeCollector(config.monitoring, name="ats")
+            self.timer = TimeCollector(config.monitoring, tlm_type=AvisoAuthMetricType.auth_resp_time.name, tlm_name="ats")
             self.is_authorised = self.timed_is_authorised
         else:
             self.is_authorised = self.is_authorised_impl

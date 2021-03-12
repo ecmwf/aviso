@@ -7,7 +7,6 @@
 # nor does it submit to any jurisdiction.
 
 from threading import Thread
-import json
 from typing import Dict
 import socket
 from . import logger
@@ -57,9 +56,8 @@ class UdpServer(Thread):
                 message_str = bytes_address_pair[0].decode()
                 address = bytes_address_pair[1]
                 logger.debug(f"Message received from {address[0]}:{address[1]}, content: {message_str}")
-                # read message
-                message = json.loads(message_str)
-                self.receiver.process_message(message)
+                # send message to the receiver
+                self.receiver.process_message(message_str)
 
 
 

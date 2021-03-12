@@ -17,14 +17,14 @@ from ..config import Config
 
 class Reporter(ABC):
 
-    def __init__(self, config: Config, tlm_receiver=None):
+    def __init__(self, config: Config, msg_receiver=None):
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         self.ms_url = config.monitor_server["url"]
         self.ms_service_host = config.monitor_server["service_host"]
         self.ms_req_timeout = config.monitor_server["req_timeout"]
         self.ms_username = config.monitor_server["username"]
         self.ms_password = config.monitor_server["password"]
-        self.tlm_receiver = tlm_receiver
+        self.msg_receiver = msg_receiver
 
     def ms_authenticate(self):
         """
@@ -78,19 +78,20 @@ class Reporter(ABC):
 
         return True
 
-    def process_tlms(self):
+    def process_messages(self):
         pass
+        
 
     def run(self):
         """
-        Run the reporter configured. It collects and aggregates a list of TLMs that are then being sent to the
+        Run the reporter configured. It collects and aggregates a list of TLMs and errors that are then sent to the
         monitoring server as metrics
         :return: True if successful
         """
         logger.debug(f"Running {self.__class__.__name__}...")
 
-        # Process TLMs
-        metrics = self.process_tlms()
+        # Process messages
+        metrics = self.process_messages()
 
         # authenticate to monitoring server
         token = self.ms_authenticate()
@@ -106,13 +107,19 @@ class Reporter(ABC):
                          f"login to monitoring server not available")
             return False
 
-    def aggregate_tlms_stats(self, tlms):
+    def aggregate_time_tlms(tlms):
         """
         This method aggregates the TLMs passed, maintaining the same stats.
 
         Args:
             tlms (List): List of measurements to aggregates
+
+        Returns:
+            Dict: aggregated metric or None if tlms is empty
         """
+        if len(tlms) == 0:
+            return None
+
         # read only the telemetry field of the tlm
         r_tlms = list(map(lambda t: t.get("telemetry"), tlms))
 
@@ -137,4 +144,37 @@ class Reporter(ABC):
             summation += tlm[tlm_type + "_counter"] * tlm[tlm_type + "_avg"]
         agg_tlm[tlm_type + "_avg"] = summation / agg_tlm[tlm_type + "_counter"]
 
+        return agg_tlm
+
+    def aggregate_unique_counter_tlms(tlms):
+        """
+        This method aggregates the counter TLMs passed for unique values
+
+        Args:
+            tlms (List): List of measurements to aggregates
+
+        Returns:
+            Dict: aggregated metric or None if tlms is empty
+        """
+        if len(tlms) == 0:
+            return None
+        
+        # read only the telemetry field of the tlm
+        r_tlms = list(map(lambda t: t.get("telemetry"), tlms))
+
+        # determine tlm_type
+        first_key = list(r_tlms[0].keys())[0]
+        tlm_type = first_key[:first_key.rfind("_")]
+
+        # create a unique list of values
+        aggr_values= []
+        for tlm in r_tlms:
+            for v in tlm[tlm_type + "_values"]:
+                if not v in aggr_values:
+                    aggr_values.append(v)
+
+        agg_tlm = {
+            tlm_type + "_counter": len(aggr_values),
+            tlm_type + "_values": aggr_values,
+        }
         return agg_tlm

@@ -11,6 +11,7 @@ import time
 
 import requests
 from aviso_monitoring.collector.time_collector import TimeCollector
+from aviso_monitoring.reporter.aviso_auth_reporter import AvisoAuthMetricType
 
 from . import logger
 from .custom_exceptions import AuthenticationException, InternalSystemError
@@ -35,7 +36,7 @@ class Authenticator:
 
         # assign explicitly a decorator to monitor the authentication
         if config.authentication_server["monitor"]:
-            self.timer = TimeCollector(config.monitoring, name="att")
+            self.timer = TimeCollector(config.monitoring, tlm_type=AvisoAuthMetricType.auth_resp_time.name, tlm_name="att")
             self.authenticate = self.timed_authenticate
         else:
             self.authenticate = self.authenticate_impl
@@ -109,14 +110,15 @@ class Authenticator:
         if resp_body.get("uid") is None:
             logger.error(f"Not able to find username in: {resp_body}")
             raise InternalSystemError(f'Error in authenticating token {token}')
-        username = resp_body["uid"]
+        # get the username
+        username = resp_body.get("uid")
 
         if resp_body.get("email") is None:
             logger.error(f"Not able to find email in: {resp_body}")
             raise InternalSystemError(f'Error in authenticating token {token}')
-        email = resp_body['email']
+        email = resp_body.get("email")
 
-        logger.info(f"Token correctly validated with user {username}, email {email}")
+        logger.debug(f"Token correctly validated with user {username}, email {email}")
         return username, email
 
     def wait_for_resp(self, token):

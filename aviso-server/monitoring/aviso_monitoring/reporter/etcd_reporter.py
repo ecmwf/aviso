@@ -11,21 +11,22 @@ from enum import Enum
 import re
 
 from .reporter import Reporter
+from ..receiver import ETCD_APP_ID
 from .. import logger
 
 
 class EtcdReporter(Reporter):
 
     def __init__(self, config, *args, **kwargs):
-        etcd_config = config.etcd_reporter
-        self.frequency = etcd_config["frequency"]
-        self.enabled = etcd_config["enabled"]
-        self.tlm_type = etcd_config["tlm_type"]
-        self.member_urls = etcd_config["member_urls"]
-        self.req_timeout = etcd_config["req_timeout"]
+        self.etcd_config = config.etcd_reporter
+        self.frequency = self.etcd_config["frequency"]
+        self.enabled = self.etcd_config["enabled"]
+        self.req_timeout = self.etcd_config["req_timeout"]
+        self.member_urls = self.etcd_config["member_urls"]
+        self.tlms = self.etcd_config["tlms"]
         super().__init__(config, *args, **kwargs)
 
-    def process_tlms(self):
+    def process_messages(self):
         """
         This method for each metric to process instantiates the relative TLM checker and run it
         :return: the metrics collected
@@ -37,10 +38,12 @@ class EtcdReporter(Reporter):
 
         # array of metric to return
         metrics = []
-        for mn in self.tlm_type:
+
+        # check for each tlm
+        for tlm_type in self.tlms.keys():
             # create the relative metric checker
-            m_type = EtcdMetricType[mn.lower()]
-            checker = eval(m_type.value + "(m_type, self.req_timeout, member_urls=self.member_urls, raw_tlms=raw_tlms)")
+            m_type = EtcdMetricType[tlm_type.lower()]
+            checker = eval(m_type.value + "(tlm_type, msg_receiver=self.msg_receiver, raw_tlms=raw_tlms, **self.tlms[tlm_type], **self.etcd_config)")
 
             # retrieve metric
             metrics.append(checker.metric())
@@ -48,6 +51,7 @@ class EtcdReporter(Reporter):
         logger.debug("Etcd metrics completed")
 
         return metrics
+    
 
     def retrive_raw_tlms(self):
         """
@@ -84,6 +88,7 @@ class EtcdMetricType(Enum):
     etcd_store_size = "StoreSize"
     etcd_cluster_status = "ClusterStatus"
     etcd_total_keys = "TotalKeys"
+    etcd_error_log = "ErrorLog"
 
 
 class EtcdChecker:
@@ -91,11 +96,12 @@ class EtcdChecker:
     Base class for etcd checkers
     """
 
-    def __init__(self, type, req_timeout=60, *args, **kwargs):
-        self.metric_type = type
+    def __init__(self, tlm_type, req_timeout=60, *args, **kwargs):
+        self.metric_name = tlm_type
         self.req_timeout = req_timeout
         self.member_urls = kwargs["member_urls"]
         self.raw_tlms = kwargs["raw_tlms"]
+        self.msg_receiver = kwargs["msg_receiver"]
 
     def metric(self):
         pass
@@ -148,7 +154,7 @@ class StoreSize(EtcdChecker):
 
         # build metric payload
         m_status = {
-            "name": self.metric_type.name,
+            "name": self.metric_name,
             "status": status,
             "message": message,
             "metrics": [
@@ -169,7 +175,7 @@ class StoreSize(EtcdChecker):
                 }
             ]
         }
-        logger.debug(f"Store size metric: {m_status}")
+        logger.debug(f"{self.metric_name} metric: {m_status}")
         return m_status
 
     def max_store_size(self, tlm_name):
@@ -216,27 +222,14 @@ class ClusterStatus(EtcdChecker):
             status = 1
             message = f"Cluster has no leader"
 
-        # retrieve total failed hearthbeat
-        tot_failed_heartbeat = 0
-        for url in self.member_urls:
-            failed_heartbeat = self.read_from_raw_tlms(url, "etcd_server_heartbeat_send_failures_total")
-            if failed_heartbeat:
-                tot_failed_heartbeat += int(failed_heartbeat)
 
         # build metric payload
         m_status = {
-            "name": self.metric_type.name,
+            "name": self.metric_name,
             "status": status,
             "message": message,
-            "metrics": [
-                {
-                    "m_name": "failed_heartbeat",
-                    "m_value": tot_failed_heartbeat,
-                    "m_unit": ""
-                }
-            ]
         }
-        logger.debug(f"Cluster status metric: {m_status}")
+        logger.debug(f"{self.metric_name} metric: {m_status}")
         return m_status
 
     def health(self, url):
@@ -299,7 +292,7 @@ class TotalKeys(EtcdChecker):
 
         # build metric payload
         m_status = {
-            "name": self.metric_type.name,
+            "name": self.metric_name,
             "status": status,
             "message": message,
             "metrics": [
@@ -310,5 +303,48 @@ class TotalKeys(EtcdChecker):
                 }
             ]
         }
-        logger.debug(f"Total keys metric: {m_status}")
+        logger.debug(f"{self.metric_name} metric: {m_status}")
+        return m_status
+
+class ErrorLog(EtcdChecker):
+    """
+    Collect the errors received
+    """
+
+    def metric(self):
+        # defaults
+        status = 0
+        message = f"No error to report"
+
+        # fetch the error log
+        assert self.msg_receiver, "Msg receiver is None"
+        new_errs = self.msg_receiver.extract_incoming_errors(ETCD_APP_ID)
+
+        if len(new_errs):
+            logger.debug(f"Processing {len(new_errs)} tlms {self.metric_name}...")
+
+            # remove the header bits if any
+            header = '[meta '
+            new_errs = list(map(lambda log: log.split(header,1)[1] if header in log else log, new_errs))
+            # replace the | with - Opsview does not like it otherwise
+            new_errs = list(map(lambda log: log.replace("|", "-"), new_errs))
+
+            # select warnings and errors
+            warns = list(filter(lambda log: (" W " in log), new_errs))
+            errs = list(filter(lambda log: (" E " in log), new_errs))
+
+            if len(errs):
+                status = 2
+                message = f"Errors received: {errs}"
+            elif len(warns):
+                status = 1
+                message = f"Warnings received: {warns}"
+
+        # build metric payload
+        m_status = {
+            "name": self.metric_name,
+            "status": status,
+            "message": message
+        }
+        logger.debug(f"{self.metric_name} metric: {m_status}")
         return m_status
