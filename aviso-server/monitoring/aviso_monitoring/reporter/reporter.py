@@ -11,8 +11,11 @@ import json
 import requests
 import urllib3
 import math
+import re
+
 from .. import logger
 from ..config import Config
+import requests
 
 
 class Reporter(ABC):
@@ -178,3 +181,46 @@ class Reporter(ABC):
             tlm_type + "_values": aggr_values,
         }
         return agg_tlm
+
+    def retrive_metrics(metric_servers, req_timeout):
+        """
+        This methods retrieves the metrics provided by specific metric servers using a Prometheus interface. 
+        """
+        raw_tlms = {}
+        for u in metric_servers:
+            url = u + "/metrics"
+            logger.debug(f"Retrieving metrics from {url}...")
+            try:
+                resp = requests.get(url, verify=False, timeout=req_timeout)
+            except Exception as e:
+                logger.error(f"Not able to get metrics from {url}")
+                logger.exception(e)
+                raw_tlms[u] = None
+                continue
+            if resp.status_code != 200:
+                logger.error(f"Not able to get metrics from {url}, "
+                             f"status {resp.status_code}, {resp.reason}, {resp.content.decode()}")
+                raw_tlms[u] = None
+            else:
+                raw_tlms[u] = resp.text
+
+        logger.debug("Metrics successfully retrieved")
+        return raw_tlms
+
+    def read_from_metrics(metrics, name):
+        """
+        This methods extract the value associated to name in the metrics text
+        :param metrics: Prometheus metrics
+        :param name:
+        :return: the value as string, None if nothing was found
+        """
+        pattern = f"{name} [0-9.e+]+"
+        res = re.findall(pattern, metrics)
+        if len(res) == 1:
+            res = res[0].split()
+            if len(res) == 2:
+                return res[1]
+            else:
+                return None
+        else:
+            return None

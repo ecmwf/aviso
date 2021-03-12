@@ -13,6 +13,7 @@ from .reporter import Reporter
 from .. import logger
 
 
+
 class AvisoAuthReporter(Reporter):
 
     def __init__(self, config, *args, **kwargs):
@@ -55,6 +56,7 @@ class AvisoAuthMetricType(Enum):
     auth_resp_time = "ResponseTime"
     auth_users_counter = "UsersCounter"
     auth_error_log = "ErrorLog"
+    auth_pod_available = "PodAvailable"
 
 
 class AvisoAuthChecker:
@@ -223,7 +225,7 @@ class UsersCounter(AvisoAuthChecker):
                     {
                         "m_name": self.metric_name,
                         "m_value": users_count,
-                        "m_unit": ""
+                        "m_unit": "users"
                     },
                 ]
             }
@@ -236,7 +238,7 @@ class UsersCounter(AvisoAuthChecker):
                     {
                         "m_name": self.metric_name,
                         "m_value": 0,
-                        "m_unit": ""
+                        "m_unit": "users"
                     },
                 ]
             }
@@ -283,3 +285,72 @@ class ErrorLog(AvisoAuthChecker):
         }
         logger.debug(f"{self.metric_name} metric: {m_status}")
         return m_status
+
+class PodAvailable(AvisoAuthChecker):
+    """
+    Check pod availability
+    """
+
+    def __init__(self, *args, **kwargs):
+        self.warning_t = kwargs["warning_t"]
+        self.critical_t = kwargs["critical_t"]
+        self.req_timeout = kwargs["req_timeout"]
+        self.metric_server_url = kwargs["metric_server_url"]
+        super().__init__(*args, **kwargs)
+
+
+    def metric(self):
+        pattern = 'kube_deployment_status_replicas{namespace="aviso",deployment="aviso-auth"}'
+        # defaults
+        status = 0
+        message = "All pods available"
+        m_status = None
+
+        # fetch the cluster metrics
+        if self.metric_server_url:
+            metrics = Reporter.retrive_metrics([self.metric_server_url], self.req_timeout)[self.metric_server_url]
+            if metrics: 
+                logger.debug(f"Processing tlm {self.metric_name}...")
+
+                av_pod = Reporter.read_from_metrics(metrics, pattern)
+                if av_pod:
+                    av_pod = int(av_pod)
+                    if av_pod <= self.critical_t:
+                        status = 2
+                        message = f"Available pods: {av_pod} below critical threshold of {self.critical_t}"
+                    elif av_pod <= self.warning_t:
+                        status = 1
+                        message = f"Available pods: {av_pod} below warning threshold of {self.warning_t}"
+
+                    # build metric payload
+                    m_status = {
+                        "name": self.metric_name,
+                        "status": status,
+                        "message": message,
+                        "metrics": [
+                            {
+                                "m_name": self.metric_name,
+                                "m_value": av_pod,
+                                "m_unit": "pods"
+                            },
+                        ]
+                    }
+                else:
+                    logger.warning(f"Could not find {pattern} for {self.metric_name}")
+        else:
+            m_status = {
+                "name": self.metric_name,
+                "status": 1,
+                "message": "Metric server not defined"
+            }
+        # check if a metric was generated
+        if m_status is None:
+            m_status = {
+                "name": self.metric_name,
+                "status": 1,
+                "message": "Metric could not be retrieved"
+            }
+        logger.debug(f"{self.metric_name} metric: {m_status}")
+        return m_status
+
+

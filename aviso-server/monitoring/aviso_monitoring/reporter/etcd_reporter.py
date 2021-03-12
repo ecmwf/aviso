@@ -8,7 +8,6 @@
 
 import requests
 from enum import Enum
-import re
 
 from .reporter import Reporter
 from ..receiver import ETCD_APP_ID
@@ -34,7 +33,7 @@ class EtcdReporter(Reporter):
         logger.debug("Etcd processing metrics...")
 
         # fetch the raw tlms provided by etcd
-        raw_tlms = self.retrive_raw_tlms()
+        raw_tlms = Reporter.retrive_metrics(self.member_urls, self.req_timeout)
 
         # array of metric to return
         metrics = []
@@ -51,33 +50,6 @@ class EtcdReporter(Reporter):
         logger.debug("Etcd metrics completed")
 
         return metrics
-    
-
-    def retrive_raw_tlms(self):
-        """
-        this methods retrieves the etcd metrics provided by each member. We collect from all of them because some of
-        them are not the same
-        """
-        raw_tlms = {}
-        for u in self.member_urls:
-            url = u + "/metrics"
-            logger.debug(f"Retrieving TLMs from {url}...")
-            try:
-                resp = requests.get(url, verify=False, timeout=self.req_timeout)
-            except Exception as e:
-                logger.error(f"Not able to get TLMs from {url}")
-                logger.exception(e)
-                raw_tlms[u] = None
-                continue
-            if resp.status_code != 200:
-                logger.error(f"Not able to get TLMs from {url}, "
-                             f"status {resp.status_code}, {resp.reason}, {resp.content.decode()}")
-                raw_tlms[u] = None
-            else:
-                raw_tlms[u] = resp.text
-
-        logger.debug("Etcd raw TLMs successfully retrieved")
-        return raw_tlms
 
 
 class EtcdMetricType(Enum):
@@ -105,24 +77,6 @@ class EtcdChecker:
 
     def metric(self):
         pass
-
-    def read_from_raw_tlms(self, url, tlm_name):
-        """
-        This methods extract the value associated to tlm_name in the raw_tlms text
-        :param url: member url
-        :param tlm_name:
-        :return: the value as string, None if nothing was found
-        """
-        pattern = f"{tlm_name} [0-9.e+]+"
-        res = re.findall(pattern, self.raw_tlms[url])
-        if len(res) == 1:
-            res = res[0].split()
-            if len(res) == 2:
-                return res[1]
-            else:
-                return None
-        else:
-            return None
 
 
 class StoreSize(EtcdChecker):
@@ -186,7 +140,7 @@ class StoreSize(EtcdChecker):
         """
         max = -1
         for u in self.member_urls:
-            size = self.read_from_raw_tlms(u, tlm_name)
+            size = Reporter.read_from_metrics(self.raw_tlms[u], tlm_name)
             if size:
                 # convert byte in GiB
                 size = round(float(size) / (1024 * 1024 * 1024), 2)
@@ -217,7 +171,7 @@ class ClusterStatus(EtcdChecker):
                 message = f"Cluster member {url} not healthy"
 
         # check if there is a leader
-        leader = self.read_from_raw_tlms(self.member_urls[0], "etcd_server_has_leader")
+        leader = Reporter.read_from_metrics(self.raw_tlms[self.member_urls[0]], "etcd_server_has_leader")
         if leader != "1":
             status = 1
             message = f"Cluster has no leader"
@@ -285,7 +239,7 @@ class TotalKeys(EtcdChecker):
         status = 0
         message = f"Total number of keys is nominal"
         # any member should reply the same
-        t_keys = self.read_from_raw_tlms(self.member_urls[0], "etcd_debugging_mvcc_keys_total")
+        t_keys = Reporter.read_from_metrics(self.raw_tlms[self.member_urls[0]], "etcd_debugging_mvcc_keys_total")
         if t_keys is None:
             status = 2
             message = f"Cannot retrieve total number of keys"

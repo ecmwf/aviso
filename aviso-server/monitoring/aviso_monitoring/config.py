@@ -71,6 +71,12 @@ class Config:
                     "warning_t": 10,  # s
                     "critical_t": 20,  # s
                 },
+                "rest_pod_available":{
+                    "warning_t": 2,  # pods
+                    "critical_t": 1,  # pods
+                    "req_timeout": 60,
+                    "metric_server_url": None
+                },
                 "rest_error_log": {}
             }
         }
@@ -86,6 +92,12 @@ class Config:
                 },
                 "auth_users_counter": {
                     "retention_window": 24  # h
+                },
+                "auth_pod_available":{
+                    "warning_t": 2,  # pods
+                    "critical_t": 1,  # pods
+                    "req_timeout": 60,
+                    "metric_server_url": None
                 },
                 "auth_error_log": {}
             }

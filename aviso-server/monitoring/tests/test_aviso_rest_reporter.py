@@ -78,7 +78,7 @@ def test_process_tlms():
     logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
     reporter = AvisoRestReporter(Config(**config), receiver())
     metrics = reporter.process_messages()
-    assert len(metrics) == 2
+    assert len(metrics) == 3
     assert len(metrics[0].get("metrics")) == 3
     assert len(list(filter(lambda m: m["m_value"] == 4, metrics[0].get("metrics")))) == 1
     errors = list(filter(lambda m: m["name"] == "rest_error_log", metrics))[0]
