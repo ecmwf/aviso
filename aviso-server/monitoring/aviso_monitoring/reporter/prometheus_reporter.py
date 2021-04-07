@@ -11,28 +11,32 @@ import urllib3
 from flask import Flask
 from flask import Response
 import logging
-from six import iteritems
-import gunicorn.app.base
 from enum import Enum
 from datetime import datetime, timedelta
+from threading import Thread
 
 from .. import logger
 from ..config import Config
 
-class PrometheusReporter():
+class PrometheusReporter(Thread):
+    """
+    This class provides an endpoint for the Prometheus scraper. It is meant to provide to Prometheus the metrics not required by Opsview but still useful for 
+    investigation
+    """
 
     def __init__(self, config: Config, msg_receiver):
-        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+        super(PrometheusReporter, self).__init__()
         prometheus_config = config.prometheus_reporter
         self.host = prometheus_config["host"]
         self.port = prometheus_config["port"]
-        self.server_type = prometheus_config["server_type"]
-        self.workers = prometheus_config["workers"]
         self.enabled = prometheus_config["enabled"]
         self.tlms = prometheus_config["tlms"]
         self.msg_receiver = msg_receiver
-        self.handler = self.create_handler()
+        # run in the background
+        self.setDaemon(True)
 
+        self.handler = self.create_handler()
+        
 
     def create_handler(self) -> Flask:
         handler = Flask(__name__)
@@ -51,7 +55,6 @@ class PrometheusReporter():
             return json_response(e, 500)
 
         @handler.route("/metrics", methods=["GET"])
-        #@compress.compressed()
         def metrics():
             logger.debug(f"Requesting metrics...")
 
@@ -65,11 +68,7 @@ class PrometheusReporter():
                 # retrieve metric
                 resp_content += checker.metric()
 
-            resp = Response(resp_content)
-            #resp.headers["Access-Control-Allow-Origin"] = "*"
-            #resp.headers["Access-Control-Allow-Headers"] = "accept, content-type, authorization"
-            #resp.headers["Content-Type"] = "text/plain"
-            return resp
+            return Response(resp_content)
 
         return handler
 
@@ -107,40 +106,15 @@ class PrometheusReporter():
         }
         return agg_tlm
 
-    def run_server(self):
-        logger.info(f"Running prometheus reporter on server {self.server_type}")
-
-        if self.server_type == "flask":
-            # flask internal server for non-production environments
-            # should only be used for testing and debugging
-            self.handler.run( 
-                host=self.host,
-                port=self.port, 
-                use_reloader=False)
-        elif self.server_type == "gunicorn":
-            options = {
-                "bind": f"{self.host}:{self.port}",
-                "workers": self.workers}
-            GunicornServer(self.handler, options).run()
-        else:
-            logging.error(f"server_type {self.server_type} not supported")
-            raise NotImplementedError
-
-class GunicornServer(gunicorn.app.base.BaseApplication):
-
-    def __init__(self, app, options=None):
-        self.options = options or {}
-        self.application = app
-        super(GunicornServer, self).__init__()
-
-    def load_config(self):
-        config = dict([(key, value) for key, value in iteritems(self.options)
-                       if key in self.cfg.settings and value is not None])
-        for key, value in iteritems(config):
-            self.cfg.set(key.lower(), value)
-
-    def load(self):
-        return self.application
+    def run(self):
+        logger.info(f"Running prometheus reporter on server flask")
+        
+        # flask internal server for non-production environments but it's fine for this usecase
+        # Gunicorn does not work because spread the request over independent processes and therefore the Receiver object cannot be shared in this way
+        self.handler.run( 
+            host=self.host,
+            port=self.port, 
+            use_reloader=False)
 
 
 class PrometheusMetricType(Enum):
@@ -200,7 +174,8 @@ class UsersCounter():
             users_count = tlm.get(self.metric_name + "_counter")
             metric+=f"{users_count}\n"
             users = tlm.get(self.metric_name + "_values")
-            
+            metric+=f'# Users: {users}\n'
+
         else:  # default metrics when no tlm have been received
             metric+="0\n"
             users = ""

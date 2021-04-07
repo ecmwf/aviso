@@ -78,7 +78,7 @@ def test_count():
         counter(do_something, args=True) # this will return always only the same
 
     # wait to receive it
-    sleep(2)
+    sleep(5)
     assert received
     udp_server.stop()
 

@@ -56,6 +56,7 @@ class Config:
             "port": 1111,
             "buffer_size": 64 * 1024
         }
+
         # this are the setting for sending the telemetry to a monitoring server like Opsview
         monitor_servers = [{
             "url": "https://localhost",
@@ -63,6 +64,7 @@ class Config:
             "password": "TBD",
             "service_host": "aviso",
         }]
+
         aviso_rest_reporter = {
             "enabled": False,
             "frequency": 1,  # min
@@ -116,8 +118,6 @@ class Config:
             "enabled": False,
             "host": "127.0.0.1",
             "port": 8080,
-            "server_type": "flask",
-            "workers": "1",
             "tlms": {
                 "auth_users_counter": {
                     "retention_window": 24  # h
@@ -256,8 +256,6 @@ class Config:
         if type(pr["enabled"]) is str:
             pr["enabled"] = pr["enabled"].casefold() == "true".casefold()
         assert pr.get("port") is not None, "prometheus_reporter port has not been configured"
-        assert pr.get("server_type") is not None, "prometheus_reporter server_type has not been configured"
-        assert pr.get("workers") is not None, "prometheus_reporter workers has not been configured"
         self._prometheus_reporter = pr
 
     def __str__(self):

@@ -23,9 +23,7 @@ setup(
         'PyYAML>=5.1.2',
         'python-json-logger>=0.1.11',
         'requests>=2.23.0',
-        'gunicorn>=20.0.4',
         'flask>=1.1.2',
-        'six>=1.15.0'
     ],
     entry_points={}
 )

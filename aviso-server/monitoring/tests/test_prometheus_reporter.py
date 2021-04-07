@@ -22,11 +22,11 @@ counter_type = PrometheusMetricType.auth_users_counter.name
 config = {
     "prometheus_reporter": {
         "enabled": True,
-        "port": 8088
+        "port": 8090
     },
     "udp_server": {
         "host": "127.0.0.1",
-        "port": 1111
+        "port": 1120
     }
 }
 
@@ -63,11 +63,9 @@ def receiver():
 def prepost_module():
     # Run the frontend at global level so it will be executed once and accessible to all tests
     reporter = PrometheusReporter(Config(**config), receiver())
-    server = Process(target=reporter.run_server)
-    server.start()
+    reporter.start()
+    time.sleep(3)
     yield
-    server.terminate()
-    server.join()
 
 def test_metrics():
     logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
