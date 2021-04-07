@@ -15,51 +15,46 @@ import re
 
 from .. import logger
 from ..config import Config
-import requests
 
 
-class Reporter(ABC):
+class OpsviewReporter(ABC):
 
     def __init__(self, config: Config, msg_receiver=None):
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-        self.ms_url = config.monitor_server["url"]
-        self.ms_service_host = config.monitor_server["service_host"]
-        self.ms_req_timeout = config.monitor_server["req_timeout"]
-        self.ms_username = config.monitor_server["username"]
-        self.ms_password = config.monitor_server["password"]
+        self.monitor_servers = config.monitor_servers
         self.msg_receiver = msg_receiver
 
-    def ms_authenticate(self):
+    def ms_authenticate(self, m_server):
         """
         This method authenticate to the monitoring server
         :return: token if successfully authenticated, None otherwise
         """
         headers = {"Content-type": "application/json", "Accept": "application/json"}
-        data = {"username": self.ms_username, "password": self.ms_password}
+        data = {"username": m_server['username'], "password": m_server['password']}
         try:
-            resp = requests.post(self.ms_url + "/login", data=json.dumps(data), headers=headers,
-                                 verify=False, timeout=self.ms_req_timeout)
+            resp = requests.post(m_server['url'] + "/login", data=json.dumps(data), headers=headers,
+                                 verify=False, timeout=60)
         except Exception as e:
             logger.error("Not able to authenticate with monitoring server")
             logger.exception(e)
             return None
         if resp.status_code != 200:
-            logger.error(f"Not able to authenticate with monitoring server for {self.ms_username} from {self.ms_url}, "
+            logger.error(f"Not able to authenticate with monitoring server for {m_server['username']} from {m_server['url']}, "
                          f"status {resp.status_code}, {resp.reason}, {resp.content.decode()}")
             return None
 
         return json.loads(resp.text)["token"]
 
-    def submit_metric(self, token, metric):
+    def submit_metric(self, m_server, token, metric):
         """
         This method send the metric passed to the monitoring server
         :param token: authentication token
         :param metric:
         :return: True if successful, False otherwise
         """
-        headers = {"Content-type": "application/json", "X-Opsview-Username": f"{self.ms_username}",
+        headers = {"Content-type": "application/json", "X-Opsview-Username": f"{m_server['username']}",
                    "X-Opsview-Token": token}
-        url = f"{self.ms_url}/detail?hostname={self.ms_service_host}&servicename=Passive Check: {metric.get('name')}"
+        url = f"{m_server['url']}/detail?hostname={m_server['service_host']}&servicename=Passive Check: {metric.get('name')}"
         data = {
             "passive_checks": {"enabled": 1},
             "set_state": {"result": metric.get('status'), "output": f"{metric.get('message')} "}
@@ -69,7 +64,7 @@ class Reporter(ABC):
             for m in metric.get("metrics"):
                 data["set_state"]["output"] += f"{m.get('m_name')}={m.get('m_value')}{m.get('m_unit')}; "
         try:
-            resp = requests.post(url, data=json.dumps(data), headers=headers, verify=False, timeout=self.ms_req_timeout)
+            resp = requests.post(url, data=json.dumps(data), headers=headers, verify=False, timeout=60)
         except Exception as e:
             logger.error("Not able to post metric")
             logger.exception(e)
@@ -97,18 +92,18 @@ class Reporter(ABC):
         metrics = self.process_messages()
 
         # authenticate to monitoring server
-        token = self.ms_authenticate()
-        if token:
-            # send metrics
-            # noinspection PyTypeChecker
-            for m in metrics:
-                self.submit_metric(token, m)
-            logger.debug(f"{self.__class__.__name__} cycle completed")
-            return True
-        else:
-            logger.error(f"{self.__class__.__name__} cycle could not be complected, "
-                         f"login to monitoring server not available")
-            return False
+        for m_server in self.monitor_servers:
+            token = self.ms_authenticate(m_server)
+            if token:
+                # send metrics
+                # noinspection PyTypeChecker
+                for m in metrics:
+                    self.submit_metric(m_server, token, m)
+            else:
+                logger.error(f"{self.__class__.__name__} login to monitoring server not available")
+
+        logger.debug(f"{self.__class__.__name__} cycle completed")
+        return True
 
     def aggregate_time_tlms(tlms):
         """

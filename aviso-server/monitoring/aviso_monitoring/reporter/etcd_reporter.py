@@ -9,12 +9,12 @@
 import requests
 from enum import Enum
 
-from .reporter import Reporter
+from .opsview_reporter import OpsviewReporter
 from ..receiver import ETCD_APP_ID
 from .. import logger
 
 
-class EtcdReporter(Reporter):
+class EtcdReporter(OpsviewReporter):
 
     def __init__(self, config, *args, **kwargs):
         self.etcd_config = config.etcd_reporter
@@ -33,7 +33,7 @@ class EtcdReporter(Reporter):
         logger.debug("Etcd processing metrics...")
 
         # fetch the raw tlms provided by etcd
-        raw_tlms = Reporter.retrive_metrics(self.member_urls, self.req_timeout)
+        raw_tlms = OpsviewReporter.retrive_metrics(self.member_urls, self.req_timeout)
 
         # array of metric to return
         metrics = []
@@ -140,11 +140,12 @@ class StoreSize(EtcdChecker):
         """
         max = -1
         for u in self.member_urls:
-            size = Reporter.read_from_metrics(self.raw_tlms[u], tlm_name)
-            if size:
-                # convert byte in GiB
-                size = round(float(size) / (1024 * 1024 * 1024), 2)
-                max = size if size > max else max
+            if self.raw_tlms[u]:
+                size = OpsviewReporter.read_from_metrics(self.raw_tlms[u], tlm_name)
+                if size:
+                    # convert byte in GiB
+                    size = round(float(size) / (1024 * 1024 * 1024), 2)
+                    max = size if size > max else max
         return max
 
 
@@ -163,19 +164,25 @@ class ClusterStatus(EtcdChecker):
         if cluster_size != len(self.member_urls):
             status = 2
             message = f"Cluster size is {cluster_size}"
+        
+        if status == 0:
+            # now check the health of each member
+            for url in self.member_urls:
+                if not self.health(url):
+                    status = 2
+                    message = f"Cluster member {url} not healthy"
+                    break
 
-        # now check the health of each member
-        for url in self.member_urls:
-            if not self.health(url):
-                status = 2
-                message = f"Cluster member {url} not healthy"
-
-        # check if there is a leader
-        leader = Reporter.read_from_metrics(self.raw_tlms[self.member_urls[0]], "etcd_server_has_leader")
-        if leader != "1":
-            status = 1
-            message = f"Cluster has no leader"
-
+        if status == 0:
+            # check if there is a leader 
+            if self.raw_tlms[self.member_urls[0]] is None:
+                status = 1
+                message = f"Could not retrieve metrics from {self.member_urls[0]}"
+            else:
+                leader = OpsviewReporter.read_from_metrics(self.raw_tlms[self.member_urls[0]], "etcd_server_has_leader")
+                if leader != "1":
+                    status = 1
+                    message = f"Cluster has no leader"
 
         # build metric payload
         m_status = {
@@ -239,7 +246,7 @@ class TotalKeys(EtcdChecker):
         status = 0
         message = f"Total number of keys is nominal"
         # any member should reply the same
-        t_keys = Reporter.read_from_metrics(self.raw_tlms[self.member_urls[0]], "etcd_debugging_mvcc_keys_total")
+        t_keys = OpsviewReporter.read_from_metrics(self.raw_tlms[self.member_urls[0]], "etcd_debugging_mvcc_keys_total")
         if t_keys is None:
             status = 2
             message = f"Cannot retrieve total number of keys"

@@ -16,6 +16,7 @@ from aviso_admin.config import Config
 from aviso_monitoring.reporter.aviso_rest_reporter import AvisoRestReporter
 from aviso_monitoring.reporter.aviso_auth_reporter import AvisoAuthReporter
 from aviso_monitoring.reporter.etcd_reporter import EtcdReporter
+from aviso_monitoring.reporter.prometheus_reporter import PrometheusReporter
 from aviso_monitoring.receiver import Receiver
 from aviso_monitoring.udp_server import UdpServer
 from aviso_monitoring import __version__ as monitoring_version
@@ -55,6 +56,11 @@ def main():
     etcd_reporter = EtcdReporter(config.monitoring, receiver)
     if etcd_reporter.enabled:
         schedule.every(etcd_reporter.frequency).minutes.do(etcd_reporter.run)
+    
+    # launch the prometheus reporter, this expose some tlms to /metrics
+    prometheus_reporter = PrometheusReporter(config.monitoring, receiver)
+    if prometheus_reporter.enabled:
+       prometheus_reporter.run_server() 
 
     # Loop so that the scheduling task keeps on running all time.
     while True:

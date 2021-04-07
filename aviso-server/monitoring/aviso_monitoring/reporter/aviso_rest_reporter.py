@@ -8,11 +8,11 @@
 from enum import Enum
 
 from ..receiver import AVISO_REST_APP_ID
-from .reporter import Reporter
+from .opsview_reporter import OpsviewReporter
 from .. import logger
 
 
-class AvisoRestReporter(Reporter):
+class AvisoRestReporter(OpsviewReporter):
 
     def __init__(self, config, *args, **kwargs):
         aviso_rest_config = config.aviso_rest_reporter
@@ -87,7 +87,7 @@ class ResponseTime(AvisoRestChecker):
             logger.debug(f"Processing {len(new_tlms)} tlms {self.metric_name}...")
 
             # aggregate the telemetries
-            agg_tlm = Reporter.aggregate_time_tlms(new_tlms)
+            agg_tlm = OpsviewReporter.aggregate_time_tlms(new_tlms)
 
             # translate to metric
             metric = self.to_metric(agg_tlm)
@@ -218,11 +218,11 @@ class PodAvailable(AvisoRestChecker):
 
         # fetch the cluster metrics
         if self.metric_server_url:
-            metrics = Reporter.retrive_metrics([self.metric_server_url], self.req_timeout)[self.metric_server_url]
+            metrics = OpsviewReporter.retrive_metrics([self.metric_server_url], self.req_timeout)[self.metric_server_url]
             if metrics: 
                 logger.debug(f"Processing tlm {self.metric_name}...")
 
-                av_pod = Reporter.read_from_metrics(metrics, pattern)
+                av_pod = OpsviewReporter.read_from_metrics(metrics, pattern)
                 if av_pod:
                     av_pod = int(av_pod)
                     if av_pod <= self.critical_t:

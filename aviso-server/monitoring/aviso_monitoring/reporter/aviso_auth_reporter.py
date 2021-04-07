@@ -9,12 +9,12 @@ from enum import Enum
 from datetime import datetime, timedelta
 
 from ..receiver import AVISO_AUTH_APP_ID
-from .reporter import Reporter
+from .opsview_reporter import OpsviewReporter
 from .. import logger
 
 
 
-class AvisoAuthReporter(Reporter):
+class AvisoAuthReporter(OpsviewReporter):
 
     def __init__(self, config, *args, **kwargs):
         aviso_auth_config = config.aviso_auth_reporter
@@ -54,7 +54,6 @@ class AvisoAuthMetricType(Enum):
     """
 
     auth_resp_time = "ResponseTime"
-    auth_users_counter = "UsersCounter"
     auth_error_log = "ErrorLog"
     auth_pod_available = "PodAvailable"
 
@@ -94,12 +93,12 @@ class ResponseTime(AvisoAuthChecker):
                 for sub_tlm in self.sub_tlms:
                     s_tlms = list(filter(lambda tlm: ("_" + sub_tlm in list(tlm.get("telemetry").keys())[0]), new_tlms))
                     # aggregate the telemetries
-                    agg_tlms.append(Reporter.aggregate_time_tlms(s_tlms))
+                    agg_tlms.append(OpsviewReporter.aggregate_time_tlms(s_tlms))
                     # remove these tlms from the main list
                     new_tlms = [tlm for tlm in new_tlms if tlm not in s_tlms]
 
             # process the main tlms
-            agg_tlms.append(Reporter.aggregate_time_tlms(new_tlms))
+            agg_tlms.append(OpsviewReporter.aggregate_time_tlms(new_tlms))
 
             # clear None values from calling aggregate_tlms_stats with empty list
             agg_tlms = [x for x in agg_tlms if x is not None]
@@ -165,86 +164,6 @@ class ResponseTime(AvisoAuthChecker):
         return m_status
 
 
-class UsersCounter(AvisoAuthChecker):
-
-    def __init__(self, *args, **kwargs):
-        self.retention_window = kwargs["retention_window"]
-        super().__init__(*args, **kwargs)
-
-    def metric(self):
-
-        logger.debug(f"Processing tlms {self.metric_name}...")
-
-        assert self.msg_receiver, "Msg receiver is None"
-        # get the tlms but not clear the buffer, we need it for the retention window
-        buffer = self.msg_receiver.extract_incoming_tlms(self.metric_name, clear=False)
-
-        if len(buffer):
-            logger.debug(f"Processing {len(buffer)} tlms {self.metric_name}...")
-
-            # consider only the ones in the retention window and reset the buffer
-            start = datetime.utcnow() - timedelta(hours=self.retention_window)
-            new_tlms = list(filter(lambda tlm: datetime.fromtimestamp(tlm["time"]) > start, buffer))
-            self.msg_receiver.set_incoming_tlms(self.metric_name, new_tlms)
-
-            # aggregate the telemetries
-            agg_tlm = Reporter.aggregate_unique_counter_tlms(new_tlms)
-
-            # translate to metric
-            metric = self.to_metric(agg_tlm)
-        else:
-            # create a default metric
-            metric = self.to_metric()
-
-        logger.debug(f"Processing tlms {self.metric_name} completed")
-
-        return metric
-
-    def to_metric(self, tlm=None):
-        """
-        This method transforms the aggregated counter into a metric
-
-        Args:
-            tlm (Dict): TLM aggregated to evaluate and report
-
-        Returns:
-            Dict: metric
-        """
-        status = 0
-        message = ""
-        if tlm:
-            users_count = tlm.get(self.metric_name + "_counter")
-            message = tlm.get(self.metric_name + "_values")
-
-            # build metric payload
-            m_status = {
-                "name": self.metric_name,
-                "status": status,
-                "message": message,
-                "metrics": [
-                    {
-                        "m_name": self.metric_name,
-                        "m_value": users_count,
-                        "m_unit": "users"
-                    },
-                ]
-            }
-        else:  # default metrics when no tlm have been received
-            m_status = {
-                "name": self.metric_name,
-                "status": status,
-                "message": message,
-                "metrics": [
-                    {
-                        "m_name": self.metric_name,
-                        "m_value": 0,
-                        "m_unit": "users"
-                    },
-                ]
-            }
-        logger.debug(f"{self.metric_name} metric: {m_status}")
-        return m_status
-
 class ErrorLog(AvisoAuthChecker):
     """
     Collect the errors received
@@ -308,11 +227,11 @@ class PodAvailable(AvisoAuthChecker):
 
         # fetch the cluster metrics
         if self.metric_server_url:
-            metrics = Reporter.retrive_metrics([self.metric_server_url], self.req_timeout)[self.metric_server_url]
+            metrics = OpsviewReporter.retrive_metrics([self.metric_server_url], self.req_timeout)[self.metric_server_url]
             if metrics: 
                 logger.debug(f"Processing tlm {self.metric_name}...")
 
-                av_pod = Reporter.read_from_metrics(metrics, pattern)
+                av_pod = OpsviewReporter.read_from_metrics(metrics, pattern)
                 if av_pod:
                     av_pod = int(av_pod)
                     if av_pod <= self.critical_t:

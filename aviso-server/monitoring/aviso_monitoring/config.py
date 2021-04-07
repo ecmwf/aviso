@@ -21,10 +21,11 @@ class Config:
 
     def __init__(self,
                  udp_server=None,
-                 monitor_server=None,
+                 monitor_servers=None,
                  aviso_rest_reporter=None,
                  aviso_auth_reporter=None,
-                 etcd_reporter=None):
+                 etcd_reporter=None,
+                 prometheus_reporter=None):
 
         try:
             # we build the configuration in priority order from the lower to the higher
@@ -34,10 +35,11 @@ class Config:
             Config.deep_update(self._config, self._read_env_variables())
             # add constructor parameters
             self.udp_server = udp_server
-            self.monitor_server = monitor_server
+            self.monitor_servers = monitor_servers
             self.aviso_rest_reporter = aviso_rest_reporter
             self.aviso_auth_reporter = aviso_auth_reporter
             self.etcd_reporter = etcd_reporter
+            self.prometheus_reporter = prometheus_reporter
 
             logger.debug(f"Loading configuration completed")
 
@@ -55,14 +57,12 @@ class Config:
             "buffer_size": 64 * 1024
         }
         # this are the setting for sending the telemetry to a monitoring server like Opsview
-        monitor_server = {
+        monitor_servers = [{
             "url": "https://localhost",
             "username": "TBD",
             "password": "TBD",
             "service_host": "aviso",
-            "req_timeout": 60,  # s
-
-        }
+        }]
         aviso_rest_reporter = {
             "enabled": False,
             "frequency": 1,  # min
@@ -90,9 +90,6 @@ class Config:
                     "critical_t": 20,  # s
                     "sub_tlms": []
                 },
-                "auth_users_counter": {
-                    "retention_window": 24  # h
-                },
                 "auth_pod_available":{
                     "warning_t": 2,  # pods
                     "critical_t": 1,  # pods
@@ -115,13 +112,27 @@ class Config:
             }
         }
 
+        prometheus_reporter = {
+            "enabled": False,
+            "host": "127.0.0.1",
+            "port": 8080,
+            "server_type": "flask",
+            "workers": "1",
+            "tlms": {
+                "auth_users_counter": {
+                    "retention_window": 24  # h
+                },
+            }
+        }
+
         # main config
         config = {}
         config["udp_server"] = udp_server
-        config["monitor_server"] = monitor_server
+        config["monitor_servers"] = monitor_servers
         config["aviso_rest_reporter"] = aviso_rest_reporter
         config["aviso_auth_reporter"] = aviso_auth_reporter
         config["etcd_reporter"] = etcd_reporter
+        config["prometheus_reporter"] = prometheus_reporter
         return config
 
     def _read_env_variables(self) -> Dict:
@@ -148,24 +159,22 @@ class Config:
         self._udp_server = u
 
     @property
-    def monitor_server(self):
-        return self._monitor_server
+    def monitor_servers(self):
+        return self._monitor_servers
 
-    @monitor_server.setter
-    def monitor_server(self, monitor_server):
-        m = self._config.get("monitor_server")
-        if monitor_server is not None and m is not None:
-            Config.deep_update(m, monitor_server)
-        elif monitor_server is not None:
-            m = monitor_server
+    @monitor_servers.setter
+    def monitor_servers(self, monitor_servers):
+        m = self._config.get("monitor_servers")
+        if monitor_servers is not None:
+            m = monitor_servers
         # verify is valid
-        assert m is not None, "monitor_server has not been configured"
-        assert m.get("url") is not None, "monitor_server url has not been configured"
-        assert m.get("username") is not None, "monitor_server username has not been configured"
-        assert m.get("password") is not None, "monitor_server password has not been configured"
-        assert m.get("service_host") is not None, "monitor_server service_host has not been configured"
-        assert m.get("req_timeout") is not None, "monitor_server req_timeout has not been configured"
-        self._monitor_server = m
+        assert m is not None, "monitor_servers has not been configured"
+        for server in m:
+            assert server.get("url") is not None, "monitor_server url has not been configured"
+            assert server.get("username") is not None, "monitor_server username has not been configured"
+            assert server.get("password") is not None, "monitor_server password has not been configured"
+            assert server.get("service_host") is not None, "monitor_server service_host has not been configured"
+        self._monitor_servers = m
 
     @property
     def aviso_rest_reporter(self):
@@ -229,13 +238,36 @@ class Config:
         assert e.get("req_timeout") is not None, "etcd_reporter req_timeout has not been configured"
         self._etcd_reporter = e
 
+    @property
+    def prometheus_reporter(self):
+        return self._prometheus_reporter
+
+    @prometheus_reporter.setter
+    def prometheus_reporter(self, prometheus_reporter):
+        pr = self._config.get("prometheus_reporter")
+        if prometheus_reporter is not None and pr is not None:
+            Config.deep_update(pr, prometheus_reporter)
+        elif prometheus_reporter is not None:
+            pr = prometheus_reporter
+        # verify is valid
+        assert pr is not None, "prometheus_reporter has not been configured"
+        assert pr.get("host") is not None, "prometheus_reporter host has not been configured"
+        assert pr.get("enabled") is not None, "prometheus_reporter enabled has not been configured"
+        if type(pr["enabled"]) is str:
+            pr["enabled"] = pr["enabled"].casefold() == "true".casefold()
+        assert pr.get("port") is not None, "prometheus_reporter port has not been configured"
+        assert pr.get("server_type") is not None, "prometheus_reporter server_type has not been configured"
+        assert pr.get("workers") is not None, "prometheus_reporter workers has not been configured"
+        self._prometheus_reporter = pr
+
     def __str__(self):
         config_string = (
                 f"udp_server: {self.udp_server}" +
-                f", monitor_server: {self.monitor_server}" +
+                f", monitor_servers: {self.monitor_servers}" +
                 f", aviso_rest_reporter: {self.aviso_rest_reporter}" +
                 f", aviso_auth_reporter: {self.aviso_auth_reporter}" +
-                f", etcd_reporter: {self.etcd_reporter}"
+                f", etcd_reporter: {self.etcd_reporter}" +
+                f", prometheus_reporter: {self.prometheus_reporter}"
         )
         return config_string
 

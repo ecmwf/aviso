@@ -20,13 +20,12 @@ config = {
         "member_urls": ["http://localhost:2379"],
     },
     # this are the setting for sending the telemetry to a monitoring server like Opsview
-    "monitor_server": {
+    "monitor_servers": [{
         "url": "https://monitoring-dev.ecmwf.int/rest",
         "username": "TBD",
         "password": "TBD",
-        "service_host": "aviso",
-        "req_timeout": 60,  # seconds
-    },
+        "service_host": "aviso"
+    }],
     "udp_server": {
         "host": "127.0.0.1",
         "port": 1115
