@@ -210,7 +210,7 @@ class PodAvailable(AvisoRestChecker):
 
 
     def metric(self):
-        pattern = 'kube_deployment_status_replicas{namespace="aviso",deployment="aviso-rest"}'
+        pattern = 'kube_deployment_status_replicas{namespace="aviso",deployment="aviso-rest-\w+"}'
         # defaults
         status = 0
         message = f"All pods available"

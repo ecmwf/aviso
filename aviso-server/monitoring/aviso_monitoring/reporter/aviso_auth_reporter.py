@@ -219,7 +219,7 @@ class PodAvailable(AvisoAuthChecker):
 
 
     def metric(self):
-        pattern = 'kube_deployment_status_replicas{namespace="aviso",deployment="aviso-auth"}'
+        pattern = 'kube_deployment_status_replicas{namespace="aviso",deployment="aviso-auth-\w+"}'
         # defaults
         status = 0
         message = "All pods available"
