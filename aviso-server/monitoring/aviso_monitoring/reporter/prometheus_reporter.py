@@ -35,7 +35,8 @@ class PrometheusReporter(Thread):
         self.msg_receiver = msg_receiver
         # run in the background
         self.setDaemon(True)
-
+        log = logging.getLogger('werkzeug')
+        log.setLevel(logging.ERROR)
         self.handler = self.create_handler()
         
 
