@@ -9,9 +9,9 @@
 from . import logger
 import json
 
-ETCD_APP_ID="aviso-etcd"
-AVISO_AUTH_APP_ID="aviso-auth"
-AVISO_REST_APP_ID="aviso-rest"
+ETCD_APP_NAME="etcd"
+AVISO_AUTH_APP_NAME="aviso-auth"
+AVISO_REST_APP_NAME="aviso-rest"
 
 class Receiver:
     """
@@ -21,7 +21,7 @@ class Receiver:
     def __init__(self) -> None:
         # setup the income telemetry lists
         self._incoming_tlms = {}
-        self._incoming_errors = {ETCD_APP_ID:[], AVISO_AUTH_APP_ID: [], AVISO_REST_APP_ID:[]}
+        self._incoming_errors = {ETCD_APP_NAME:[], AVISO_AUTH_APP_NAME: [], AVISO_REST_APP_NAME:[]}
 
     def process_message(self, message):
         """
@@ -33,18 +33,19 @@ class Receiver:
             bool: True if successfully parsed, False otherwise
         """
         # first check if it's a log message
-        if ETCD_APP_ID in message:
-            self._incoming_errors[ETCD_APP_ID].append(message)
-            logger.debug(f"{ETCD_APP_ID} log received")
-            return True
-        elif '"hostname": "'+ AVISO_AUTH_APP_ID in message and '"telemetry_type"' not in message:
-            self._incoming_errors[AVISO_AUTH_APP_ID].append(message)
-            logger.debug(f"{AVISO_AUTH_APP_ID} log received")
-            return True
-        elif '"hostname": "'+ AVISO_REST_APP_ID in message and '"telemetry_type"' not in message:
-            self._incoming_errors[AVISO_REST_APP_ID].append(message)
-            logger.debug(f"{AVISO_REST_APP_ID} log received")
-            return True  
+        if message.startswith("<"):  # this is the PRI part of a syslog message
+            if ETCD_APP_NAME in message:
+                self._incoming_errors[ETCD_APP_NAME].append(message)
+                logger.debug(f"{ETCD_APP_NAME} log received")
+                return True
+            elif AVISO_AUTH_APP_NAME in message:
+                self._incoming_errors[AVISO_AUTH_APP_NAME].append(message)
+                logger.debug(f"{AVISO_AUTH_APP_NAME} log received")
+                return True
+            elif AVISO_REST_APP_NAME in message:
+                self._incoming_errors[AVISO_REST_APP_NAME].append(message)
+                logger.debug(f"{AVISO_REST_APP_NAME} log received")
+                return True  
         else:
             # validate telemetry message
             try:

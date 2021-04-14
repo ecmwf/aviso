@@ -17,6 +17,7 @@ from threading import Thread
 
 from .. import logger
 from ..config import Config
+from .aviso_auth_reporter import AvisoAuthMetricType
 
 class PrometheusReporter(Thread):
     """
@@ -62,7 +63,7 @@ class PrometheusReporter(Thread):
             # check for each tlm
             for tlm_type in self.tlms.keys():
                 # create the relative metric checker
-                m_type = PrometheusMetricType[tlm_type.lower()]
+                m_type = AvisoAuthMetricType[tlm_type.lower()]
                 checker = eval(m_type.value + "(tlm_type, msg_receiver=self.msg_receiver, **self.tlms[tlm_type])")
 
                 # retrieve metric
@@ -115,13 +116,7 @@ class PrometheusReporter(Thread):
             host=self.host,
             port=self.port, 
             use_reloader=False)
-
-
-class PrometheusMetricType(Enum):
-    """
-    This Enum describes the various metrics that can be used and link the name to the relative checker
-    """
-    auth_users_counter = "UsersCounter"
+    
 
 class UsersCounter():
 

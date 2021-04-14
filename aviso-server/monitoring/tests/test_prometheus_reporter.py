@@ -14,11 +14,12 @@ from multiprocessing import Process
 import requests
 
 from aviso_monitoring import logger
-from aviso_monitoring.reporter.prometheus_reporter import PrometheusReporter, PrometheusMetricType
-from aviso_monitoring.receiver import Receiver, AVISO_AUTH_APP_ID
+from aviso_monitoring.reporter.prometheus_reporter import PrometheusReporter
+from aviso_monitoring.reporter.aviso_auth_reporter import AvisoAuthMetricType
+from aviso_monitoring.receiver import Receiver, AVISO_AUTH_APP_NAME
 from aviso_monitoring.config import Config
 
-counter_type = PrometheusMetricType.auth_users_counter.name
+counter_type = AvisoAuthMetricType.auth_users_counter.name
 config = {
     "prometheus_reporter": {
         "enabled": True,
@@ -72,4 +73,4 @@ def test_metrics():
     conf = Config(**config)
     resp = requests.get(f"http://{conf.prometheus_reporter['host']}:{conf.prometheus_reporter['port']}/metrics")
     assert resp.status_code == 200
-    assert resp.text.endswith("2\n")
+    assert " 2\n" in resp.text

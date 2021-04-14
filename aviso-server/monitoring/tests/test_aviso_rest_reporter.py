@@ -10,7 +10,7 @@ import os
 import datetime
 from aviso_monitoring import logger
 from aviso_monitoring.reporter.aviso_rest_reporter import AvisoRestReporter, AvisoRestMetricType
-from aviso_monitoring.receiver import Receiver, AVISO_REST_APP_ID
+from aviso_monitoring.receiver import Receiver, AVISO_REST_APP_NAME
 from aviso_monitoring.config import Config
 
 config = {
@@ -58,11 +58,11 @@ def receiver():
         }}
     ]
 
-    err_rest_log = 'Mar  9 07:18:34 10-44-0-29 {"asctime": "2021-03-09 07:18:34,385", "hostname": "aviso-rest-blue-56698cb9bc-4s2z7", "process": 42, "thread": 140026491313032, "name": "root", "filename": "frontend.py", "lineno": 73, "levelname": "ERROR", "message": "Value tc3_lace is not valid"}'
+    err_rest_log = '<191>1 2021-04-12T09:19:12.252093+00:00 aviso-rest-green-9c975dc86-mvplw aviso-rest 58 - [origin software="aviso"]  {"asctime": "2021-04-12 09:19:12,252", "hostname": "aviso-rest-green-9c975dc86-mvplw", "process": 58, "thread": 139943263611624, "name": "aviso-monitoring", "filename": "transmitter.py", "lineno": 74, "levelname": "ERROR", "message": "Telemetry transmitter cycle completed"}'
 
     receiver = Receiver()
     receiver._incoming_tlms[tlm_type] = tlms
-    receiver._incoming_errors[AVISO_REST_APP_ID] = [err_rest_log]
+    receiver._incoming_errors[AVISO_REST_APP_NAME] = [err_rest_log]
     return receiver
 
 

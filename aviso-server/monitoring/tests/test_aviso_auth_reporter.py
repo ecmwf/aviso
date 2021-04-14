@@ -10,7 +10,7 @@ import os
 import datetime
 from aviso_monitoring import logger
 from aviso_monitoring.reporter.aviso_auth_reporter import AvisoAuthReporter, AvisoAuthMetricType
-from aviso_monitoring.receiver import Receiver, AVISO_AUTH_APP_ID
+from aviso_monitoring.receiver import Receiver, AVISO_AUTH_APP_NAME
 from aviso_monitoring.config import Config
 
 time_type = AvisoAuthMetricType.auth_resp_time.name
@@ -112,11 +112,11 @@ def receiver():
         }
     }
     
-    err_auth_log = 'Mar  9 07:18:34 10-44-0-29 {"asctime": "2021-03-09 07:18:34,385", "hostname": "aviso-auth-blue-56698cb9bc-4s2z7", "process": 42, "thread": 140026491313032, "name": "root", "filename": "frontend.py", "lineno": 73, "levelname": "ERROR", "message": "Value tc3_lace is not valid"}'
+    err_auth_log = '<191>1 2021-04-12T09:00:08.931717+00:00 aviso-auth-green-7f6d59848f-cg6zv aviso-auth 49 - [origin software="aviso"]  {"asctime": "2021-04-12 09:00:08,931", "hostname": "aviso-auth-green-7f6d59848f-cg6zv", "process": 49, "thread": 140428749499272, "name": "aviso-monitoring", "filename": "time_collector.py", "lineno": 38, "levelname": "ERROR", "message": "Time collected"}'
 
     receiver = Receiver()
     receiver._incoming_tlms[time_type] = [time_tlm1, time_tlm2, time_tlm1t1, time_tlm2t1, time_tlm1t2, time_tlm2t2]
-    receiver._incoming_errors[AVISO_AUTH_APP_ID] = [err_auth_log]
+    receiver._incoming_errors[AVISO_AUTH_APP_NAME] = [err_auth_log]
     return receiver
 
 

@@ -7,8 +7,10 @@
 # nor does it submit to any jurisdiction.
 
 from setuptools import setup, find_packages
-
+import pathlib
 from aviso_rest import __version__
+
+INSTALL_REQUIRES = (pathlib.Path(__file__).parent / "requirements.txt").read_text().splitlines()
 
 setup(
     name='aviso-rest',
@@ -20,18 +22,7 @@ setup(
     packages=find_packages(),
     zip_safe=False,
     include_package_data=True,
-    install_requires=[
-        'Click>=7.0',
-        'etcd3>=0.11.1',
-        'PyYAML>=5.1.2',
-        'python-json-logger>=0.1.11',
-        'requests>=2.23.0',
-        'parse>=1.12.1',
-        'gunicorn>=20.0.4',
-        'flask>=1.1.2',
-        'pyinotify>=0.9.6',
-        'cloudevents>=1.2.0'
-    ],
+    install_requires=INSTALL_REQUIRES,
     entry_points={
         'console_scripts': [
             'aviso-rest=aviso_rest.frontend:main'

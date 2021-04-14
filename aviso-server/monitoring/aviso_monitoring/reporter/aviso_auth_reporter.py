@@ -8,7 +8,7 @@
 from enum import Enum
 from datetime import datetime, timedelta
 
-from ..receiver import AVISO_AUTH_APP_ID
+from ..receiver import AVISO_AUTH_APP_NAME
 from .opsview_reporter import OpsviewReporter
 from .. import logger
 
@@ -56,6 +56,7 @@ class AvisoAuthMetricType(Enum):
     auth_resp_time = "ResponseTime"
     auth_error_log = "ErrorLog"
     auth_pod_available = "PodAvailable"
+    auth_users_counter = "UsersCounter" # this is a Prometheus checker
 
 
 class AvisoAuthChecker:
@@ -176,14 +177,10 @@ class ErrorLog(AvisoAuthChecker):
 
         # fetch the error log
         assert self.msg_receiver, "Msg receiver is None"
-        new_errs = self.msg_receiver.extract_incoming_errors(AVISO_AUTH_APP_ID)
+        new_errs = self.msg_receiver.extract_incoming_errors(AVISO_AUTH_APP_NAME)
 
         if len(new_errs):
             logger.debug(f"Processing {len(new_errs)} tlms {self.metric_name}...")
-
-            # remove the header bits if any
-            header = '[meta sequenceId="1"] '
-            new_errs = list(map(lambda log: log.split(header,1)[1] if header in log else log, new_errs))
 
             # select warnings and errors
             warns = list(filter(lambda log: ("WARNING" in log), new_errs))

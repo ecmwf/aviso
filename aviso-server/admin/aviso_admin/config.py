@@ -172,7 +172,7 @@ class Config:
         if logging_conf_path is not None:
             try:
                 with open(logging_conf_path, "r") as f:
-                    log_config = yaml.safe_load(f.read())
+                    log_config = yaml.load(f.read(), loader=yaml.Loader)
             except Exception as e:
                 logger.warning(f"Not able to load the logging configuration, exception: {type(e)} {e}")
                 logger.debug("", exc_info=True)
@@ -180,7 +180,7 @@ class Config:
         elif "AVISO_ADMIN_LOG" in os.environ:
             try:
                 with open(os.environ["AVISO_ADMIN_LOG"], "r") as f:
-                    log_config = yaml.safe_load(f.read())
+                    log_config = yaml.load(f.read(), loader=yaml.Loader)
             except Exception as e:
                 logger.warning(f"Not able to load the logging configuration, exception: {type(e)} {e}")
                 logger.debug("", exc_info=True)
@@ -324,7 +324,7 @@ class Config:
 
 
 # class to allow yaml loader to replace ~ with HOME directory
-class HomeFolderLoader(yaml.SafeLoader):
+class HomeFolderLoader(yaml.Loader):
     path_matcher = re.compile('~')
 
     @staticmethod

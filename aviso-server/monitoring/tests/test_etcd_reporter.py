@@ -11,7 +11,7 @@ import os
 from aviso_monitoring import logger
 from aviso_monitoring.config import Config
 from aviso_monitoring.reporter.etcd_reporter import EtcdReporter
-from aviso_monitoring.receiver import Receiver, ETCD_APP_ID
+from aviso_monitoring.receiver import Receiver, ETCD_APP_NAME
 
 tlm_type = "test2"  # to be defined
 config = {
@@ -33,12 +33,12 @@ config = {
 }
 
 def receiver():
-    warn_etcd_log = '<181>1 2021-03-09T07:36:55+00:00 aviso-etcd-0 2021-03-09 - - [meta sequenceId="1"] 07:36:55.088752 W | etcdmain: no data-dir provided, using default data-dir ./default.etcd'
+    warn_etcd_log = '<189>1 2021-04-13T09:02:09+00:00 aviso-etcd-4-7cc86d75b4-zrtnf etcd - - [origin enterpriseId="7464" software="aviso"][meta sequenceId="1"] 09:02:09.076897 W | etcdmain: no data-dir provided, using default data-dir ./default.etcd'
 
-    err_etcd_log = '<181>1 2021-03-09T07:36:55+00:00 aviso-etcd-0 2021-03-09 - - [meta sequenceId="1"] 2021-01-25 15:12:03.354688 E | etcdserver: publish error: etcdserver: request timed out, possibly due to connection lost'
+    err_etcd_log = '<189>1 2021-04-13T09:02:09+00:00 aviso-etcd-4-7cc86d75b4-zrtnf etcd - - [origin enterpriseId="7464" software="aviso"][meta sequenceId="1"] 09:02:09.076897 E | etcdserver: publish error: etcdserver: request timed out, possibly due to connection lost'
 
     receiver = Receiver()
-    receiver._incoming_errors[ETCD_APP_ID] = [warn_etcd_log, err_etcd_log]
+    receiver._incoming_errors[ETCD_APP_NAME] = [warn_etcd_log, err_etcd_log]
     return receiver
 
 # you need to set the connection to opsview to run this test and select a tml_type associated to a passive check

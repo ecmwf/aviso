@@ -8,6 +8,9 @@
 
 from aviso_admin import __version__
 from setuptools import setup, find_packages
+import pathlib
+
+INSTALL_REQUIRES = (pathlib.Path(__file__).parent / "requirements.txt").read_text().splitlines()
 
 setup(
     name='aviso-admin',
@@ -18,12 +21,7 @@ setup(
     packages=find_packages(),
     zip_safe=False,
     include_package_data=True,
-    install_requires=[
-        'PyYAML>=5.1.2',
-        'python-json-logger>=0.1.11',
-        'requests>=2.23.0',
-        'schedule>=0.6.0'
-    ],
+    install_requires=INSTALL_REQUIRES,
     entry_points={
         'console_scripts': [
             'aviso-admin=aviso_admin.admin:main'
