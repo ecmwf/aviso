@@ -203,7 +203,7 @@ class Config:
         if logging_conf_path is not None:
             try:
                 with open(logging_conf_path, "r") as f:
-                    log_config = yaml.load(f.read(), loader=yaml.Loader)
+                    log_config = yaml.load(f.read(), Loader=yaml.Loader)
             except Exception as e:
                 logger.warning(f"Not able to load the logging configuration, exception: {type(e)} {e}")
                 logger.debug("", exc_info=True)
@@ -211,7 +211,7 @@ class Config:
         elif "AVISO_LOG" in os.environ:
             try:
                 with open(os.environ["AVISO_LOG"], "r") as f:
-                    log_config = yaml.load(f.read(), loader=yaml.Loader)
+                    log_config = yaml.load(f.read(), Loader=yaml.Loader)
             except Exception as e:
                 logger.warning(f"Not able to load the logging configuration, exception: {type(e)} {e}")
                 logger.debug("", exc_info=True)
