@@ -233,3 +233,26 @@ def test_no_backend_key():
     resp = requests.post(frontend_url, json=body, headers={"Authorization": f"EmailKey {valid_email()}:{valid_token()}"},
                          timeout=configuration.backend['req_timeout'])
     assert resp.status_code == 400
+
+def test_bad_route():
+    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    key = "/ec/diss/SCL"
+    # encode key
+    encoded_key = Authoriser._encode_to_str_base64(key)
+    range_end = Authoriser._encode_to_str_base64(str(Authoriser._incr_last_byte(key), "utf-8"))
+    # create the body for the get range on the etcd sever
+    body = {
+        "key": encoded_key,
+        "range_end": range_end,
+        "limit": 100,
+        "sort_order": "DESCEND",
+        "sort_target": "KEY",
+        "keys_only": False,
+        "revision": None,
+        "min_mod_revision": None,
+        "max_mod_revision": None
+    }
+    # make the call
+    resp = requests.post(frontend_url[:-3], json=body, headers={"Authorization": f"EmailKey {valid_email()}:{valid_token()}"},
+                         timeout=configuration.backend['req_timeout'])
+    assert resp.status_code == 404

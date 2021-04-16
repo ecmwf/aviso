@@ -14,7 +14,7 @@ from aviso_monitoring.collector.time_collector import TimeCollector
 from aviso_monitoring.reporter.aviso_auth_reporter import AvisoAuthMetricType
 
 from . import logger
-from .custom_exceptions import AuthenticationException, InternalSystemError, ServiceUnavailableException
+from .custom_exceptions import TokenNotValidException, InternalSystemError, AuthenticationUnavailableException
 
 MAX_N_TRIES = 25
 
@@ -53,12 +53,12 @@ class Authenticator:
         :param request:
         :return:
         - the username if token is valid
-        - AuthenticationException if the server returns 403
+        - TokenNotValidException if the server returns 403
         - InternalSystemError for all the other cases
         """
         if request.environ is None or request.environ.get("HTTP_AUTHORIZATION") is None:
             logger.debug(f"Authorization header absent {request.environ}")
-            raise AuthenticationException("Authorization header not found")
+            raise TokenNotValidException("Authorization header not found")
 
         # validate the authorization header
         auth_header = request.environ.get("HTTP_AUTHORIZATION")
@@ -67,7 +67,7 @@ class Authenticator:
             auth_email, auth_token = credentials.split(':', 1)
         except ValueError:
             logger.debug(f"Authorization header not recognised {auth_header}")
-            raise AuthenticationException(
+            raise TokenNotValidException(
                 "Could not read authorization header, expected 'Authorization: <email>:<key>'")
 
         # validate the token
@@ -76,7 +76,7 @@ class Authenticator:
         # validate the email
         if auth_email.casefold() != email.casefold():
             logger.debug(f"Emails not matching {auth_email.casefold()}, {email.casefold()}")
-            raise AuthenticationException("Invalid email.")
+            raise TokenNotValidException("Invalid email associate to the token.")
 
         return username
 
@@ -87,7 +87,6 @@ class Authenticator:
         :param token:
         :return:
         - the username and email if token is valid
-        - AuthenticationException if the server returns 403
         - InternalSystemError for all the other cases
         """
         logger.debug(f"Request authentication for token {token}")
@@ -122,6 +121,8 @@ class Authenticator:
         This methods helps in cases of 429, too many requests at the same time, by spacing in time the requests
         :param token:
         :return: response to token validation
+        - TokenNotValidException if the server returns 403
+        - AuthenticationUnavailableException if unreachable
         """
         n_tries = 0
         while n_tries < MAX_N_TRIES:
@@ -139,16 +140,16 @@ class Authenticator:
                 message = f'Not able to authenticate token {token} from {self.url}, {str(errh)}'
                 if resp.status_code == 403:
                     logger.debug(message)
-                    raise AuthenticationException(f'Token {token} not valid')
+                    raise TokenNotValidException(f'Token {token} not valid')
                 if resp.status_code == 408 or ( resp.status_code >= 500 and resp.status_code < 600):
                     logger.warning(message)
-                    raise ServiceUnavailableException(f'Error in authenticating token {token}')
+                    raise AuthenticationUnavailableException(f'Error in authenticating token {token}')
                 else:
                     logger.error(message)
                     raise InternalSystemError(f'Error in authenticating token {token}, please contact the support team') 
             except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as err:
                 logger.warning(f'Not able to authenticate token {token}, {str(err)}')
-                raise ServiceUnavailableException(f'Error in authenticating token {token}')
+                raise AuthenticationUnavailableException(f'Error in authenticating token {token}')
             except Exception as e:
                 logger.exception(e)
                 raise InternalSystemError(f'Error in authenticating token {token}, please contact the support team')

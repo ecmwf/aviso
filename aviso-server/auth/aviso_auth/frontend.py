@@ -13,6 +13,7 @@ from flask import Response
 from flask import request
 from flask_caching import Cache
 from gunicorn import glogging
+import werkzeug.exceptions
 from six import iteritems
 import gunicorn.app.base
 from aviso_auth import logger, __version__
@@ -20,8 +21,7 @@ from aviso_auth.authentication import Authenticator
 from aviso_auth.authorisation import Authoriser
 from aviso_auth.backend_adapter import BackendAdapter
 from aviso_auth.config import Config
-from aviso_auth.custom_exceptions import InvalidInputError, NotFoundException, InternalSystemError, \
-    AuthenticationException, ForbiddenRequestException, ServiceUnavailableException
+import aviso_auth.custom_exceptions as custom
 from aviso_monitoring.collector.time_collector import TimeCollector
 from aviso_monitoring import __version__ as monitoring_version
 from aviso_monitoring.collector.count_collector import UniqueCountCollector
@@ -64,48 +64,59 @@ class Frontend:
                 h.update(header)
             return json.dumps({"message": str(m)}), code, h
 
-        @handler.errorhandler(InvalidInputError)
-        def bad_request(e):
+        @handler.errorhandler(custom.InvalidInputError)
+        def invalid_input(e):
             logger.debug(f"Request malformed: {e}")
             return json_response(e, 400)
 
-        @handler.errorhandler(AuthenticationException)
-        def not_authenticated(e):
+        @handler.errorhandler(custom.TokenNotValidException)
+        def token_not_valid(e):
             logger.debug(f"Authentication failed: {e}")
             return json_response(e, 401, self.authenticator.UNAUTHORISED_RESPONSE_HEADER)
 
-        @handler.errorhandler(ForbiddenRequestException)
-        def forbidden_request(e):
-            logger.debug(f"Request not authorised: {e}")
+        @handler.errorhandler(custom.ForbiddenDestinationException)
+        def forbidden_destination(e):
+            logger.debug(f"Destination not authorised: {e}")
             return json_response(e, 403)
 
-        @handler.errorhandler(NotFoundException)
-        def not_found(e):
+        @handler.errorhandler(custom.UserNotFoundException)
+        def user_not_found(e):
             return json_response(e, 404)
 
-        @handler.errorhandler(InternalSystemError)
+        @handler.errorhandler(custom.InternalSystemError)
         def internal_error(e):
             return json_response(e, 500)
 
-        @handler.errorhandler(ServiceUnavailableException)
-        def service_unavailable(e):
+        @handler.errorhandler(custom.AuthenticationUnavailableException)
+        def authentication_unavailable(e):
             return json_response("Service currently unavailable, please try again later", 503, {"Retry-After": 30})
+
+        @handler.errorhandler(custom.AuthorisationUnavailableException)
+        def authorisation_unavailable(e):
+            return authentication_unavailable(e) # same behaviour
+        
+        @handler.errorhandler(custom.BackendUnavailableException)
+        def backend_unavailable(e):
+            return authentication_unavailable(e) # same behaviour
 
         @handler.errorhandler(Exception)
         def default_error_handler(e):
             logging.exception(str(e))
-            return json_response("Internal System Error, please contact the support team", 500)
+            # leave the HTTP errors raised by flask on their own
+            if issubclass(type(e), werkzeug.exceptions.HTTPException):
+                return e
+            else:
+                return json_response("Internal System Error, please contact the support team", 500)
 
         @handler.route(self.config.backend['route'], methods=["POST"])
         def root():
             logger.info(f"New request received: {request.data}")
-            try:
-                resp_content = timed_process_request()
+            
+            resp_content = timed_process_request()
 
-                # forward back the response
-                return Response(resp_content)
-            except ForbiddenRequestException:
-                return forbidden_request("User not allowed to access to the resource")
+            # forward back the response
+            return Response(resp_content)
+
 
         def process_request():
             # authenticate request and count the users
@@ -115,7 +126,7 @@ class Frontend:
             # authorise request
             valid = self.authoriser.is_authorised(username, request)
             if not valid:
-                raise ForbiddenRequestException()
+                raise custom.ForbiddenDestinationException("User not allowed to access to the resource")
             logger.debug("Request successfully authorised")
 
             # forward request to backend

@@ -11,7 +11,7 @@ from aviso_monitoring.collector.time_collector import TimeCollector
 from aviso_monitoring.reporter.aviso_auth_reporter import AvisoAuthMetricType
 
 from . import logger
-from .custom_exceptions import InvalidInputError, InternalSystemError, ServiceUnavailableException
+from .custom_exceptions import InvalidInputError, InternalSystemError, BackendUnavailableException
 
 
 class BackendAdapter:
@@ -53,13 +53,13 @@ class BackendAdapter:
                 raise InvalidInputError("History not available")
             if resp.status_code == 408 or ( resp.status_code >= 500 and resp.status_code < 600):
                 logger.warning(message)
-                raise ServiceUnavailableException(f'Error connecting to backend')
+                raise BackendUnavailableException(f'Error connecting to backend')
             else:
                 logger.error(message)
                 raise InternalSystemError(f'Error connecting to backend, please contact the support team') 
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as err:
             logger.warning(f'Error connecting to backend {self.url}, {str(err)}')
-            raise ServiceUnavailableException(f'Error connecting to backend')
+            raise BackendUnavailableException(f'Error connecting to backend')
         except Exception as e:
             logger.exception(e)
             raise InternalSystemError(f'Error connecting to backend, please contact the support team')

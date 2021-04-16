@@ -14,7 +14,7 @@ from aviso_monitoring.reporter.aviso_auth_reporter import AvisoAuthMetricType
 from requests.auth import HTTPBasicAuth
 
 from . import logger
-from .custom_exceptions import InternalSystemError, InvalidInputError, NotFoundException, ServiceUnavailableException
+from .custom_exceptions import InternalSystemError, InvalidInputError, UserNotFoundException, AuthorisationUnavailableException
 
 
 class Authoriser:
@@ -55,6 +55,8 @@ class Authoriser:
         :param username:
         :return:
         - the list of allowed destinations associated to this username if valid
+        - UserNotFoundException if the user is not registred in ECPDS
+        - AuthorisationUnavailableException if the ECPDS server is unreachable
         - InternalSystemError otherwise
         """
         logger.debug(f"Request allowed destinations for username {username}")
@@ -67,13 +69,13 @@ class Authoriser:
             message = f'Not able to retrieve destinations for {username} from {self.url}, {str(errh)}'
             if resp.status_code == 408 or ( resp.status_code >= 500 and resp.status_code < 600):
                 logger.warning(message)
-                raise ServiceUnavailableException(f'Error in retrieving destinations for {username}')
+                raise AuthorisationUnavailableException(f'Error in retrieving destinations for {username}')
             else:
                 logger.error(message)
                 raise InternalSystemError(f'Error in retrieving destinations for {username}, please contact the support team') 
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as err:
             logger.warning(f'Not able to retrieve destinations for {username} from {self.url}, {str(err)}')
-            raise ServiceUnavailableException(f'Error in retrieving destinations for {username}')
+            raise AuthorisationUnavailableException(f'Error in retrieving destinations for {username}')
         except Exception as e:
             logger.exception(e)
             raise InternalSystemError(f'Error in retrieving destinations for {username}, please contact the support team')
@@ -91,7 +93,7 @@ class Authoriser:
             message = f'Error in retrieving destinations for {username}'
             if f"User {username} not found" in resp_body.get("error"):
                message += f', {resp_body.get("error")}'
-               raise NotFoundException(message)
+               raise UserNotFoundException(message)
             else:
                 message += f', please contact the support team'
                 raise InternalSystemError(message)
@@ -111,6 +113,8 @@ class Authoriser:
         :return:
         - True if authorised
         - False if not authorised
+        - UserNotFoundException if the user is not registred in ECPDS
+        - AuthorisationUnavailableException if the ECPDS server is unreachable
         - InternalSystemError otherwise
         """
         # we expect only JSON body
@@ -137,6 +141,8 @@ class Authoriser:
         :return:
         - True if authorised
         - False if not authorised
+        - UserNotFoundException if the user is not registred in ECPDS
+        - AuthorisationUnavailableException if the ECPDS server is unreachable
         - InternalSystemError otherwise
         """
         # first check if we are accessing to a open key space, open to everyone

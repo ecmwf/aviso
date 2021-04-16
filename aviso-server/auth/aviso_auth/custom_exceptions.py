@@ -11,11 +11,11 @@ class InvalidInputError(Exception):
     pass
 
 
-class ForbiddenRequestException(Exception):
+class ForbiddenDestinationException(Exception):
     pass
 
 
-class AuthenticationException(Exception):
+class TokenNotValidException(Exception):
     pass
 
 
@@ -23,8 +23,14 @@ class InternalSystemError(Exception):
     pass
 
 
-class NotFoundException(Exception):
+class UserNotFoundException(Exception):
     pass
 
-class ServiceUnavailableException(Exception):
+class AuthenticationUnavailableException(Exception):
+    pass
+
+class AuthorisationUnavailableException(Exception):
+    pass
+
+class BackendUnavailableException(Exception):
     pass

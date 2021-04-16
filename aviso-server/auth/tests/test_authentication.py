@@ -5,7 +5,7 @@ import subprocess
 
 from aviso_auth import config, logger
 from aviso_auth.authentication import Authenticator
-from aviso_auth.custom_exceptions import AuthenticationException, InternalSystemError, ServiceUnavailableException
+from aviso_auth.custom_exceptions import TokenNotValidException, InternalSystemError, AuthenticationUnavailableException
 
 
 def conf() -> config.Config:  # this automatically configure the logging
@@ -41,7 +41,7 @@ def test_bad_token():
     try:
         auth._token_to_username("111111111111112222222222333333")
     except Exception as e:
-        assert isinstance(e, AuthenticationException)
+        assert isinstance(e, TokenNotValidException)
 
 
 def test_bad_url():
@@ -52,7 +52,7 @@ def test_bad_url():
     try:
         auth._token_to_username(valid_token())
     except Exception as e:
-        assert isinstance(e, ServiceUnavailableException)
+        assert isinstance(e, AuthenticationUnavailableException)
 
 
 def test_timeout():
@@ -69,4 +69,4 @@ def test_timeout():
     try:
         auth._token_to_username(valid_token())
     except Exception as e:
-        assert isinstance(e, ServiceUnavailableException)
+        assert isinstance(e, AuthenticationUnavailableException)

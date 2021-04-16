@@ -4,7 +4,7 @@ import random
 import subprocess
 from aviso_auth import config, logger
 from aviso_auth.authorisation import Authoriser
-from aviso_auth.custom_exceptions import ForbiddenRequestException, InternalSystemError, NotFoundException, ServiceUnavailableException
+from aviso_auth.custom_exceptions import ForbiddenDestinationException, InternalSystemError, UserNotFoundException, AuthorisationUnavailableException
 
 
 def conf() -> config.Config:  # this automatically configure the logging
@@ -31,7 +31,7 @@ def test_not_allowed_destinations():
     try:
         destinations = auth._allowed_destinations("fake_user")
     except Exception as e:
-        assert isinstance(e, NotFoundException)
+        assert isinstance(e, UserNotFoundException)
         assert "fake_user not found" in str(e)
 
 
@@ -43,7 +43,7 @@ def test_bad_url():
     try:
         destinations = auth._allowed_destinations(valid_user())
     except Exception as e:
-        assert isinstance(e, ServiceUnavailableException)
+        assert isinstance(e, AuthorisationUnavailableException)
 
 def test_timeout():
     logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
@@ -59,7 +59,7 @@ def test_timeout():
     try:
         destinations = auth._allowed_destinations(valid_user())
     except Exception as e:
-        assert isinstance(e, ServiceUnavailableException)
+        assert isinstance(e, AuthorisationUnavailableException)
 
     
 
