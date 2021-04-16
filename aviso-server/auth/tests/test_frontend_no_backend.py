@@ -12,7 +12,7 @@ from aviso_auth.frontend import Frontend
 def conf() -> config.Config:  # this automatically configure the logging
     c = config.Config(conf_path=os.path.expanduser("~/.aviso-auth/testing/config.yaml"))
     c.backend["url"] = "https://fake_url.ecmwf.int"
-    c.frontend["port"]=8084
+    c.frontend["port"] = 8083
     return c
 
 

@@ -11,8 +11,8 @@ from aviso_auth.frontend import Frontend
 
 def conf() -> config.Config:  # this automatically configure the logging
     c = config.Config(conf_path=os.path.expanduser("~/.aviso-auth/testing/config.yaml"))
-    c.authorisation_server["url"] = "https://fake_url.ecmwf.int"
-    c.frontend["port"]=8083
+    c.authentication_server["url"] = "https://fake_url.ecmwf.int"
+    c.frontend["port"] = 8081
     return c
 
 
@@ -38,7 +38,7 @@ def prepost_module():
     time.sleep(1)
     yield
     
-def test_broken_authoriser():
+def test_broken_authenticator():
     logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
     key = "/ec/diss/SCL"
     # encode key
