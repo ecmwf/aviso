@@ -13,7 +13,6 @@ from flask import Response
 from flask import request
 from flask_caching import Cache
 from gunicorn import glogging
-import werkzeug.exceptions
 from six import iteritems
 import gunicorn.app.base
 from aviso_auth import logger, __version__
@@ -102,11 +101,10 @@ class Frontend:
         @handler.errorhandler(Exception)
         def default_error_handler(e):
             logging.exception(str(e))
-            # leave the HTTP errors raised by flask on their own
-            if issubclass(type(e), werkzeug.exceptions.HTTPException):
-                return e
-            else:
-                return json_response("Internal System Error, please contact the support team", 500)
+            logging.error(f"Request: {request.json}")
+            return json.dumps(
+                {"message": "Server error occurred", "details": str(e)}
+            ), getattr(e, 'code', 500), {'Content-Type': 'application/json'}
 
         @handler.route(self.config.backend['route'], methods=["POST"])
         def root():

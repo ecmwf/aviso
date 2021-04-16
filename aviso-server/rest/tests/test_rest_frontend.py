@@ -9,7 +9,7 @@
 import json
 import os
 import time
-from multiprocessing import Process
+import threading
 
 import pytest
 import requests
@@ -29,11 +29,10 @@ frontend_url_api = f"{frontend_url_home}/api/v1"
 def prepost_module():
     # Run the frontend at global level so it will be executed once and accessible to all tests
     frontend = Frontend(config)
-    server = Process(target=frontend.run_server)
+    server = threading.Thread(target=frontend.run_server, daemon=True)
     server.start()
+    time.sleep(1)
     yield
-    server.terminate()
-    server.join()
 
 
 def test_homepage():

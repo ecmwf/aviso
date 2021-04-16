@@ -76,7 +76,7 @@ class Frontend:
             logging.exception(str(error))
             logging.error(f"Request: {request.json}")
             return json.dumps(
-                {"message": "Internal server error occurred", "details": str(error)}
+                {"message": "Server error occurred", "details": str(error)}
             ), getattr(error, 'code', 500), {'Content-Type': 'application/json'}
 
         @handler.route("/", methods=['GET'])
