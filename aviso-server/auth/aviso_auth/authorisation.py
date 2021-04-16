@@ -14,7 +14,7 @@ from aviso_monitoring.reporter.aviso_auth_reporter import AvisoAuthMetricType
 from requests.auth import HTTPBasicAuth
 
 from . import logger
-from .custom_exceptions import InternalSystemError, InvalidInputError
+from .custom_exceptions import InternalSystemError, InvalidInputError, NotFoundException, ServiceUnavailableException
 
 
 class Authoriser:
@@ -61,20 +61,40 @@ class Authoriser:
         try:
             resp = requests.get(self.url, params={"id": username}, timeout=self.req_timeout,
                                 auth=HTTPBasicAuth(self.username, self.password))
+            # raise an error for http cases
+            resp.raise_for_status()
+        except requests.exceptions.HTTPError as errh:
+            message = f'Not able to retrieve destinations for {username} from {self.url}, {str(errh)}'
+            if resp.status_code == 408 or ( resp.status_code >= 500 and resp.status_code < 600):
+                logger.warning(message)
+                raise ServiceUnavailableException(f'Error in retrieving destinations for {username}')
+            else:
+                logger.error(message)
+                raise InternalSystemError(f'Error in retrieving destinations for {username}, please contact the support team') 
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as err:
+            logger.warning(f'Not able to retrieve destinations for {username} from {self.url}, {str(err)}')
+            raise ServiceUnavailableException(f'Error in retrieving destinations for {username}')
         except Exception as e:
             logger.exception(e)
-            raise InternalSystemError(f'Error in retrieving destinations for {username}')
+            raise InternalSystemError(f'Error in retrieving destinations for {username}, please contact the support team')
 
+        # just in case requests does not always raise an error
         if resp.status_code != 200:
-            logger.error(f'Not able to retrieve destinations for {username} from {self.url}, '
-                         f'status {resp.status_code}, {resp.reason}, {resp.content.decode()}')
-            raise InternalSystemError(f'Error in retrieving destinations for {username}')
+            message = f'Not able to retrieve destinations for {username} from {self.url}, status {resp.status_code}, {resp.reason}, {resp.content.decode()}'
+            logger.error(message)
+            raise InternalSystemError(f'Error in retrieving destinations for {username}, please contact the support team') 
 
         resp_body = resp.json()
         if resp_body.get("success") != "yes":
             logger.error(f'Error in retrieving destinations for {username} from {self.url}, '
                          f'error {resp_body.get("error")}')
-            raise InternalSystemError(f'Error in retrieving destinations for {username}')
+            message = f'Error in retrieving destinations for {username}'
+            if f"User {username} not found" in resp_body.get("error"):
+               message += f', {resp_body.get("error")}'
+               raise NotFoundException(message)
+            else:
+                message += f', please contact the support team'
+                raise InternalSystemError(message)
 
         destinations = []
         if resp_body.get("destinationList"):

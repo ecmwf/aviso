@@ -11,7 +11,7 @@ from aviso_monitoring.collector.time_collector import TimeCollector
 from aviso_monitoring.reporter.aviso_auth_reporter import AvisoAuthMetricType
 
 from . import logger
-from .custom_exceptions import InvalidInputError, InternalSystemError
+from .custom_exceptions import InvalidInputError, InternalSystemError, ServiceUnavailableException
 
 
 class BackendAdapter:
@@ -39,23 +39,37 @@ class BackendAdapter:
         This method forwards the request to the backend configured
         :param request:
         :return: response content from backend
+        - InternalSystemError otherwise
         """
         if request.data is None:
             raise InvalidInputError("Invalid request, data cannot be empty")
         try:
             resp = requests.post(self.url, data=request.data, timeout=self.req_timeout)
+            # raise an error for http cases
+            resp.raise_for_status()
+        except requests.exceptions.HTTPError as errh:
+            message = f'Error connecting to backend {self.url}, {str(errh)}'
+            if resp.status_code == 400 and 'required revision has been compacted' in resp.json().get("error"):
+                raise InvalidInputError("History not available")
+            if resp.status_code == 408 or ( resp.status_code >= 500 and resp.status_code < 600):
+                logger.warning(message)
+                raise ServiceUnavailableException(f'Error connecting to backend')
+            else:
+                logger.error(message)
+                raise InternalSystemError(f'Error connecting to backend, please contact the support team') 
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as err:
+            logger.warning(f'Error connecting to backend {self.url}, {str(err)}')
+            raise ServiceUnavailableException(f'Error connecting to backend')
         except Exception as e:
             logger.exception(e)
-            raise InternalSystemError(f'Error connecting to backend')
+            raise InternalSystemError(f'Error connecting to backend, please contact the support team')
 
+        # just in case requests does not always raise an error
         if resp.status_code != 200:
             logger.debug(
                 f'Error in forwarding requests to backend {self.url}, status {resp.status_code}, {resp.reason}, '
                 f'{resp.content.decode()}')
-            if resp.status_code == 400 and 'required revision has been compacted' in resp.json().get("error"):
-                raise InvalidInputError("History not available")
-            else:
-                raise InternalSystemError(f'Error connecting to backend')
+            raise InternalSystemError(f'Error connecting to backend, please contact the support team')
         else:
             return resp.content
 

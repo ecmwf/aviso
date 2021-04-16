@@ -21,7 +21,7 @@ from aviso_auth.authorisation import Authoriser
 from aviso_auth.backend_adapter import BackendAdapter
 from aviso_auth.config import Config
 from aviso_auth.custom_exceptions import InvalidInputError, NotFoundException, InternalSystemError, \
-    AuthenticationException, ForbiddenRequestException
+    AuthenticationException, ForbiddenRequestException, ServiceUnavailableException
 from aviso_monitoring.collector.time_collector import TimeCollector
 from aviso_monitoring import __version__ as monitoring_version
 from aviso_monitoring.collector.count_collector import UniqueCountCollector
@@ -81,17 +81,20 @@ class Frontend:
 
         @handler.errorhandler(NotFoundException)
         def not_found(e):
-            logger.debug(f"Backend could not find resource requested: {e}")
             return json_response(e, 404)
 
         @handler.errorhandler(InternalSystemError)
         def internal_error(e):
             return json_response(e, 500)
 
+        @handler.errorhandler(ServiceUnavailableException)
+        def service_unavailable(e):
+            return json_response("Service currently unavailable, please try again later", 503, {"Retry-After": 30})
+
         @handler.errorhandler(Exception)
         def default_error_handler(e):
             logging.exception(str(e))
-            return json_response(e, 500)
+            return json_response("Internal System Error, please contact the support team", 500)
 
         @handler.route(self.config.backend['route'], methods=["POST"])
         def root():

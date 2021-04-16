@@ -25,3 +25,6 @@ class InternalSystemError(Exception):
 
 class NotFoundException(Exception):
     pass
+
+class ServiceUnavailableException(Exception):
+    pass
