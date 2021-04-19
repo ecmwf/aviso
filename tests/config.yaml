@@ -10,6 +10,8 @@ configuration_engine:
   port: 2379
   https: false
 auth_type: none
+schema_parser: generic
+remote_schema: False
 logging:
   version: 1
   disable_existing_loggers: False

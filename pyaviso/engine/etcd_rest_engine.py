@@ -10,6 +10,7 @@ import base64
 import http.client
 import logging
 from typing import List, Dict
+import time
 
 import requests
 
@@ -82,15 +83,39 @@ class EtcdRestEngine(EtcdEngine):
         }
         # make the call
         logger.debug(f"Pull request: {body}")
-        resp = requests.post(url, json=body, headers=self.auth.header(), timeout=self.timeout)
 
-        # check response
-        if resp.status_code == 400 and ("History not available" in resp.content.decode() or
-                                        "required revision has been compacted" in resp.content.decode()):
-            raise EngineHistoryNotAvailableError()
-        elif resp.status_code != 200:
-            raise EngineException(f'Not able to pull key {key}, status {resp.status_code}, {resp.reason}, '
-                                  f'{resp.content.decode()}')
+        # start an infinite loop of request if the server side is unreachable
+        while True:
+            try:
+                resp = requests.post(url, json=body, headers=self.auth.header(), timeout=self.timeout)
+                resp.raise_for_status()
+            except requests.exceptions.HTTPError as err:
+                if resp.status_code == 408 or ( resp.status_code >= 500 and resp.status_code < 600):
+                    logger.warning(f"Unable to connect to {url}, trying again in {self.automatic_retry_delay}s...")
+                    logger.debug(f"Not able to pull key {key}, {str(err)}, trying again...")
+                    time.sleep(self.automatic_retry_delay)
+                    continue
+                elif resp.status_code == 400 and ("History not available" in resp.content.decode() or
+                                            "required revision has been compacted" in resp.content.decode()):
+                    raise EngineHistoryNotAvailableError()
+                else:
+                    raise EngineException(f"Not able to pull key {key}, {str(err)}")
+            except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as err:
+                logger.warning(f"Unable to connect to {url}, trying again in {self.automatic_retry_delay}s...")
+                logger.debug(f"Not able to pull key {key}, {str(err)}, trying again...")
+                time.sleep(self.automatic_retry_delay)
+                continue
+            except Exception as e:
+                logger.exception(e)
+                raise EngineException(f'Not able to pull key {key}, status {resp.status_code}, {resp.reason}, '
+                                    f'{resp.content.decode()}')
+
+            if resp.status_code != 200:
+                raise EngineException(f'Not able to pull key {key}, status {resp.status_code}, {resp.reason}, '
+                                    f'{resp.content.decode()}')
+            else:  # we got a good responce, exit from the loop
+                break
+
         logger.debug(f"Query for {key} completed")
 
         # parse the result to return just key-value pairs

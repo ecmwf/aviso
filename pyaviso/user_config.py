@@ -38,7 +38,8 @@ class EngineConfig:
                  timeout: Optional[int] = None,
                  service: Optional[str] = None,
                  https: bool = False,
-                 catchup: Optional[bool] = None):
+                 catchup: Optional[bool] = None,
+                 automatic_retry_delay: Optional[int] = None):
         """
         :param host: endpoint host of the notification server
         :param port: endpoint port of the notification server
@@ -50,6 +51,7 @@ class EngineConfig:
         for the event listeners validation
         :param https: if True the connection will go through HTTPS
         :param catchup: if True the notification engine will first look for the missed notifications
+        :param automatic_retry_delay: Number of seconds to wait before retrying to connect to the engine
         """
         self.host = host
         self.port = port
@@ -60,6 +62,7 @@ class EngineConfig:
         self.https = https
         self.service = service
         self.catchup = catchup
+        self.automatic_retry_delay = automatic_retry_delay
 
     def __str__(self):
         config_string = (
@@ -71,7 +74,8 @@ class EngineConfig:
                 f", timeout: {self.timeout}" +
                 f", max_file_size: {self.max_file_size}" +
                 f", service: {self.service}" +
-                f", catchup: {self.catchup}"
+                f", catchup: {self.catchup}"+
+                f", automatic_retry_delay: {self.automatic_retry_delay}"
         )
         return config_string
 
@@ -176,6 +180,7 @@ class UserConfig:
         notification_engine["timeout"] = 60  # seconds
         notification_engine["service"] = "aviso/v1"
         notification_engine["catchup"] = True
+        notification_engine["automatic_retry_delay"] = 15 # seconds
 
         # configuration engine
         configuration_engine = {}
@@ -185,6 +190,7 @@ class UserConfig:
         configuration_engine["type"] = "etcd_rest"
         configuration_engine["max_file_size"] = 500  # KiB
         configuration_engine["timeout"] = 60  # seconds
+        configuration_engine["automatic_retry_delay"] = 15 # seconds
 
         # main config
         config = {}
@@ -316,6 +322,10 @@ class UserConfig:
             timeout = None if os.environ["AVISO_TIMEOUT"] == "null" else int(os.environ["AVISO_TIMEOUT"])
             config["notification_engine"]["timeout"] = timeout
             config["configuration_engine"]["timeout"] = timeout
+        if "AVISO_AUTOMATIC_RETRY_DELAY" in os.environ:  # one variable for both engine
+            automatic_retry_delay = None if os.environ["AVISO_AUTOMATIC_RETRY_DELAY"] == "null" else int(os.environ["AVISO_AUTOMATIC_RETRY_DELAY"])
+            config["notification_engine"]["automatic_retry_delay"] = automatic_retry_delay
+            config["configuration_engine"]["automatic_retry_delay"] = automatic_retry_delay
         return config
 
     def logging_setup(self, logging_conf_path: str):
@@ -371,6 +381,7 @@ class UserConfig:
         assert "https" in ne, "notification_engine https has not been configured"
         assert "service" in ne, "notification_engine service has not been configured"
         assert "catchup" in ne, "notification_engine catchup has not been configured"
+        assert "automatic_retry_delay" in ne, "notification_engine automatic_retry_delay has not been configured"
         assert "polling_interval" in ne, \
             "notification_engine polling_interval has not been configured"
         assert "timeout" in ne, "notification_engine timeout has not been configured"
@@ -382,7 +393,8 @@ class UserConfig:
         # translate the ne in a NotificationEngineConfig
         self._notification_engine = EngineConfig(
             ne["host"], ne["port"], ne["type"], polling_interval=ne["polling_interval"],
-            timeout=ne["timeout"], https=ne["https"], service=ne["service"], catchup=ne["catchup"])
+            timeout=ne["timeout"], https=ne["https"], service=ne["service"], catchup=ne["catchup"],
+            automatic_retry_delay=ne["automatic_retry_delay"])
 
     @property
     def configuration_engine(self) -> EngineConfig:
@@ -404,6 +416,7 @@ class UserConfig:
         assert "max_file_size" in ce, \
             "configuration_engine max_file_size has not been configured"
         assert "timeout" in ce, "configuration_engine timeout has not been configured"
+        assert "automatic_retry_delay" in ce, "configuration_engine automatic_retry_delay has not been configured"
         if type(ce["https"]) is str:
             ce["https"] = ce["https"].casefold() == "true".casefold()
 
@@ -412,7 +425,7 @@ class UserConfig:
         # translate the ce in a ConfigurationEngineConfig
         self._configuration_engine = EngineConfig(
             ce["host"], ce["port"], ce["type"], max_file_size=ce["max_file_size"],
-            timeout=ce["timeout"], https=ce["https"])
+            timeout=ce["timeout"], https=ce["https"], automatic_retry_delay=ce["automatic_retry_delay"])
 
     @property
     def schema_parser(self) -> ListenerSchemaParserType:

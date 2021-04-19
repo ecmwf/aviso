@@ -119,7 +119,10 @@ def clear_environment():
         os.environ.pop("AVISO_SCHEMA_PARSER")
     except KeyError:
         pass
-
+    try:
+        os.environ.pop("AVISO_AUTOMATIC_RETRY_DELAY")
+    except KeyError:
+        pass
 
 def test_default():
     logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
@@ -131,6 +134,8 @@ def test_default():
     assert c["notification_engine"]["port"] == 2379
     assert c["notification_engine"]["host"] == "localhost"
     assert c["notification_engine"]["service"] == "aviso/v1"
+    assert c["notification_engine"]["automatic_retry_delay"] == 15
+    assert c["configuration_engine"]["automatic_retry_delay"] == 15
     assert not c["notification_engine"]["https"]
     assert c["notification_engine"]["catchup"]
     assert c["configuration_engine"]["timeout"] == 60
@@ -165,6 +170,8 @@ def test_config_file():
     assert c.notification_engine.https
     assert c.notification_engine.catchup
     assert c.notification_engine.service == "aviso/v2"
+    assert c.notification_engine.automatic_retry_delay == 30
+    assert c.configuration_engine.automatic_retry_delay == 30
     assert c.configuration_engine.https
     assert c.notification_engine.timeout == 30
     assert c.configuration_engine.port == 8080
@@ -192,6 +199,8 @@ def test_config_file_with_ev():
     assert c.notification_engine.port == 8080
     assert c.notification_engine.host == "test"
     assert c.notification_engine.timeout == 30
+    assert c.notification_engine.automatic_retry_delay == 30
+    assert c.configuration_engine.automatic_retry_delay == 30
     assert c.notification_engine.https
     assert c.notification_engine.catchup
     assert c.notification_engine.service == "aviso/v2"
@@ -228,6 +237,7 @@ def test_env_variables():
     os.environ["AVISO_POLLING_INTERVAL"] = "3"
     os.environ["AVISO_MAX_FILE_SIZE"] = "300"
     os.environ["AVISO_TIMEOUT"] = "null"
+    os.environ["AVISO_AUTOMATIC_RETRY_DELAY"] = "60"
     os.environ["AVISO_AUTH_TYPE"] = "etcd"
     os.environ["AVISO_KEY_TTL"] = "20"
     os.environ["AVISO_USERNAME_FILE"] = "tests/unit/fixtures/username"
@@ -246,6 +256,8 @@ def test_env_variables():
     assert c.notification_engine.port == 3
     assert c.notification_engine.host == "test_env"
     assert c.notification_engine.timeout is None
+    assert c.notification_engine.automatic_retry_delay == 60
+    assert c.configuration_engine.automatic_retry_delay == 60
     assert c.notification_engine.https
     assert not c.notification_engine.catchup
     assert c.notification_engine.service == "aviso/v3"
@@ -281,6 +293,7 @@ def test_env_variables_with_config_file():
     os.environ["AVISO_POLLING_INTERVAL"] = "3"
     os.environ["AVISO_MAX_FILE_SIZE"] = "300"
     os.environ["AVISO_TIMEOUT"] = "20"
+    os.environ["AVISO_AUTOMATIC_RETRY_DELAY"] = "60"
     os.environ["AVISO_AUTH_TYPE"] = "ecmwf"
     os.environ["AVISO_KEY_TTL"] = "20"
     os.environ["AVISO_REMOTE_SCHEMA"] = "false"
@@ -299,6 +312,8 @@ def test_env_variables_with_config_file():
     assert c.notification_engine.port == 3
     assert c.notification_engine.host == "test_env"
     assert c.notification_engine.timeout == 20
+    assert c.notification_engine.automatic_retry_delay == 60
+    assert c.configuration_engine.automatic_retry_delay == 60
     assert c.notification_engine.service == "aviso/v3"
     assert not c.notification_engine.https
     assert not c.notification_engine.catchup
@@ -318,9 +333,9 @@ def test_constructor():
     logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
     # create a config with passing the configuration file as well as the parameters. The parameters will take priority
     notification_engine = {"host": "localhost", "port": 2379, "type": "ETCD_REST", "polling_interval": 60,
-                           "timeout": 10, "https": False, "service": "aviso/v4", "catchup": False}
-    configuration_engine = {"host": "localhost", "port": 2379, "type": "ETCD_REST", "max_file_size": 200, "timeout": 10,
-                            "https": False}
+                           "timeout": 10, "automatic_retry_delay": 10, "https": False, "service": "aviso/v4", "catchup": False}
+    configuration_engine = {"host": "localhost", "port": 2379, "type": "ETCD_REST", "max_file_size": 200, "timeout": 10, 
+                            "automatic_retry_delay": 10, "https": False}
 
     c = UserConfig(
         conf_path=test_config_folder + "config.yaml",
@@ -347,6 +362,8 @@ def test_constructor():
     assert c.notification_engine.port == 2379
     assert c.notification_engine.host == "localhost"
     assert c.notification_engine.timeout == 10
+    assert c.notification_engine.automatic_retry_delay == 10
+    assert c.configuration_engine.automatic_retry_delay == 10
     assert c.notification_engine.service == "aviso/v4"
     assert not c.notification_engine.https
     assert not c.notification_engine.catchup
@@ -382,6 +399,7 @@ def test_constructor_with_env_var():
     os.environ["AVISO_POLLING_INTERVAL"] = "3"
     os.environ["AVISO_MAX_FILE_SIZE"] = "300"
     os.environ["AVISO_TIMEOUT"] = "20"
+    os.environ["AVISO_AUTOMATIC_RETRY_DELAY"] = "60"
     os.environ["AVISO_AUTH_TYPE"] = "etcd"
     os.environ["AVISO_KEY_TTL"] = "20"
     os.environ["AVISO_USERNAME_FILE"] = "tests/unit/fixtures/username"
@@ -390,9 +408,9 @@ def test_constructor_with_env_var():
 
     # create a config with passing the configuration file as well as the parameters. The parameters will take priority
     notification_engine = {"host": "localhost", "port": 2379, "type": "ETCD_REST", "polling_interval": 60,
-                           "timeout": 10, "https": False, "service": "aviso/v4", "catchup": False}
+                           "timeout": 10, "automatic_retry_delay": 10, "https": False, "service": "aviso/v4", "catchup": False}
     configuration_engine = {"host": "localhost", "port": 2379, "type": "ETCD_REST", "max_file_size": 200, "timeout": 10,
-                            "https": False}
+                            "https": False, "automatic_retry_delay": 10,}
 
     c = UserConfig(
         conf_path=test_config_folder + "config.yaml",
@@ -418,6 +436,8 @@ def test_constructor_with_env_var():
     assert c.notification_engine.port == 2379
     assert c.notification_engine.host == "localhost"
     assert c.notification_engine.timeout == 10
+    assert c.notification_engine.automatic_retry_delay == 10
+    assert c.configuration_engine.automatic_retry_delay == 10
     assert c.notification_engine.service == "aviso/v4"
     assert not c.notification_engine.https
     assert not c.notification_engine.catchup

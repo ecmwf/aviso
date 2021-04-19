@@ -39,6 +39,7 @@ class Engine(ABC):
         self.catchup = config.catchup
         self._auth = auth
         self._https = config.https
+        self.automatic_retry_delay = config.automatic_retry_delay
         self._listeners = []
         # this is used to synchronise multiple listening threads accessing the state
         self._state_lock = threading.Lock()
@@ -155,7 +156,7 @@ class Engine(ABC):
                 t.start()
                 logger.debug(f"Thread {t.ident} started to listen to {key}")
             except Exception as e:
-                logger.error(f"Listening to {key} could not be started: {e}")
+                logger.error(f"Error in listening to {key}: {e}")
                 logger.debug("", exc_info=True)
                 self._remove_listener(key)
                 return False
