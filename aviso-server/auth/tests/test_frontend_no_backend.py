@@ -4,14 +4,17 @@ import requests
 import yaml
 import time
 import threading
+from flask import Flask
+from werkzeug.exceptions import InternalServerError
 
 from aviso_auth import config, logger
 from aviso_auth.authorisation import Authoriser
 from aviso_auth.frontend import Frontend
 
+
 def conf() -> config.Config:  # this automatically configure the logging
     c = config.Config(conf_path=os.path.expanduser("~/.aviso-auth/testing/config.yaml"))
-    c.backend["url"] = "https://fake_url.ecmwf.int"
+    c.backend["url"] = "http://127.0.0.1:8022"
     c.frontend["port"] = 8083
     return c
 
@@ -29,12 +32,22 @@ def valid_email() -> str:
         c = yaml.load(f.read(), Loader=yaml.Loader)
         return c["email"]
 
+# mock backend
+mock_backend = Flask("Backend")
+@mock_backend.route(configuration.backend["route"],  methods=['POST'])
+def error():
+    return InternalServerError("Test Error")
+
 @pytest.fixture(scope="module", autouse=True)
 def prepost_module():
     # Run the frontend at global level so it will be executed once and accessible to all tests
     frontend = Frontend(configuration)
     server = threading.Thread(target=frontend.run_server, daemon=True)
     server.start()
+    time.sleep(1)
+    # Run the mock backend
+    backend = threading.Thread(target=mock_backend.run, daemon=True, kwargs={"host": "127.0.0.1", "port": 8022})
+    backend.start()
     time.sleep(1)
     yield
 

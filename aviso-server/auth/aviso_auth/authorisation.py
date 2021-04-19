@@ -67,7 +67,7 @@ class Authoriser:
             resp.raise_for_status()
         except requests.exceptions.HTTPError as errh:
             message = f'Not able to retrieve destinations for {username} from {self.url}, {str(errh)}'
-            if resp.status_code == 408 or ( resp.status_code >= 500 and resp.status_code < 600):
+            if resp.status_code == 408 or ( resp.status_code >= 500 and resp.status_code < 600): 
                 logger.warning(message)
                 raise AuthorisationUnavailableException(f'Error in retrieving destinations for {username}')
             else:
