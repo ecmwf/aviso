@@ -11,8 +11,11 @@ import json
 import os
 import time
 from shutil import rmtree
-
+import subprocess
+import contextlib
+import logging
 import pytest
+from threading import Thread
 
 from pyaviso import user_config, HOME_FOLDER, logger
 from pyaviso.authentication import auth
@@ -52,8 +55,11 @@ def pre_post_test(engine):
             pass
     yield
     # delete all the keys at the end of the test
-    engine.delete("test")
-    engine.stop()
+    try:
+        engine.delete("test")
+        engine.stop()
+    except Exception as ignore:
+        pass
 
 
 @pytest.mark.parametrize("engine", [rest_engine()])
@@ -479,3 +485,34 @@ def test_save_delete_state(engine):
     # delete it
     engine._delete_saved_revision()
     assert engine._last_saved_revision() == -1
+
+@contextlib.contextmanager
+def caplog_for_logger(caplog):  # this is needed to assert over the logging output
+    caplog.clear()
+    lo = logging.getLogger()
+    lo.addHandler(caplog.handler)
+    caplog.handler.setLevel(logging.DEBUG)
+    yield
+    lo.removeHandler(caplog.handler)
+
+@pytest.mark.parametrize("engine", [rest_engine()])
+def test_automatic_retry(engine, caplog):
+    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    
+    # create a process listening to a port
+    out1 = subprocess.Popen(
+        f"nc -l {10001}", shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
+    # set timeout to 1s
+    engine.timeout = 1
+    engine._base_url = "http://127.0.0.1:10001/v3/"
+
+     # run a basic pull as background thread and check the log 
+    server = Thread(target=engine.pull, daemon=True, kwargs={"key": "test1"})
+    server.start()
+    time.sleep(2)
+
+    for record in caplog.records:
+        assert record.levelname != "ERROR"
+    # check that it's trying again in the system log
+    assert "Unable to connect to http://127.0.0.1:10001/v3/kv/range, trying again in" in caplog.text

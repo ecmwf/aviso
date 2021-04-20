@@ -4,7 +4,7 @@ listeners:
       country: [Italy, Germany]
     triggers:
       - type: command
-        working_dir: tests/integration/fixtures
+        working_dir: tests/unit/fixtures
         command: ./my_script.sh --date ${request.date} --number ${request.number}
         environment:
           AIRPORT: ${request.airport}

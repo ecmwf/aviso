@@ -18,9 +18,9 @@ from pyaviso.cli_aviso_config import *
 from pyaviso.engine.engine_factory import EngineType
 
 test_svc = "test_svc/v1"
-config_folder_to_push1 = "tests/integration/fixtures/config_test_push1"
-config_folder_to_push2 = "tests/integration/fixtures/config_test_push2"
-config_folder_to_pull = "tests/integration/fixtures/config_test_pull1"
+config_folder_to_push1 = "tests/system/fixtures/config_test_push1"
+config_folder_to_push2 = "tests/system/fixtures/config_test_push2"
+config_folder_to_pull = "tests/system/fixtures/config_test_pull1"
 
 
 def create_conf() -> user_config.UserConfig:  # this automatically configure the logging
@@ -176,9 +176,9 @@ def test_push_and_pull_workflow1(conf):
     # check that is like the larger set
     assert os.path.exists(config_folder_to_pull)
     dcmp = dircmp(config_folder_to_push1, config_folder_to_pull)
-    assert _print_diff_files(dcmp) == 'diff_file config1.json found in tests/integration/fixtures/config_test_push1 ' \
-                                      'and tests/integration/fixtures/config_test_pull1diff_file config2.json found ' \
-                                      'in tests/integration/fixtures/config_test_push1 and tests/integration/' \
+    assert _print_diff_files(dcmp) == 'diff_file config1.json found in tests/system/fixtures/config_test_push1 ' \
+                                      'and tests/system/fixtures/config_test_pull1diff_file config2.json found ' \
+                                      'in tests/system/fixtures/config_test_push1 and tests/system/' \
                                       'fixtures/config_test_pull1'
 
 
@@ -259,9 +259,9 @@ def test_push_and_pull_workflow3(conf):
     # check that is like the larger set
     assert os.path.exists(config_folder_to_pull)
     dcmp = dircmp(config_folder_to_push1, config_folder_to_pull)
-    assert _print_diff_files(dcmp) == 'diff_file config1.json found in tests/integration/fixtures/config_test_push1 ' \
-                                      'and tests/integration/fixtures/config_test_pull1diff_file config2.json found ' \
-                                      'in tests/integration/fixtures/config_test_push1 and tests/integration/' \
+    assert _print_diff_files(dcmp) == 'diff_file config1.json found in tests/system/fixtures/config_test_push1 ' \
+                                      'and tests/system/fixtures/config_test_pull1diff_file config2.json found ' \
+                                      'in tests/system/fixtures/config_test_push1 and tests/system/' \
                                       'fixtures/config_test_pull1'
 
 

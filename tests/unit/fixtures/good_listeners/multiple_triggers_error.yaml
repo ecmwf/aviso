@@ -7,5 +7,5 @@ listeners:
       - type: log
         path: testLog.log
       - type: command
-        working_dir: tests/integration/fixtures
-        command: ./my_script.sh --date ${request.date} --number ${request.number}
+        working_dir: tests/unit/fixtures
+        command: echoerror "AAAAA"

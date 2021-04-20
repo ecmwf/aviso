@@ -27,7 +27,7 @@ manager: NotificationManager = NotificationManager()
 
 # set of known exceptions
 KNOWN_EXCEPTION = (ServiceConfigException, EventListenerException,
-                   TriggerException, EngineException, InvalidInputError, AssertionError)
+                   TriggerException, EngineException, InvalidInputError, AssertionError, KeyError)
 
 
 def catch_all_exceptions(cls, handler):

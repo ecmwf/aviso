@@ -233,7 +233,7 @@ def test_env_variables():
     os.environ["AVISO_QUIET"] = "True"
     os.environ["AVISO_NO_FAIL"] = "True"
     os.environ["AVISO_USERNAME"] = "test_env"
-    os.environ["AVISO_KEY_FILE"] = "tests/unit/fixtures/bad/key"
+    os.environ["AVISO_KEY_FILE"] = "tests/unit/fixtures/bad_key"
     os.environ["AVISO_POLLING_INTERVAL"] = "3"
     os.environ["AVISO_MAX_FILE_SIZE"] = "300"
     os.environ["AVISO_TIMEOUT"] = "null"
@@ -287,7 +287,7 @@ def test_env_variables_with_config_file():
     os.environ["AVISO_QUIET"] = "False"
     os.environ["AVISO_NO_FAIL"] = "False"
     os.environ["AVISO_USERNAME"] = "test_env"
-    os.environ["AVISO_KEY_FILE"] = "tests/unit/fixtures/bad/key"
+    os.environ["AVISO_KEY_FILE"] = "tests/unit/fixtures/bad_key"
     os.environ["AVISO_NOTIFICATION_ENGINE"] = "ETCD_GRPC"
     os.environ["AVISO_CONFIGURATION_ENGINE"] = "ETCD_GRPC"
     os.environ["AVISO_POLLING_INTERVAL"] = "3"
@@ -345,7 +345,7 @@ def test_constructor():
         no_fail=False,
         quiet=False,
         username="test2",
-        key_file="tests/unit/fixtures/bad/key",
+        key_file="tests/unit/fixtures/bad_key",
         auth_type="ecmwf",
         key_ttl=30,
         remote_schema=True,
