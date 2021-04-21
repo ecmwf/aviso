@@ -15,12 +15,12 @@ from typing import List, Dict
 
 import click
 
-from . import logger, __version__
-from . import user_config as conf
-from .custom_exceptions import *
-from .engine import EngineType
-from .notification_manager import NotificationManager
-from .service_config_manager import ServiceConfigException
+from pyaviso import logger, __version__
+from pyaviso import user_config as conf
+from pyaviso.custom_exceptions import *
+from pyaviso.engine import EngineType
+from pyaviso.notification_manager import NotificationManager
+from pyaviso.service_config_manager import ServiceConfigException
 
 # Create the listener manager
 manager: NotificationManager = NotificationManager()

@@ -15,6 +15,8 @@ from datetime import datetime
 from queue import Queue
 from typing import Tuple, Any
 
+from typing_extensions import final
+
 from .engine import Engine, DATE_FORMAT
 from .. import logger, HOME_FOLDER
 from ..authentication.auth import Auth
@@ -82,7 +84,9 @@ class EtcdEngine(Engine, ABC):
         try:
             # initialise the revisions
             final_rev = None
-            if from_date is None:
+
+            # check start date
+            if from_date is None:  # no start date defined
                 if self.catchup is None:
                     raise EngineException("catchup not defined for notification engine")
                 if self.catchup:  # we start from the saved one
@@ -96,16 +100,23 @@ class EtcdEngine(Engine, ABC):
                     self._delete_saved_revision()
                     # we start from now
                     next_rev = self._latest_revision(key) + 1
-            else:
+
+            else: # start date defined
                 logger.info("Searching for past notifications...")
                 next_rev, final_rev = self._from_to_revisions(key, from_date=from_date, to_date=to_date)
-                if next_rev:
+                if next_rev == -1 and final_rev == -1:
+                    logger.warning("No history available in the time period selected")
+                    channel.put(True)
+                    return
+                elif next_rev:
                     logger.info("Search completed, retrieving...")
                 else:
-                    logger.error(f"Error in retrieving the history")
+                    logger.error(f"Error in one of the listening process")
                     channel.put(False)
+                    return
 
-            if to_date:  # retrieve only past notifications
+            # check end date
+            if to_date:  # end date defined, retrieve only past notifications
                 if final_rev:
                     kvs = self.pull(key, min_rev=next_rev, max_rev=final_rev)
                     # remove the status from the result
@@ -121,7 +132,9 @@ class EtcdEngine(Engine, ABC):
                 if len(self._listeners) == 0:  # this is the last pooling thread
                     # terminate the main execution
                     channel.put(True)
-            else:  # start the polling for new notifications
+                    return
+
+            else:  # no end date defined, start the polling for new notifications
                 while key in self._listeners:  # this is the stop condition
                     # retrieve any change since the last revision
                     kvs = self.pull(key, min_rev=next_rev)
@@ -141,6 +154,7 @@ class EtcdEngine(Engine, ABC):
                         trigger_callback(kvs)
                     # wait the polling interval before trying again
                     time.sleep(self._polling_interval)
+                    
         except Exception as e:
             logger.error(f"Error while listening to key {key}: {e}")
             logger.debug("", exc_info=True)
@@ -278,6 +292,7 @@ class EtcdEngine(Engine, ABC):
         # check all limit cases first
         # limit case - check if there is no status
         if status_rev == -1:
+            logger.debug("No status available")
             return None, None
         # limit case - check if this revision is before from_date and to_date
         if status_date <= from_date:
@@ -332,8 +347,8 @@ class EtcdEngine(Engine, ABC):
         else:  # we exit because is the last point but we are inside the interval
             from_rev = status_rev
         if to_date and to_rev is None:  # this means there are no point inside the interval - limit case
-            logger.info("No keys found")
-            return None, None
+            logger.debug("No keys found")
+            return -1, -1
 
         return from_rev, to_rev
 
