@@ -15,8 +15,6 @@ from datetime import datetime
 from queue import Queue
 from typing import Tuple, Any
 
-from typing_extensions import final
-
 from .engine import Engine, DATE_FORMAT
 from .. import logger, HOME_FOLDER
 from ..authentication.auth import Auth

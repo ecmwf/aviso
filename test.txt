@@ -1,0 +1,49 @@
+Loading configuration completed
+Running Aviso v.0.10.0
+Configuration loaded: notification_engine: host: k8s-dataservices-master.ecmwf.int, port: 32330, https: False, type: ETCD_REST, polling_interval: 5, timeout: 60, max_file_size: None, service: aviso/v1, catchup: True, automatic_retry_delay: 15, configuration_engine: host: k8s-dataservices-master.ecmwf.int, port: 32330, https: False, type: ETCD_REST, polling_interval: None, timeout: 60, max_file_size: 500, service: None, catchup: None, automatic_retry_delay: 15, auth_type: ecmwf, debug: True, quiet: False, username: claudio.iacopino@ecmwf.int, username_file: None, no_fail: False, key_ttl: -1, schema_parser: ListenerSchemaParserType.ECMWF, remote_schema: True
+Creating the engine
+Setting password from key file
+Username: claudio.iacopino@ecmwf.int
+Setting up REST interface to connect to the etcd server k8s-dataservices-master.ecmwf.int:32330
+Calling push...
+Looking for file in the directory /tmp/aviso-suite/aviso-config/pyaviso/ecmwf/json2/
+Pushing file
+Calling the engine push with status update
+Calling pull for /ec/config/aviso/v1...
+Pull request: {'key': 'L2VjL2NvbmZpZy9hdmlzby92MQ==', 'range_end': None, 'limit': 10000, 'sort_order': 'DESCEND', 'sort_target': 'KEY', 'keys_only': False, 'revision': None, 'min_mod_revision': None, 'max_mod_revision': None}
+Starting new HTTP connection (1): k8s-dataservices-master.ecmwf.int:32330
+send: b'POST /v3/kv/range HTTP/1.1\r\nHost: k8s-dataservices-master.ecmwf.int:32330\r\nUser-Agent: python-requests/2.25.1\r\nAccept-Encoding: gzip, deflate\r\nAccept: */*\r\nConnection: keep-alive\r\nAuthorization: EmailKey claudio.iacopino@ecmwf.int:210b3a1da9429fd24f11dd4c98a137a7\r\nContent-Length: 211\r\nContent-Type: application/json\r\n\r\n'
+send: b'{"key": "L2VjL2NvbmZpZy9hdmlzby92MQ==", "range_end": null, "limit": 10000, "sort_order": "DESCEND", "sort_target": "KEY", "keys_only": false, "revision": null, "min_mod_revision": null, "max_mod_revision": null}'
+reply: 'HTTP/1.1 200 OK\r\n'
+header: Server: gunicorn
+header: Date: Thu, 22 Apr 2021 10:29:09 GMT
+header: Connection: close
+header: Content-Type: text/html; charset=utf-8
+header: Content-Length: 114
+http://k8s-dataservices-master.ecmwf.int:32330 "POST /v3/kv/range HTTP/1.1" 200 114
+Query for /ec/config/aviso/v1 completed
+0 keys found
+Calling push...
+Preparing the transaction statement
+Starting new HTTP connection (1): k8s-dataservices-master.ecmwf.int:32330
+send: b'POST /v3/kv/txn HTTP/1.1\r\nHost: k8s-dataservices-master.ecmwf.int:32330\r\nUser-Agent: python-requests/2.25.1\r\nAccept-Encoding: gzip, deflate\r\nAccept: */*\r\nConnection: keep-alive\r\nAuthorization: EmailKey claudio.iacopino@ecmwf.int:210b3a1da9429fd24f11dd4c98a137a7\r\nContent-Length: 2865\r\nContent-Type: application/json\r\n\r\n'
+send: b'{"success": [{"requestPut": {"key": "L2VjL2NvbmZpZy9hdmlzby92MS9ldmVudF9saXN0ZW5lcl9zY2hlbWEuanNvbg==", "value": "eyJ2ZXJzaW9uIjogMC4xLCAicGF5bG9hZCI6ICJsb2NhdGlvbiIsICJkaXNzZW1pbmF0aW9uIjogeyJlbmRwb2ludCI6IFt7ImVuZ2luZSI6IFsiZXRjZF9yZXN0IiwgImV0Y2RfZ3JwYyJdLCAiYmFzZSI6ICIvZWMvZGlzcy97ZGVzdGluYXRpb259IiwgInN0ZW0iOiAiZGF0ZT17ZGF0ZX0sdGFyZ2V0PXt0YXJnZXR9LGNsYXNzPXtjbGFzc30sZXhwdmVyPXtleHB2ZXJ9LGRvbWFpbj17ZG9tYWlufSx0aW1lPXt0aW1lfSxzdHJlYW09e3N0cmVhbX0sc3RlcD17c3RlcH0iLCAiYWRtaW4iOiAiL2VjL2FkbWluL3tkYXRlfS97ZGVzdGluYXRpb259In0sIHsiZW5naW5lIjogWyJmaWxlX2Jhc2VkIl0sICJiYXNlIjogIi90bXAvYXZpc28vZGlzcy97ZGVzdGluYXRpb259IiwgInN0ZW0iOiAie3RhcmdldH0ve2NsYXNzfS97ZXhwdmVyfS97ZG9tYWlufS97ZGF0ZX0ve3RpbWV9L3tzdHJlYW19L3tzdGVwfSJ9XSwgInJlcXVlc3QiOiB7ImNsYXNzIjogW3sidHlwZSI6ICJFbnVtSGFuZGxlciJ9XSwgImRhdGUiOiBbeyJ0eXBlIjogIkRhdGVIYW5kbGVyIiwgImNhbm9uaWMiOiAiJVklbSVkIn1dLCAiZGVzdGluYXRpb24iOiBbeyJ0eXBlIjogIlN0cmluZ0hhbmRsZXIiLCAicmVxdWlyZWQiOiB0cnVlfV0sICJ0YXJnZXQiOiBbeyJ0eXBlIjogIlN0cmluZ0hhbmRsZXIifV0sICJkb21haW4iOiBbeyJ0eXBlIjogIkVudW1IYW5kbGVyIiwgImRlZmF1bHQiOiAiZyJ9XSwgImV4cHZlciI6IFt7InR5cGUiOiAiSW50SGFuZGxlciIsICJjYW5vbmljIjogInswOjA+NH0ifV0sICJzdGVwIjogW3sidHlwZSI6ICJJbnRIYW5kbGVyIiwgInJhbmdlIjogWzAsIDEwMDAwMF19XSwgInN0cmVhbSI6IFt7InR5cGUiOiAiRW51bUhhbmRsZXIiLCAidmFsdWVzIjogWyJzY2VmIiwgInNjd2UiLCAibW1zZmd0cyIsICJzY2RhZ3RzIiwgInRjM19mcmEiLCAidGMzX3R1ciJdfV0sICJ0aW1lIjogW3sidHlwZSI6ICJUaW1lSGFuZGxlciIsICJjYW5vbmljIjogInswOjA+Mn0iLCAidmFsdWVzIjogWzAsIDYsIDEyLCAxOF19XX19LCAibWFycyI6IHsiZW5kcG9pbnQiOiBbeyJlbmdpbmUiOiBbImV0Y2RfcmVzdCIsICJldGNkX2dycGMiXSwgImJhc2UiOiAiL2VjL21hcnMiLCAic3RlbSI6ICJkYXRlPXtkYXRlfSxjbGFzcz17Y2xhc3N9LGV4cHZlcj17ZXhwdmVyfSxkb21haW49e2RvbWFpbn0sdGltZT17dGltZX0sc3RyZWFtPXtzdHJlYW19LHN0ZXA9e3N0ZXB9In0sIHsiZW5naW5lIjogWyJmaWxlX2Jhc2VkIl0sICJiYXNlIjogIi90bXAvYXZpc28vbWFycyIsICJzdGVtIjogIntjbGFzc30ve2V4cHZlcn0ve2RvbWFpbn0ve2RhdGV9L3t0aW1lfS97c3RyZWFtfS97c3RlcH0ifV0sICJyZXF1ZXN0IjogeyJjbGFzcyI6IFt7InR5cGUiOiAiRW51bUhhbmRsZXIifV0sICJkYXRlIjogW3sidHlwZSI6ICJEYXRlSGFuZGxlciIsICJjYW5vbmljIjogIiVZJW0lZCJ9XSwgImRvbWFpbiI6IFt7InR5cGUiOiAiRW51bUhhbmRsZXIifV0sICJleHB2ZXIiOiBbeyJ0eXBlIjogIkludEhhbmRsZXIiLCAiY2Fub25pYyI6ICJ7MDowPjR9In1dLCAic3RlcCI6IFt7InR5cGUiOiAiSW50SGFuZGxlciIsICJyYW5nZSI6IFswLCAxMDAwMDBdfV0sICJzdHJlYW0iOiBbeyJ0eXBlIjogIkVudW1IYW5kbGVyIiwgInZhbHVlcyI6IFsic2NlZiIsICJzY3dlIiwgIm1tc2ZndHMiLCAic2NkYWd0cyIsICJ0YzNfZnJhIiwgInRjM190dXIiXX1dLCAidGltZSI6IFt7InR5cGUiOiAiVGltZUhhbmRsZXIiLCAiY2Fub25pYyI6ICJ7MDowPjJ9IiwgInZhbHVlcyI6IFswLCA2LCAxMiwgMThdfV19fX0="}}, {"requestPut": {"key": "L2VjL2NvbmZpZy9hdmlzby92MQ==", "value": "eyJldGNkX3VzZXIiOiAiY2xhdWRpby5pYWNvcGlub0BlY213Zi5pbnQiLCAibWVzc2FnZSI6ICJ1cGRhdGluZyBzY2hlbWEgZmlsZSAuLi4iLCAidW5peF91c2VyIjogIm1hY2kiLCAiYXZpc29fdmVyc2lvbiI6ICIwLjEwLjAiLCAiZW5naW5lIjogIkVUQ0RfUkVTVCIsICJob3N0bmFtZSI6ICJ2aXJvbiIsICJkYXRlX3RpbWUiOiAiMjAyMS0wNC0yMlQxMDoyOTowOS4yOTQwMDVaIn0="}}]}'
+reply: 'HTTP/1.1 404 NOT FOUND\r\n'
+header: Server: gunicorn
+header: Date: Thu, 22 Apr 2021 10:29:09 GMT
+header: Connection: close
+header: Content-Type: application/json
+header: Content-Length: 186
+http://k8s-dataservices-master.ecmwf.int:32330 "POST /v3/kv/txn HTTP/1.1" 404 186
+Not able to execute the transaction, status 404, NOT FOUND, {"message": "Server error occurred", "details": "404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again."}
+
+Traceback (most recent call last):
+  File "/perm/ma/maci/git/aviso/pyaviso/cli_aviso_config.py", line 60, in push
+    pushed_files = config_manager.push(service, dir, message, delete)
+  File "/perm/ma/maci/git/aviso/pyaviso/service_config_manager.py", line 102, in push
+    if self._engine.push_with_status(kvs, base_key=base_key, message=user_message, ks_delete=ks_delete):
+  File "/perm/ma/maci/git/aviso/pyaviso/engine/engine.py", line 239, in push_with_status
+    return self.push(kvs, ks_delete, ttl)
+  File "/perm/ma/maci/git/aviso/pyaviso/engine/etcd_rest_engine.py", line 231, in push
+    assert resp.status_code == 200, f'Not able to execute the transaction, status {resp.status_code}, ' \
+AssertionError: Not able to execute the transaction, status 404, NOT FOUND, {"message": "Server error occurred", "details": "404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again."}

@@ -217,7 +217,7 @@ class EtcdGrpcEngine(EtcdEngine):
         transaction_request = etcdrpc.TxnRequest(success=ops)
 
         # commit transaction
-        logger.debug(f"Committing the transaction statement: {ops}")
+        #logger.debug(f"Committing the transaction statement: {ops}")
         try_again = True
         while try_again:
             try:

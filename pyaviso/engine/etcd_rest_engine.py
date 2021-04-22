@@ -226,7 +226,7 @@ class EtcdRestEngine(EtcdEngine):
 
         body = {"success": ops}
         # commit transaction
-        logger.debug(f"Committing the transaction statement: {body}")
+        #logger.debug(f"Committing the transaction statement: {body}")
         resp = requests.post(url, json=body, headers=self.auth.header(), timeout=self.timeout)
         assert resp.status_code == 200, f'Not able to execute the transaction, status {resp.status_code}, ' \
             f'{resp.reason}, {resp.content.decode()}'
