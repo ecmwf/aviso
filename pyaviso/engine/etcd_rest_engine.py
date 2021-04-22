@@ -110,11 +110,8 @@ class EtcdRestEngine(EtcdEngine):
                 raise EngineException(f'Not able to pull key {key}, status {resp.status_code}, {resp.reason}, '
                                     f'{resp.content.decode()}')
 
-            if resp.status_code != 200:
-                raise EngineException(f'Not able to pull key {key}, status {resp.status_code}, {resp.reason}, '
-                                    f'{resp.content.decode()}')
-            else:  # we got a good responce, exit from the loop
-                break
+            # we got a good responce, exit from the loop
+            break
 
         logger.debug(f"Query for {key} completed")
 
@@ -162,9 +159,12 @@ class EtcdRestEngine(EtcdEngine):
         }
         # make the call
         logger.debug(f"Deleting key range associated to key {key}")
-        resp = requests.post(url, json=body, headers=self.auth.header(), timeout=self.timeout)
-        assert resp.status_code == 200, f'Not able to delete key {key}, status {resp.status_code}, {resp.reason}, ' \
-            f'{resp.content.decode()}'
+        try:
+            resp = requests.post(url, json=body, headers=self.auth.header(), timeout=self.timeout)
+            resp.raise_for_status()
+        except Exception as err:
+            raise EngineException(f'Not able to delete key {key}, {str(err)}')
+        
         logger.debug(f"Delete request for key {key} completed")
 
         # parse the result to return just key-value pairs of what has been deleted
@@ -198,10 +198,7 @@ class EtcdRestEngine(EtcdEngine):
 
         # check if we need to request a lease for the ttl
         if ttl:
-            try:
-                lease = self._lease(ttl)
-            except EngineException:
-                raise EngineException("Not able to push keys")
+            lease = self._lease(ttl)
 
         logger.debug(f"Preparing the transaction statement")
         ops = []
@@ -227,9 +224,12 @@ class EtcdRestEngine(EtcdEngine):
         body = {"success": ops}
         # commit transaction
         #logger.debug(f"Committing the transaction statement: {body}")
-        resp = requests.post(url, json=body, headers=self.auth.header(), timeout=self.timeout)
-        assert resp.status_code == 200, f'Not able to execute the transaction, status {resp.status_code}, ' \
-            f'{resp.reason}, {resp.content.decode()}'
+        try:
+            resp = requests.post(url, json=body, headers=self.auth.header(), timeout=self.timeout)
+            resp.raise_for_status()
+        except Exception as err:
+            raise EngineException(f'Not able to execute the transaction, {str(err)}')
+
         logger.debug(f"Transaction completed")
         resp_body = resp.json()
         # read the header
@@ -250,10 +250,11 @@ class EtcdRestEngine(EtcdEngine):
 
             url = self._base_url + "auth/authenticate"
             body = {"name": self.auth.username, "password": self.auth.password}
-
-            resp = requests.post(url, json=body, headers=self.auth.header(), timeout=self.timeout)
-            if resp.status_code != 200:
-                raise EngineException(f'Not able to authenticate {self.auth.username}, status {resp.status_code}')
+            try:
+                resp = requests.post(url, json=body, headers=self.auth.header(), timeout=self.timeout)
+                resp.raise_for_status()
+            except Exception as err:
+                raise EngineException(f'Not able to authenticate {self.auth.username}, {str(err)}')
             assert resp.json().get("token") is not None, f'No token found in authentication response'
             self.auth.token = resp.json()["token"]
 
@@ -280,9 +281,31 @@ class EtcdRestEngine(EtcdEngine):
             "keys_only": True
         }
         # make the call
-        resp = requests.post(url, json=body, headers=self.auth.header(), timeout=self.timeout)
-        assert resp.status_code == 200, f'Not able to request latest revision, status {resp.status_code}, ' \
-            f'{resp.reason}, {resp.content.decode()}'
+        while True:
+            try:
+                resp = requests.post(url, json=body, headers=self.auth.header(), timeout=self.timeout)
+                resp.raise_for_status()
+            except requests.exceptions.HTTPError as err:
+                if resp.status_code == 408 or ( resp.status_code >= 500 and resp.status_code < 600):
+                    logger.warning(f"Unable to connect to {url}, trying again in {self.automatic_retry_delay}s...")
+                    logger.debug(f"Not able to request latest revision, {str(err)}, trying again...")
+                    time.sleep(self.automatic_retry_delay)
+                    continue
+                else:
+                    raise EngineException(f"Not able to request latest revision, {str(err)}")
+            except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as err:
+                logger.warning(f"Unable to connect to {url}, trying again in {self.automatic_retry_delay}s...")
+                logger.debug(f"Not able to request latest revision, {str(err)}, trying again...")
+                time.sleep(self.automatic_retry_delay)
+                continue
+            except Exception as e:
+                logger.exception(e)
+                raise EngineException(f'Not able to request latest revision, status {resp.status_code}, {resp.reason}, '
+                                    f'{resp.content.decode()}') 
+
+            # we got a good responce, exit from the loop
+            break   
+
         logger.debug(f"Query for latest revision completed")
         resp_body = resp.json()
         # read the header
@@ -314,11 +337,12 @@ class EtcdRestEngine(EtcdEngine):
         }
 
         # make the call
-        resp = requests.post(url, json=body, headers=self.auth.header(), timeout=self.timeout)
+        try:
+            resp = requests.post(url, json=body, headers=self.auth.header(), timeout=self.timeout)
+            resp.raise_for_status()
+        except Exception as err:
+            raise EngineException(f'Not able to request a lease, {str(err)}')
 
-        # check response
-        assert resp.status_code == 200, f'Not able to request a lease, status {resp.status_code}, ' \
-            f'{resp.reason}, {resp.content.decode()}'
         logger.debug(f"Lease request completed")
         resp_body = resp.json()
         if "ID" in resp_body:
@@ -377,7 +401,10 @@ httpclient_logger = logging.getLogger("http.client")
 
 
 def httpclient_log(*args):
-    httpclient_logger.log(logging.DEBUG, " ".join(args))
+    to_be_logged = " ".join(args)
+    if len(to_be_logged) > 1000:
+        to_be_logged = to_be_logged[:1000]
+    httpclient_logger.log(logging.DEBUG, to_be_logged)
 
 
 # mask the print() built-in in the http.client module to use logging instead
