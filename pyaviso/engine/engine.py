@@ -13,12 +13,12 @@ import threading
 from abc import ABC, abstractmethod
 from datetime import datetime
 from queue import Queue
-from typing import List, Dict
+from typing import Dict, List
 
-from . import EngineType
-from .. import logger, __version__, exit_channel
+from .. import __version__, exit_channel, logger
 from ..authentication.auth import Auth
 from ..user_config import EngineConfig
+from . import EngineType
 
 DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 

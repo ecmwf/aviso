@@ -1,11 +1,15 @@
 import os
-import yaml
 import random
 import subprocess
 
+import yaml
 from aviso_auth import config, logger
 from aviso_auth.authentication import Authenticator
-from aviso_auth.custom_exceptions import TokenNotValidException, InternalSystemError, AuthenticationUnavailableException
+from aviso_auth.custom_exceptions import (
+    AuthenticationUnavailableException,
+    InternalSystemError,
+    TokenNotValidException,
+)
 
 
 def conf() -> config.Config:  # this automatically configure the logging

@@ -8,8 +8,8 @@
 
 from typing import Dict
 
-from .trigger import TriggerType, Trigger
 from .. import logger
+from .trigger import Trigger, TriggerType
 
 
 class TriggerFactory:

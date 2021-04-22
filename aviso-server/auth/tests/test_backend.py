@@ -1,13 +1,14 @@
-import pytest
+import json
 import os
+
+import pytest
 import requests
 import yaml
-import json
-
 from aviso_auth import config, logger
 from aviso_auth.authorisation import Authoriser
 from aviso_auth.backend_adapter import BackendAdapter
 from aviso_auth.custom_exceptions import InternalSystemError, InvalidInputError
+
 
 def conf() -> config.Config:  # this automatically configure the logging
     return config.Config(conf_path=os.path.expanduser("~/.aviso-auth/testing/config.yaml"))

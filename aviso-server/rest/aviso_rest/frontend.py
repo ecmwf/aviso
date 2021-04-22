@@ -8,24 +8,25 @@
 
 import json
 import logging
-from typing import Dict
 from logging import Formatter
+from typing import Dict
+
 import gunicorn.app.base
-from flask import Flask
-from flask import request
+from aviso_monitoring import __version__ as monitoring_version
+from aviso_monitoring.collector.time_collector import TimeCollector
+from aviso_monitoring.reporter.aviso_rest_reporter import AvisoRestMetricType
+from aviso_rest import __version__, logger
+from aviso_rest.config import Config
+from cloudevents.http import from_http
+from flask import Flask, request
 from gunicorn import glogging
 from six import iteritems
-from cloudevents.http import from_http
-from aviso_rest import logger, __version__
+
 from pyaviso.custom_exceptions import InvalidInputError
+
 # from flask_swagger_ui import get_swaggerui_blueprint
 from pyaviso.notification_manager import NotificationManager
 from pyaviso.version import __version__ as aviso_version
-from aviso_rest.config import Config
-from aviso_monitoring.collector.time_collector import TimeCollector
-from aviso_monitoring import __version__ as monitoring_version
-from aviso_monitoring.reporter.aviso_rest_reporter import AvisoRestMetricType
-
 
 SWAGGER_URL = '/openapi'
 API_URL = 'frontend/web/openapi.yaml'

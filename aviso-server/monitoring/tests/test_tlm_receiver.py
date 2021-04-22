@@ -1,11 +1,12 @@
-import os
+import datetime
 import json
+import os
 import socket
 import time
+
 from aviso_monitoring import logger
-import datetime
-from aviso_monitoring.udp_server import UdpServer
 from aviso_monitoring.receiver import Receiver
+from aviso_monitoring.udp_server import UdpServer
 
 test_message = {
     "telemetry_type": "type1",

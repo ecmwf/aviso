@@ -7,15 +7,14 @@
 # nor does it submit to any jurisdiction.
 
 from datetime import datetime
-from typing import List, Dict
+from typing import Dict, List
 
-from . import event_listener_factory as elf
-from .event_listener import EventListener
-from .. import logger
-from .. import user_config
+from .. import logger, user_config
 from ..authentication.auth import Auth
 from ..custom_exceptions import EventListenerException
 from ..engine import engine_factory as ef
+from . import event_listener_factory as elf
+from .event_listener import EventListener
 
 
 class ListenerManager:

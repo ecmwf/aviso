@@ -7,8 +7,8 @@
 # nor does it submit to any jurisdiction.
 
 
-from .collector import Collector
 from .. import logger
+from .collector import Collector
 
 
 class UniqueCountCollector(Collector):

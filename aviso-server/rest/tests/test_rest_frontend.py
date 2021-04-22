@@ -8,8 +8,8 @@
 
 import json
 import os
-import time
 import threading
+import time
 
 import pytest
 import requests

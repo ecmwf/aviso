@@ -14,9 +14,9 @@ from typing import Dict
 import requests
 from cloudevents.http import CloudEvent, to_structured
 
-from . import trigger
 from .. import logger
 from ..custom_exceptions import TriggerException
+from . import trigger
 
 
 class ProtocolType(Enum):

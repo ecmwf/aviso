@@ -1,10 +1,15 @@
 import datetime
 import queue
+
 import requests
 from aviso_admin import config
 from aviso_admin.cleaner import Cleaner
 from aviso_admin.compactor import Compactor
-from aviso_monitoring.reporter.etcd_reporter import StoreSize, EtcdReporter, EtcdMetricType
+from aviso_monitoring.reporter.etcd_reporter import (
+    EtcdMetricType,
+    EtcdReporter,
+    StoreSize,
+)
 
 """
 This test simulates the store size cycle day by day including:

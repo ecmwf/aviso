@@ -7,9 +7,9 @@
 # nor does it submit to any jurisdiction.
 from enum import Enum
 
+from .. import logger
 from ..receiver import AVISO_REST_APP_NAME
 from .opsview_reporter import OpsviewReporter
-from .. import logger
 
 
 class AvisoRestReporter(OpsviewReporter):

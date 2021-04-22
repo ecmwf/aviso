@@ -13,14 +13,14 @@ import time
 from datetime import datetime
 from queue import Queue
 from shutil import rmtree
-from typing import List, Dict
+from typing import Dict, List
 
 import pyinotify
 
-from .engine import Engine
 from .. import logger
 from ..authentication.auth import Auth
 from ..user_config import EngineConfig
+from .engine import Engine
 
 
 # noinspection PyTypeChecker

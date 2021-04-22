@@ -6,8 +6,8 @@
 # granted to it by virtue of its status as an intergovernmental organisation
 # nor does it submit to any jurisdiction.
 
-from .auth import Auth
 from ..user_config import UserConfig
+from .auth import Auth
 
 
 class NoneAuth(Auth):

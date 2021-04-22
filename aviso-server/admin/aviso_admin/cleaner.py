@@ -12,7 +12,7 @@ import os
 import requests
 
 from . import logger
-from .utils import encode_to_str_base64, decode_to_bytes, incr_last_byte
+from .utils import decode_to_bytes, encode_to_str_base64, incr_last_byte
 
 DATE_FORMAT = "%Y%m%d"
 

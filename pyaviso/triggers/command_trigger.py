@@ -10,10 +10,10 @@ import os
 import subprocess
 from typing import Dict
 
-from . import trigger
-from .trigger import TriggerType
 from .. import logger
 from ..custom_exceptions import TriggerException
+from . import trigger
+from .trigger import TriggerType
 
 
 # noinspection PyProtectedMember

@@ -12,8 +12,8 @@ import sys
 
 import click
 
-from . import logger, __version__
-from .cli_aviso import user_config_setup, KNOWN_EXCEPTION
+from . import __version__, logger
+from .cli_aviso import KNOWN_EXCEPTION, user_config_setup
 from .service_config_manager import ServiceConfigManager
 from .user_config import UserConfig
 

@@ -11,11 +11,11 @@ import signal
 import sys
 import threading
 import time
-from typing import List, Dict
+from typing import Dict, List
 
 import click
 
-from pyaviso import logger, __version__
+from pyaviso import __version__, logger
 from pyaviso import user_config as conf
 from pyaviso.custom_exceptions import *
 from pyaviso.engine import EngineType

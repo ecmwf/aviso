@@ -6,11 +6,11 @@
 # granted to it by virtue of its status as an intergovernmental organisation
 # nor does it submit to any jurisdiction.
 
-from typing import Dict, Callable
+from typing import Callable, Dict
 
+from .. import logger
 from . import trigger
 from .trigger import TriggerType
-from .. import logger
 
 
 class FunctionTrigger(trigger.Trigger):

@@ -6,8 +6,9 @@
 # granted to it by virtue of its status as an intergovernmental organisation
 # nor does it submit to any jurisdiction.
 
-from . import logger
 import json
+
+from . import logger
 
 ETCD_APP_NAME="etcd"
 AVISO_AUTH_APP_NAME="aviso-auth"

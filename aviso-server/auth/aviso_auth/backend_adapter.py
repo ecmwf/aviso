@@ -11,7 +11,11 @@ from aviso_monitoring.collector.time_collector import TimeCollector
 from aviso_monitoring.reporter.aviso_auth_reporter import AvisoAuthMetricType
 
 from . import logger
-from .custom_exceptions import InvalidInputError, InternalSystemError, BackendUnavailableException
+from .custom_exceptions import (
+    BackendUnavailableException,
+    InternalSystemError,
+    InvalidInputError,
+)
 
 
 class BackendAdapter:

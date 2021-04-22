@@ -6,12 +6,13 @@
 # granted to it by virtue of its status as an intergovernmental organisation
 # nor does it submit to any jurisdiction.
 
-from abc import ABC
 import json
-import requests
-import urllib3
 import math
 import re
+from abc import ABC
+
+import requests
+import urllib3
 
 from .. import logger
 from ..config import Config

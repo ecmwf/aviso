@@ -14,7 +14,11 @@ from aviso_monitoring.collector.time_collector import TimeCollector
 from aviso_monitoring.reporter.aviso_auth_reporter import AvisoAuthMetricType
 
 from . import logger
-from .custom_exceptions import TokenNotValidException, InternalSystemError, AuthenticationUnavailableException
+from .custom_exceptions import (
+    AuthenticationUnavailableException,
+    InternalSystemError,
+    TokenNotValidException,
+)
 
 MAX_N_TRIES = 25
 

@@ -6,8 +6,8 @@
 # granted to it by virtue of its status as an intergovernmental organisation
 # nor does it submit to any jurisdiction.
 
-from .etcd_auth import EtcdAuth
 from ..user_config import UserConfig
+from .etcd_auth import EtcdAuth
 
 
 class EcmwfAuth(EtcdAuth):

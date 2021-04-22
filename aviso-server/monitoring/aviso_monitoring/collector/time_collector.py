@@ -8,8 +8,8 @@
 
 from timeit import default_timer as timer
 
-from .collector import Collector
 from .. import logger
+from .collector import Collector
 
 
 class TimeCollector(Collector):

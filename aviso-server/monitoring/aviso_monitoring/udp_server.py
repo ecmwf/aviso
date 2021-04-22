@@ -6,9 +6,10 @@
 # granted to it by virtue of its status as an intergovernmental organisation
 # nor does it submit to any jurisdiction.
 
+import socket
 from threading import Thread
 from typing import Dict
-import socket
+
 from . import logger
 
 msgFromServer = "Hello UDP Client"

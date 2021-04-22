@@ -9,7 +9,7 @@
 import json
 import os
 from shutil import rmtree
-from typing import List, Dict
+from typing import Dict, List
 
 from . import logger
 from .authentication.auth import Auth

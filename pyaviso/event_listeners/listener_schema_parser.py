@@ -6,13 +6,13 @@
 # granted to it by virtue of its status as an intergovernmental organisation
 # nor does it submit to any jurisdiction.
 
-from enum import Enum
-from typing import Dict
 import json
 import os
+from enum import Enum
+from typing import Dict
 
+from .. import HOME_FOLDER, SYSTEM_FOLDER, logger
 from ..custom_exceptions import ServiceConfigException
-from .. import logger, HOME_FOLDER, SYSTEM_FOLDER
 
 LOCAL_SCHEMA_FOLDER = "service_configuration"
 LISTENER_SCHEMA_FILE_NAME = "event_listener_schema.json"

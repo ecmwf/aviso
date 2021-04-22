@@ -1,11 +1,17 @@
-import os
+import datetime
 import json
+import os
 import socket
 import time
+
 from aviso_monitoring import logger
-import datetime
+from aviso_monitoring.receiver import (
+    AVISO_AUTH_APP_NAME,
+    AVISO_REST_APP_NAME,
+    ETCD_APP_NAME,
+    Receiver,
+)
 from aviso_monitoring.udp_server import UdpServer
-from aviso_monitoring.receiver import Receiver, ETCD_APP_NAME, AVISO_REST_APP_NAME, AVISO_AUTH_APP_NAME
 
 warn_etcd_log = '<189>1 2021-04-13T09:02:09+00:00 aviso-etcd-4-7cc86d75b4-zrtnf etcd - - [origin enterpriseId="7464" software="aviso"][meta sequenceId="1"] 09:02:09.076897 W | etcdmain: no data-dir provided, using default data-dir ./default.etcd'
 

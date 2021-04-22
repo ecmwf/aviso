@@ -9,17 +9,17 @@
 import time
 
 import schedule
-from aviso_admin import logger, __version__
+from aviso_admin import __version__, logger
 from aviso_admin.cleaner import Cleaner
 from aviso_admin.compactor import Compactor
 from aviso_admin.config import Config
-from aviso_monitoring.reporter.aviso_rest_reporter import AvisoRestReporter
+from aviso_monitoring import __version__ as monitoring_version
+from aviso_monitoring.receiver import Receiver
 from aviso_monitoring.reporter.aviso_auth_reporter import AvisoAuthReporter
+from aviso_monitoring.reporter.aviso_rest_reporter import AvisoRestReporter
 from aviso_monitoring.reporter.etcd_reporter import EtcdReporter
 from aviso_monitoring.reporter.prometheus_reporter import PrometheusReporter
-from aviso_monitoring.receiver import Receiver
 from aviso_monitoring.udp_server import UdpServer
-from aviso_monitoring import __version__ as monitoring_version
 
 
 def main():

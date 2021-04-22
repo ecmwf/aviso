@@ -13,7 +13,7 @@ import requests
 
 from . import logger
 from .custom_exceptions import ServerException
-from .utils import encode_to_str_base64, decode_to_bytes
+from .utils import decode_to_bytes, encode_to_str_base64
 
 DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 

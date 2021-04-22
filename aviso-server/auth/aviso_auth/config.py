@@ -12,14 +12,14 @@ import logging.config
 import logging.handlers
 import os
 import re
-import sys
 import socket
+import sys
 from typing import Dict
 
 import yaml
 from aviso_monitoring.collector.config import Config as MonitoringConfig
 
-from . import logger, HOME_FOLDER, SYSTEM_FOLDER
+from . import HOME_FOLDER, SYSTEM_FOLDER, logger
 
 # Default configuration location
 CONF_FILE = "config.yaml"

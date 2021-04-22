@@ -6,15 +6,15 @@
 # granted to it by virtue of its status as an intergovernmental organisation
 # nor does it submit to any jurisdiction.
 
-from time import sleep
 import json
-from random import random
 import os
-from aviso_monitoring.udp_server import UdpServer
-from aviso_monitoring.collector.count_collector import UniqueCountCollector
-from aviso_monitoring.collector.config import Config
-from aviso_monitoring import logger
+from random import random
+from time import sleep
 
+from aviso_monitoring import logger
+from aviso_monitoring.collector.config import Config
+from aviso_monitoring.collector.count_collector import UniqueCountCollector
+from aviso_monitoring.udp_server import UdpServer
 
 
 def do_something(fix=False):

@@ -9,9 +9,9 @@
 import json
 from typing import Dict
 
+from .. import logger
 from . import trigger
 from .trigger import TriggerType
-from .. import logger
 
 
 class EchoTrigger(trigger.Trigger):

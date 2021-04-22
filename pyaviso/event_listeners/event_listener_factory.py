@@ -9,10 +9,10 @@
 from datetime import datetime
 from typing import Dict, List, Optional
 
-from . import event_listener as el
 from .. import logger
 from ..engine.engine_factory import EngineFactory
 from ..triggers import trigger_factory as tf
+from . import event_listener as el
 
 
 class EventListenerFactory:

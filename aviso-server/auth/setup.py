@@ -6,9 +6,10 @@
 # granted to it by virtue of its status as an intergovernmental organisation
 # nor does it submit to any jurisdiction.
 
-from aviso_auth import __version__
-from setuptools import setup, find_packages
 import pathlib
+
+from aviso_auth import __version__
+from setuptools import find_packages, setup
 
 INSTALL_REQUIRES = (pathlib.Path(__file__).parent / "requirements.txt").read_text().splitlines()
 

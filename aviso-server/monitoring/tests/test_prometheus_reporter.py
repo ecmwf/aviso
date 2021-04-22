@@ -6,18 +6,18 @@
 # granted to it by virtue of its status as an intergovernmental organisation
 # nor does it submit to any jurisdiction.
 
-import os
 import datetime
+import os
 import time
-import pytest
 from multiprocessing import Process
-import requests
 
+import pytest
+import requests
 from aviso_monitoring import logger
-from aviso_monitoring.reporter.prometheus_reporter import PrometheusReporter
-from aviso_monitoring.reporter.aviso_auth_reporter import AvisoAuthMetricType
-from aviso_monitoring.receiver import Receiver, AVISO_AUTH_APP_NAME
 from aviso_monitoring.config import Config
+from aviso_monitoring.receiver import AVISO_AUTH_APP_NAME, Receiver
+from aviso_monitoring.reporter.aviso_auth_reporter import AvisoAuthMetricType
+from aviso_monitoring.reporter.prometheus_reporter import PrometheusReporter
 
 counter_type = AvisoAuthMetricType.auth_users_counter.name
 config = {

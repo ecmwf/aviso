@@ -9,17 +9,17 @@
 import base64
 import http.client
 import logging
-from typing import List, Dict
 import time
+from typing import Dict, List
 
 import requests
 
-from .etcd_engine import EtcdEngine, MAX_KV_RETURNED
 from .. import logger
 from ..authentication.auth import Auth
 from ..authentication.etcd_auth import EtcdAuth
 from ..custom_exceptions import EngineException, EngineHistoryNotAvailableError
 from ..user_config import EngineConfig
+from .etcd_engine import MAX_KV_RETURNED, EtcdEngine
 
 
 class EtcdRestEngine(EtcdEngine):

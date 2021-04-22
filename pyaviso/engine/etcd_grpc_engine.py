@@ -6,18 +6,17 @@
 # granted to it by virtue of its status as an intergovernmental organisation
 # nor does it submit to any jurisdiction.
 
-from typing import List, Dict
+from typing import Dict, List
 
 import grpc
-from etcd3 import Etcd3Client
-from etcd3 import etcdrpc
+from etcd3 import Etcd3Client, etcdrpc
 
-from .etcd_engine import EtcdEngine, MAX_KV_RETURNED
 from .. import logger
 from ..authentication.auth import Auth
 from ..authentication.etcd_auth import EtcdAuth
 from ..custom_exceptions import EngineException, EngineHistoryNotAvailableError
 from ..user_config import EngineConfig
+from .etcd_engine import MAX_KV_RETURNED, EtcdEngine
 
 
 # noinspection PyUnboundLocalVariable,PyUnresolvedReferences

@@ -6,13 +6,14 @@
 # granted to it by virtue of its status as an intergovernmental organisation
 # nor does it submit to any jurisdiction.
 
-from time import sleep
 import json
 import os
-from aviso_monitoring.udp_server import UdpServer
-from aviso_monitoring.collector.time_collector import TimeCollector
-from aviso_monitoring.collector.config import Config
+from time import sleep
+
 from aviso_monitoring import logger
+from aviso_monitoring.collector.config import Config
+from aviso_monitoring.collector.time_collector import TimeCollector
+from aviso_monitoring.udp_server import UdpServer
 
 
 def take_some_time(seconds=0.1, flag=False, flag2=True):

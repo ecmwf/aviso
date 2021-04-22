@@ -6,12 +6,16 @@
 # granted to it by virtue of its status as an intergovernmental organisation
 # nor does it submit to any jurisdiction.
 
-import os
 import datetime
+import os
+
 from aviso_monitoring import logger
-from aviso_monitoring.reporter.aviso_auth_reporter import AvisoAuthReporter, AvisoAuthMetricType
-from aviso_monitoring.receiver import Receiver, AVISO_AUTH_APP_NAME
 from aviso_monitoring.config import Config
+from aviso_monitoring.receiver import AVISO_AUTH_APP_NAME, Receiver
+from aviso_monitoring.reporter.aviso_auth_reporter import (
+    AvisoAuthMetricType,
+    AvisoAuthReporter,
+)
 
 time_type = AvisoAuthMetricType.auth_resp_time.name
 config = {

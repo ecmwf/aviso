@@ -11,7 +11,7 @@ import os
 
 import requests
 from aviso_admin import config, logger
-from aviso_admin.cleaner import Cleaner, DATE_FORMAT
+from aviso_admin.cleaner import DATE_FORMAT, Cleaner
 from aviso_admin.utils import encode_to_str_base64
 
 

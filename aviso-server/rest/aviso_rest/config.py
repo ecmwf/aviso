@@ -12,14 +12,17 @@ import logging.config
 import logging.handlers
 import os
 import re
+import socket
 import sys
 from typing import Dict
+
 import yaml
-from yaml import Loader
-import socket
-from . import logger, HOME_FOLDER, SYSTEM_FOLDER
-from pyaviso.user_config import UserConfig as AvisoConfig
 from aviso_monitoring.collector.config import Config as MonitoringConfig
+from yaml import Loader
+
+from pyaviso.user_config import UserConfig as AvisoConfig
+
+from . import HOME_FOLDER, SYSTEM_FOLDER, logger
 
 # Default configuration location
 CONF_FILE = "config.yaml"

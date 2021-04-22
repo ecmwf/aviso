@@ -5,13 +5,12 @@
 # In applying this licence, ECMWF does not waive the privileges and immunities
 # granted to it by virtue of its status as an intergovernmental organisation
 # nor does it submit to any jurisdiction.
-from enum import Enum
 from datetime import datetime, timedelta
+from enum import Enum
 
+from .. import logger
 from ..receiver import AVISO_AUTH_APP_NAME
 from .opsview_reporter import OpsviewReporter
-from .. import logger
-
 
 
 class AvisoAuthReporter(OpsviewReporter):

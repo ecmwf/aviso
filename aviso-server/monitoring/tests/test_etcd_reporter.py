@@ -10,8 +10,8 @@ import os
 
 from aviso_monitoring import logger
 from aviso_monitoring.config import Config
+from aviso_monitoring.receiver import ETCD_APP_NAME, Receiver
 from aviso_monitoring.reporter.etcd_reporter import EtcdReporter
-from aviso_monitoring.receiver import Receiver, ETCD_APP_NAME
 
 tlm_type = "test2"  # to be defined
 config = {

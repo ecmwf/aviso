@@ -7,9 +7,9 @@
 # nor does it submit to any jurisdiction.
 
 import collections.abc
+import os
 import sys
 from typing import Dict
-import os
 
 from .. import logger
 

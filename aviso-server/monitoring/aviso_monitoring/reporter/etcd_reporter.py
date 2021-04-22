@@ -6,12 +6,13 @@
 # granted to it by virtue of its status as an intergovernmental organisation
 # nor does it submit to any jurisdiction.
 
-import requests
 from enum import Enum
 
-from .opsview_reporter import OpsviewReporter
-from ..receiver import ETCD_APP_NAME
+import requests
+
 from .. import logger
+from ..receiver import ETCD_APP_NAME
+from .opsview_reporter import OpsviewReporter
 
 
 class EtcdReporter(OpsviewReporter):

@@ -14,11 +14,11 @@ import logging.handlers
 import os
 import re
 import sys
-from typing import Optional, Dict
+from typing import Dict, Optional
 
 import yaml
 
-from . import logger, HOME_FOLDER, SYSTEM_FOLDER
+from . import HOME_FOLDER, SYSTEM_FOLDER, logger
 from .authentication import AuthType
 from .engine import EngineType
 from .event_listeners.listener_schema_parser import ListenerSchemaParserType

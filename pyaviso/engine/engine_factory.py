@@ -6,11 +6,11 @@
 # granted to it by virtue of its status as an intergovernmental organisation
 # nor does it submit to any jurisdiction.
 
-from . import EngineType
 from .. import logger
 from ..authentication.auth import Auth
 from ..custom_exceptions import EngineException
 from ..user_config import EngineConfig
+from . import EngineType
 
 
 class EngineFactory:

@@ -8,15 +8,15 @@
 
 import time
 from datetime import datetime
-from typing import List, Dict, Tuple
+from typing import Dict, List, Tuple
 
 import yaml
 
-from . import logger, user_config, exit_channel
+from . import exit_channel, logger, user_config
 from .authentication.auth import Auth
 from .custom_exceptions import EventListenerException, InvalidInputError
 from .engine import engine_factory as ef
-from .event_listeners.event_listener import EventListener, DEFAULT_PAYLOAD_KEY
+from .event_listeners.event_listener import DEFAULT_PAYLOAD_KEY, EventListener
 from .event_listeners.listener_manager import ListenerManager
 
 

@@ -1,10 +1,16 @@
 import os
-import yaml
 import random
 import subprocess
+
+import yaml
 from aviso_auth import config, logger
 from aviso_auth.authorisation import Authoriser
-from aviso_auth.custom_exceptions import ForbiddenDestinationException, InternalSystemError, UserNotFoundException, AuthorisationUnavailableException
+from aviso_auth.custom_exceptions import (
+    AuthorisationUnavailableException,
+    ForbiddenDestinationException,
+    InternalSystemError,
+    UserNotFoundException,
+)
 
 
 def conf() -> config.Config:  # this automatically configure the logging

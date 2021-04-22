@@ -7,17 +7,18 @@
 # nor does it submit to any jurisdiction.
 
 import json
-import urllib3
-from flask import Flask
-from flask import Response
 import logging
-from enum import Enum
 from datetime import datetime, timedelta
+from enum import Enum
 from threading import Thread
+
+import urllib3
+from flask import Flask, Response
 
 from .. import logger
 from ..config import Config
 from .aviso_auth_reporter import AvisoAuthMetricType
+
 
 class PrometheusReporter(Thread):
     """

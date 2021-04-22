@@ -14,7 +14,12 @@ from aviso_monitoring.reporter.aviso_auth_reporter import AvisoAuthMetricType
 from requests.auth import HTTPBasicAuth
 
 from . import logger
-from .custom_exceptions import InternalSystemError, InvalidInputError, UserNotFoundException, AuthorisationUnavailableException
+from .custom_exceptions import (
+    AuthorisationUnavailableException,
+    InternalSystemError,
+    InvalidInputError,
+    UserNotFoundException,
+)
 
 
 class Authoriser:

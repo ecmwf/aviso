@@ -13,13 +13,13 @@ import time
 from abc import ABC, abstractmethod
 from datetime import datetime
 from queue import Queue
-from typing import Tuple, Any
+from typing import Any, Tuple
 
-from .engine import Engine, DATE_FORMAT
-from .. import logger, HOME_FOLDER
+from .. import HOME_FOLDER, logger
 from ..authentication.auth import Auth
-from ..custom_exceptions import EngineHistoryNotAvailableError, EngineException
+from ..custom_exceptions import EngineException, EngineHistoryNotAvailableError
 from ..user_config import EngineConfig
+from .engine import DATE_FORMAT, Engine
 
 MAX_KV_RETURNED = 10000
 LOCAL_STATE_FOLDER = "etcd/last"

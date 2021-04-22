@@ -1,15 +1,16 @@
-import pytest
 import os
+import threading
+import time
+
+import pytest
 import requests
 import yaml
-import time
-import threading
-from flask import Flask
-from werkzeug.exceptions import InternalServerError
-
 from aviso_auth import config, logger
 from aviso_auth.authorisation import Authoriser
 from aviso_auth.frontend import Frontend
+from flask import Flask
+from werkzeug.exceptions import InternalServerError
+
 
 def conf() -> config.Config:  # this automatically configure the logging
     c = config.Config(conf_path=os.path.expanduser("~/.aviso-auth/testing/config.yaml"))

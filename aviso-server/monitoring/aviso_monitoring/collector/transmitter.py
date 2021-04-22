@@ -6,11 +6,11 @@
 # granted to it by virtue of its status as an intergovernmental organisation
 # nor does it submit to any jurisdiction.
 
-from threading import Thread
-import time
 import datetime
 import json
 import socket
+import time
+from threading import Thread
 
 from .. import logger
 
