@@ -9,10 +9,8 @@
 import json
 import logging
 from datetime import datetime, timedelta
-from enum import Enum
 from threading import Thread
 
-import urllib3
 from flask import Flask, Response
 
 from .. import logger
@@ -22,8 +20,8 @@ from .aviso_auth_reporter import AvisoAuthMetricType
 
 class PrometheusReporter(Thread):
     """
-    This class provides an endpoint for the Prometheus scraper. It is meant to provide to Prometheus the metrics not required by Opsview but still useful for
-    investigation
+    This class provides an endpoint for the Prometheus scraper. It is meant to provide to Prometheus the metrics not
+    required by Opsview but still useful for investigation
     """
 
     def __init__(self, config: Config, msg_receiver):
@@ -58,7 +56,7 @@ class PrometheusReporter(Thread):
 
         @handler.route("/metrics", methods=["GET"])
         def metrics():
-            logger.debug(f"Requesting metrics...")
+            logger.debug("Requesting metrics...")
 
             resp_content = ""
             # check for each tlm
@@ -98,7 +96,7 @@ class PrometheusReporter(Thread):
         aggr_values = []
         for tlm in r_tlms:
             for v in tlm[tlm_type + "_values"]:
-                if not v in aggr_values:
+                if v not in aggr_values:
                     aggr_values.append(v)
 
         agg_tlm = {
@@ -108,10 +106,11 @@ class PrometheusReporter(Thread):
         return agg_tlm
 
     def run(self):
-        logger.info(f"Running prometheus reporter on server flask")
+        logger.info("Running prometheus reporter on server flask")
 
         # flask internal server for non-production environments but it's fine for this usecase
-        # Gunicorn does not work because spread the request over independent processes and therefore the Receiver object cannot be shared in this way
+        # Gunicorn does not work because spread the request over independent processes and therefore the Receiver
+        # object cannot be shared in this way
         self.handler.run(host=self.host, port=self.port, use_reloader=False)
 
 
@@ -160,7 +159,8 @@ class UsersCounter:
         Returns:
             str: metric
         """
-        metric = "# HELP aviso_auth_users Number of users in the last 24 hours\n# TYPE aviso_auth_users gauge\naviso_auth_users "
+        metric = "# HELP aviso_auth_users Number of users in the last 24 hours\n# TYPE aviso_auth_users\
+         gauge\naviso_auth_users "
         if tlm:
             users_count = tlm.get(self.metric_name + "_counter")
             metric += f"{users_count}\n"

@@ -16,7 +16,6 @@ from . import trigger
 from .trigger import TriggerType
 
 
-# noinspection PyProtectedMember
 class CommandTrigger(trigger.Trigger):
     """
     This class implements the 'Shell' trigger by executing an external shell script defined by the user.
@@ -32,7 +31,7 @@ class CommandTrigger(trigger.Trigger):
         self.trigger_type = TriggerType.command
 
     def execute(self):
-        logger.info(f"Starting Command Trigger...'")
+        logger.info("Starting Command Trigger...'")
 
         # prepare the variables passed as local variables
         my_env = os.environ.copy()  # don't change the caller environment
@@ -52,9 +51,9 @@ class CommandTrigger(trigger.Trigger):
         out = subprocess.Popen(final_command, env=my_env, shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         # log the results
         stdout, stderr = out.communicate()
-        if stdout is not None and stdout.decode() is not "":
+        if stdout is not None and stdout.decode() != "":
             logger.info(stdout.decode())
-        if stderr is not None and stderr.decode() is not "":
+        if stderr is not None and stderr.decode() != "":
             raise TriggerException(stderr.decode())
 
-        logger.debug(f"Command Trigger completed")
+        logger.debug("Command Trigger completed")

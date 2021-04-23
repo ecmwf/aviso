@@ -27,7 +27,7 @@ class AvisoRestReporter(OpsviewReporter):
         Returns:
             list: list of the metrics aggregated
         """
-        logger.debug(f"Processing tlms for aviso-rest...")
+        logger.debug("Processing tlms for aviso-rest...")
 
         # array of metrics to return
         metrics = []
@@ -109,7 +109,7 @@ class ResponseTime(AvisoRestChecker):
             Dict: metric
         """
         status = 0
-        message = f"Response time is nominal"
+        message = "Response time is nominal"
         if tlm:
             resp_time_max = tlm.get(self.metric_name + "_max")  # we evaluate with the max value
             if resp_time_max > self.critical_t:
@@ -144,7 +144,7 @@ class ErrorLog(AvisoRestChecker):
     def metric(self):
         # defaults
         status = 0
-        message = f"No error to report"
+        message = "No error to report"
 
         # fetch the error log
         assert self.msg_receiver, "Msg receiver is None"
@@ -183,10 +183,10 @@ class PodAvailable(AvisoRestChecker):
         super().__init__(*args, **kwargs)
 
     def metric(self):
-        pattern = 'kube_deployment_status_replicas{namespace="aviso",deployment="aviso-rest-\w+"}'
+        pattern = r'kube_deployment_status_replicas{namespace="aviso",deployment="aviso-rest-\w+"}'
         # defaults
         status = 0
-        message = f"All pods available"
+        message = "All pods available"
         m_status = None
 
         # fetch the cluster metrics

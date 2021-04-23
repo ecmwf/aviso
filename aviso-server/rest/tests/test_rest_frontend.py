@@ -321,7 +321,6 @@ def test_method_not_allowed_405():
     assert resp.status_code == 405
 
 
-# noinspection PyPep8
 def test_notify_ttl():
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     body = {
@@ -332,7 +331,7 @@ def test_notify_ttl():
                 "target": "E1",
                 "class": "od",
                 "date": "20191112",
-                "destination": "FOO",
+                "destination": "F",
                 "domain": "g",
                 "expver": "1",
                 "step": "1",
@@ -357,7 +356,7 @@ def test_notify_ttl():
 
     # now retrieve it
     ps = _parse_inline_params(
-        "event=dissemination,target=E1,class=od,date=20191112,destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=0"
+        "event=dissemination,target=E1,class=od,date=20191112,destination=F,domain=g,expver=1,step=1,stream=enfo,time=0"
     )
     result = NotificationManager().value(ps, config=config.aviso)
     assert "xxx" in result
@@ -367,7 +366,7 @@ def test_notify_ttl():
 
     # now test the value command
     ps = _parse_inline_params(
-        "event=dissemination,target=E1,class=od,date=20191112,destination=FOO,domain=g,expver=1,step=1,stream=enfo,time=0"
+        "event=dissemination,target=E1,class=od,date=20191112,destination=F,domain=g,expver=1,step=1,stream=enfo,time=0"
     )
     result = NotificationManager().value(ps, config=config.aviso)
     assert result is None
@@ -464,7 +463,7 @@ def test_send_notification():
         "specversion": "1.0",
         "time": "2020-03-02T13:34:40.245Z",
     }
-    resp = requests.post(f"http://localhost:30003/api/v1/notification", json=body)
+    resp = requests.post("http://localhost:30003/api/v1/notification", json=body)
     assert resp.ok
     assert resp.status_code == 200
     assert resp.text

@@ -23,7 +23,6 @@ from ..user_config import EngineConfig
 from .engine import Engine
 
 
-# noinspection PyTypeChecker
 class FileBasedEngine(Engine):
     """
     This class is a specialisation of the Engine class. It implements a file-based server to be used for testing
@@ -140,7 +139,7 @@ class FileBasedEngine(Engine):
         :param ttl: Not supported in this implementation
         :return: True if successful
         """
-        logger.debug(f"Calling push...")
+        logger.debug("Calling push...")
 
         # first delete the keys requested
         if ks_delete is not None and len(ks_delete) != 0:
@@ -180,7 +179,7 @@ class FileBasedEngine(Engine):
                 logger.debug("", exc_info=True)
                 return False
 
-        logger.debug(f"Transaction completed")
+        logger.debug("Transaction completed")
 
         return True
 
@@ -217,11 +216,9 @@ class FileBasedEngine(Engine):
 
             # create a watch manager
             wm = pyinotify.WatchManager()  # Watch Manager
-            # noinspection PyUnresolvedReferences
             mask = pyinotify.IN_CLOSE_WRITE  # watched events
 
             # define a class to handle the new events
-            # noinspection PyPep8Naming
             class EventHandler(pyinotify.ProcessEvent):
                 def __init__(self, engine):
                     super(EventHandler, self).__init__()
@@ -247,7 +244,7 @@ class FileBasedEngine(Engine):
             # add the handler to the watch manager and define the watching task
             handler = EventHandler(engine=self)
             notifier = pyinotify.Notifier(wm, handler, read_freq=self._polling_interval)
-            wdd = wm.add_watch(key, mask, rec=True, auto_add=True)
+            wm.add_watch(key, mask, rec=True, auto_add=True)
 
             # encapsulate the watcher in a daemon thread so we can stop it
             def t_run():

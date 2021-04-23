@@ -111,7 +111,7 @@ class EtcdEngine(Engine, ABC):
                 elif next_rev:
                     logger.info("Search completed, retrieving...")
                 else:
-                    logger.error(f"Error in one of the listening process")
+                    logger.error("Error in one of the listening process")
                     channel.put(False)
                     return
 
@@ -200,7 +200,7 @@ class EtcdEngine(Engine, ABC):
                 try:
                     # delete the file
                     os.remove(full_rev_path)
-                    logger.debug(f"Last revision file has been successfully deleted")
+                    logger.debug("Last revision file has been successfully deleted")
                 except Exception:
                     logger.warning(f"Deleting the last revision file has failed: {full_rev_path}")
                     logger.debug("", exc_info=True)
@@ -257,7 +257,7 @@ class EtcdEngine(Engine, ABC):
         try:
             kvs = self.pull(key=key, prefix=False, rev=rev)
         # in case of retrieving a compacted revision we will get a 400 error with a proper reason
-        except EngineHistoryNotAvailableError as e:
+        except EngineHistoryNotAvailableError:
             logger.debug(f"Revision {rev} too old for current history")
             return rev, None, rev, None  # return in a way that is clear that we arrived at the end of the history
 

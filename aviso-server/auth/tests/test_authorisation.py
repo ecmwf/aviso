@@ -7,7 +7,6 @@ from aviso_auth import config, logger
 from aviso_auth.authorisation import Authoriser
 from aviso_auth.custom_exceptions import (
     AuthorisationUnavailableException,
-    ForbiddenDestinationException,
     InternalSystemError,
     UserNotFoundException,
 )
@@ -35,7 +34,7 @@ def test_not_allowed_destinations():
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     auth = Authoriser(conf())
     try:
-        destinations = auth._allowed_destinations("fake_user")
+        auth._allowed_destinations("fake_user")
     except Exception as e:
         assert isinstance(e, UserNotFoundException)
         assert "fake_user not found" in str(e)
@@ -47,7 +46,7 @@ def test_bad_url():
     c.authorisation_server["url"] = "https://fake_url.ecmwf.int"
     auth = Authoriser(c)
     try:
-        destinations = auth._allowed_destinations(valid_user())
+        auth._allowed_destinations(valid_user())
     except Exception as e:
         assert isinstance(e, AuthorisationUnavailableException)
 
@@ -56,15 +55,13 @@ def test_timeout():
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     port = random.randint(10000, 20000)
     # create a process listening to a port
-    out1 = subprocess.Popen(
-        f"nc -l {port}", shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-    )
+    subprocess.Popen(f"nc -l {port}", shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     c = conf()
     c.authorisation_server["url"] = f"https://127.0.0.1:{port}"
     c.authorisation_server["req_timeout"] = 1
     auth = Authoriser(c)
     try:
-        destinations = auth._allowed_destinations(valid_user())
+        auth._allowed_destinations(valid_user())
     except Exception as e:
         assert isinstance(e, AuthorisationUnavailableException)
 
@@ -75,7 +72,7 @@ def test_bad_credentials():
     c.authorisation_server["username"] = "fake_user"
     auth = Authoriser(c)
     try:
-        destinations = auth._allowed_destinations(valid_user())
+        auth._allowed_destinations(valid_user())
     except Exception as e:
         assert isinstance(e, InternalSystemError)
 

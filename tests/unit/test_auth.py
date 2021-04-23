@@ -58,6 +58,6 @@ def test_etcd_auth_fail(conf):
     try:
         eng._authenticate()
         assert False
-    except Exception as ignore:
+    except Exception:
         pass
     assert auth1.token is None

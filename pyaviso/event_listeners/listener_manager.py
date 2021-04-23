@@ -147,7 +147,7 @@ class ListenerManager:
             try:
                 for ev_listener in listener_factory.create_listeners(ls, from_date, to_date, payload_key):
                     event_listeners.append(ev_listener)
-                logger.debug(f"Listener dictionary correctly parsed")
+                logger.debug("Listener dictionary correctly parsed")
             except Exception as e:
                 raise EventListenerException(f"Not able to load listener dictionary {ls}: {e}")
 

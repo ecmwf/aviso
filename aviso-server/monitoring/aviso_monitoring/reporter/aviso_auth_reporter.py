@@ -5,7 +5,6 @@
 # In applying this licence, ECMWF does not waive the privileges and immunities
 # granted to it by virtue of its status as an intergovernmental organisation
 # nor does it submit to any jurisdiction.
-from datetime import datetime, timedelta
 from enum import Enum
 
 from .. import logger
@@ -28,7 +27,7 @@ class AvisoAuthReporter(OpsviewReporter):
         Returns:
             list: list of the metrics aggregated
         """
-        logger.debug(f"Processing tlms aviso-auth...")
+        logger.debug("Processing tlms aviso-auth...")
 
         # array of metrics to return
         metrics = []
@@ -124,7 +123,7 @@ class ResponseTime(AvisoAuthChecker):
             Dict: metric
         """
         status = 0
-        message = f"Response time is nominal"
+        message = "Response time is nominal"
         if tlms:
             resp_time_max = 0
             for tlm in tlms:
@@ -159,7 +158,7 @@ class ErrorLog(AvisoAuthChecker):
     def metric(self):
         # defaults
         status = 0
-        message = f"No error to report"
+        message = "No error to report"
 
         # fetch the error log
         assert self.msg_receiver, "Msg receiver is None"
@@ -198,7 +197,7 @@ class PodAvailable(AvisoAuthChecker):
         super().__init__(*args, **kwargs)
 
     def metric(self):
-        pattern = 'kube_deployment_status_replicas{namespace="aviso",deployment="aviso-auth-\w+"}'
+        pattern = r'kube_deployment_status_replicas{namespace="aviso",deployment="aviso-auth-\w+"}'
         # defaults
         status = 0
         message = "All pods available"

@@ -48,7 +48,7 @@ class Cleaner:
             f"Not able to request destinations for {date_s}, status {resp.status_code}, "
             f"{resp.reason}, {resp.content.decode()}"
         )
-        logger.debug(f"Query for destinations completed")
+        logger.debug("Query for destinations completed")
         resp_body = resp.json()
 
         # read the body and extract the destinations
@@ -84,7 +84,7 @@ class Cleaner:
             f"{resp.reason}, {resp.content.decode()}"
         )
 
-        logger.debug(f"Deleting destinations completed")
+        logger.debug("Deleting destinations completed")
 
         # check how many keys have been deleted
         resp_body = resp.json()
@@ -122,7 +122,7 @@ class Cleaner:
             f"Not able to delete keys for {date_s}, status {resp.status_code}, "
             f"{resp.reason}, {resp.content.decode()}"
         )
-        logger.debug(f"Deleting keys completed")
+        logger.debug("Deleting keys completed")
 
         # check how many keys have been deleted
         resp_body = resp.json()

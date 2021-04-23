@@ -9,7 +9,7 @@
 import logging
 from queue import Queue
 
-from .version import __version__
+from .version import __version__  # noqa: F401
 
 # setting application logger - this goes before anything else
 logger = logging.getLogger("aviso")
@@ -24,5 +24,4 @@ SYSTEM_FOLDER = "/etc/aviso"
 # This is a thread-safe communication channel. It is used to tell the main thread when to terminate.
 exit_channel = Queue()
 
-# noinspection PyPep8
-from .notification_manager import NotificationManager
+from .notification_manager import NotificationManager  # noqa: F401, E402

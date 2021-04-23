@@ -17,7 +17,12 @@ import click
 
 from pyaviso import __version__, logger
 from pyaviso import user_config as conf
-from pyaviso.custom_exceptions import *
+from pyaviso.custom_exceptions import (
+    EngineException,
+    EventListenerException,
+    InvalidInputError,
+    TriggerException,
+)
 from pyaviso.engine import EngineType
 from pyaviso.notification_manager import NotificationManager
 from pyaviso.service_config_manager import ServiceConfigException
@@ -67,7 +72,7 @@ def catch_all_exceptions(cls, handler):
         def invoke(self, ctx):
             try:
                 return super(Cls, self).invoke(ctx)
-            except Exception as e:
+            except Exception:
                 # call the handler
                 handler()
 
@@ -207,7 +212,6 @@ def cli():
     pass
 
 
-# noinspection PyIncorrectDocstring
 @click.command(cls=catch_all_exceptions(click.Command, handler=stop_listeners), context_settings=CONTEXT_SETTINGS)
 @user_config_setup
 @notification_server_setup
@@ -265,7 +269,6 @@ def listen(listener_files: List[str], configuration: conf.UserConfig, from_date,
         sys.exit(-1)
 
 
-# noinspection PyIncorrectDocstring
 @click.command(context_settings=CONTEXT_SETTINGS)
 @click.argument("parameters", required=True)
 @user_config_setup
@@ -293,7 +296,6 @@ def key(parameters: str, configuration: conf.UserConfig):
         sys.exit(-1)
 
 
-# noinspection PyIncorrectDocstring
 @click.command(context_settings=CONTEXT_SETTINGS)
 @click.argument("parameters", required=True)
 @user_config_setup
@@ -321,7 +323,6 @@ def value(parameters: str, configuration: conf.UserConfig):
         sys.exit(-1)
 
 
-# noinspection PyIncorrectDocstring
 @click.command(context_settings=CONTEXT_SETTINGS)
 @click.argument("parameters", required=True)
 @user_config_setup

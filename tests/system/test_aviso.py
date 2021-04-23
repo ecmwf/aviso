@@ -9,34 +9,23 @@
 import contextlib
 import logging
 import os
-import random
-import subprocess
+import time
 from datetime import datetime
-from multiprocessing import Process
 from shutil import rmtree
 
 import pytest
 from click.testing import CliRunner
-from flask import Flask, request
 
-from pyaviso import HOME_FOLDER, user_config
+from pyaviso import HOME_FOLDER, NotificationManager, logger, user_config
 from pyaviso.authentication import auth
-from pyaviso.cli_aviso import *
-from pyaviso.cli_aviso import _parse_inline_params
+from pyaviso.cli_aviso import _parse_inline_params, key, notify, value
 from pyaviso.engine.engine_factory import EngineType
 from pyaviso.engine.etcd_engine import LOCAL_STATE_FOLDER
 from pyaviso.engine.etcd_grpc_engine import EtcdGrpcEngine
 from pyaviso.engine.etcd_rest_engine import EtcdRestEngine
 from pyaviso.engine.file_based_engine import FileBasedEngine
-from pyaviso.event_listeners.listener_schema_parser import ListenerSchemaParser
 
 aviso = NotificationManager()
-
-
-def schema():
-    # Load the schema
-    listener_schema = ListenerSchemaParser().load(conf)
-    return listener_schema["flight"]
 
 
 def create_conf() -> user_config.UserConfig:  # this automatically configure the logging
@@ -100,7 +89,6 @@ def engine(config):
         eng = EtcdGrpcEngine(config.notification_engine, authenticator)
     elif config.notification_engine.type == EngineType.FILE_BASED:
         eng = FileBasedEngine(config.notification_engine, authenticator)
-    # noinspection PyUnboundLocalVariable
     return eng
 
 
@@ -138,7 +126,7 @@ def reset_previuous_run():
     if os.path.exists(full_path):
         try:
             os.remove(full_path)
-        except Exception as e:
+        except Exception:
             pass
     return full_path
 
@@ -186,7 +174,6 @@ def test_key(config):
 def test_notify_and_value(config):
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
-    # noinspection PyPep8
     result = runner.invoke(
         notify, ["event=flight,country=Italy,airport=fco,date=20210101,number=AZ203,payload=Departed"]
     )
@@ -211,7 +198,6 @@ def test_notify_and_value(config):
 def test_notify_no_payload(config):
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
-    # noinspection PyPep8
     result = runner.invoke(notify, ["event=flight,country=Italy,airport=fco,date=20210101,number=AZ203"])
 
     assert result.exit_code == 0
@@ -227,7 +213,6 @@ def test_notify_no_payload(config):
 def test_notify_test(config):
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
-    # noinspection PyPep8
     result = runner.invoke(
         notify, ["event=flight,country=Italy,airport=fco,date=20210101,number=AZ203,payload=Departed", "--test"]
     )
@@ -242,7 +227,6 @@ def test_notify_ttl(config):
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
 
     runner = CliRunner()
-    # noinspection PyPep8
     result = runner.invoke(
         notify, ["event=flight,country=Italy,airport=fco,date=20210101,number=AZ203,payload=Departed,ttl=1"]
     )

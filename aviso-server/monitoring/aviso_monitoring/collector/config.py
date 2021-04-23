@@ -26,8 +26,8 @@ class Config:
         Args:
             transmitter ([Dict], optional): [configuration dictionary for the transmitter]. Defaults to None.
             enabled ([Bool], optional): [if False the component does not send any telemetry]. Defaults to None.
-            conf_from_file ([Dict], optional): [system configuration dictionary. This will be treated as if read from file, in the same
-        priority order]. Defaults to None.
+            conf_from_file ([Dict], optional): [system configuration dictionary. This will be treated as if read
+            from file, in the same priority order]. Defaults to None.
         """
 
         try:
@@ -46,7 +46,7 @@ class Config:
             self.transmitter = transmitter
             self.enabled = enabled
 
-            logger.debug(f"Loading configuration completed")
+            logger.debug("Loading configuration completed")
 
         except Exception as e:
             logger.error(f"Error occurred while setting the configuration, exception: {type(e)} {e}")

@@ -18,7 +18,7 @@ from ..custom_exceptions import EventListenerException
 from ..engine import EngineType
 from ..engine.engine import Engine
 from ..triggers import trigger_factory as tf
-from .validation import *
+from .validation import *  # noqa: F403
 
 DEFAULT_PAYLOAD_KEY = "payload"
 
@@ -168,7 +168,6 @@ class EventListener:
         :return:
         """
         # read the key format from the schema
-        # noinspection PyPep8
         key_put_format = EventListener._key_base_format(
             self.listener_schema, self.engine.engine_type
         ) + EventListener._key_stem_format(self.listener_schema, self.engine.engine_type)
@@ -403,7 +402,7 @@ class EventListener:
                     assert "type" in p_schema, f"Wrong schema structure, 'type' could not be located for {p}"
                     p_schema_c = p_schema.copy()
                     validator_class = p_schema_c.pop("type")
-                    validator: TypeHandler = eval(f"{validator_class}(key=p, **p_schema_c)")
+                    validator: TypeHandler = eval(f"{validator_class}(key=p, **p_schema_c)")  # noqa: F405
                     # format the values associated to this attribute
                     value = params[p]
                     if type(value) is list:

@@ -2,8 +2,6 @@ import json
 import os
 
 import pytest
-import requests
-import yaml
 from aviso_auth import config, logger
 from aviso_auth.authorisation import Authoriser
 from aviso_auth.backend_adapter import BackendAdapter
@@ -99,7 +97,7 @@ def test_bad_etcd_format_request():
     # make the call
     backend = BackendAdapter(conf())
     try:
-        resp = backend.forward_impl(request)
+        backend.forward_impl(request)
     except Exception as e:
         assert isinstance(e, InternalSystemError)
 
@@ -128,7 +126,7 @@ def test_bad_etcd_request_value():
     # make the call
     backend = BackendAdapter(conf())
     try:
-        resp = backend.forward_impl(request)
+        backend.forward_impl(request)
     except Exception as e:
         assert isinstance(e, InternalSystemError)
 
@@ -157,7 +155,7 @@ def test_future_rev():
     # make the call
     backend = BackendAdapter(conf())
     try:
-        resp = backend.forward_impl(request)
+        backend.forward_impl(request)
     except Exception as e:
         assert isinstance(e, InternalSystemError)
 
@@ -187,7 +185,7 @@ def test_compacted_rev():
     # make the call
     backend = BackendAdapter(conf())
     try:
-        resp = backend.forward_impl(request)
+        backend.forward_impl(request)
     except Exception as e:
         assert isinstance(e, InvalidInputError)
 
@@ -308,6 +306,6 @@ def test_no_body():
     # make the call
     backend = BackendAdapter(conf())
     try:
-        resp = backend.forward_impl(request)
+        backend.forward_impl(request)
     except Exception as e:
         assert isinstance(e, InvalidInputError)

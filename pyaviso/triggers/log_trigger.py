@@ -25,7 +25,7 @@ class LogTrigger(trigger.Trigger):
         self.trigger_type = TriggerType.log
 
     def execute(self):
-        logger.info(f"Starting Log Trigger...")
+        logger.info("Starting Log Trigger...")
         # create a file handler for the log specified
         log_path = self.params.get("path")
         handler = logging.FileHandler(log_path, "a")
@@ -38,4 +38,4 @@ class LogTrigger(trigger.Trigger):
         logger.info(f"Notification received: {self.notification}")
         # remove the logger
         log.removeHandler(handler)
-        logger.info(f"Log Trigger completed")
+        logger.info("Log Trigger completed")

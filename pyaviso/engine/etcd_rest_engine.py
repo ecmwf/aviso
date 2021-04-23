@@ -125,7 +125,7 @@ class EtcdRestEngine(EtcdEngine):
         new_kvs: List[Dict[str, bytes]] = []
         resp_body = resp.json()
         if "kvs" in resp_body:
-            logger.debug(f"Building key-value list")
+            logger.debug("Building key-value list")
             for kv in resp_body["kvs"]:
                 new_kv = self._parse_raw_kv(kv, key_only)
                 new_kvs.append(new_kv)
@@ -173,7 +173,7 @@ class EtcdRestEngine(EtcdEngine):
         del_kvs: List[Dict[str, bytes]] = []
         resp_body = resp.json()
         if "prev_kvs" in resp_body:
-            logger.debug(f"Building key-value list")
+            logger.debug("Building key-value list")
             for kv in resp_body["prev_kvs"]:
                 new_kv = self._parse_raw_kv(kv)
                 del_kvs.append(new_kv)
@@ -189,7 +189,7 @@ class EtcdRestEngine(EtcdEngine):
         :param ttl: time to leave of the keys pushed, once expired the keys will be deleted
         :return: True if successful
         """
-        logger.debug(f"Calling push...")
+        logger.debug("Calling push...")
         url = self._base_url + "kv/txn"
 
         # first authenticate and use the token for the header
@@ -199,7 +199,7 @@ class EtcdRestEngine(EtcdEngine):
         if ttl:
             lease = self._lease(ttl)
 
-        logger.debug(f"Preparing the transaction statement")
+        logger.debug("Preparing the transaction statement")
         ops = []
         # first delete the keys requested
         if ks_delete is not None and len(ks_delete) != 0:
@@ -216,7 +216,6 @@ class EtcdRestEngine(EtcdEngine):
             v = self._encode_to_str_base64(kv["value"])
             put = {"requestPut": {"key": k, "value": v}}
             if ttl:
-                # noinspection PyUnboundLocalVariable
                 put["requestPut"]["lease"] = lease
             ops.append(put)
 
@@ -229,7 +228,7 @@ class EtcdRestEngine(EtcdEngine):
         except Exception as err:
             raise EngineException(f"Not able to execute the transaction, {str(err)}")
 
-        logger.debug(f"Transaction completed")
+        logger.debug("Transaction completed")
         resp_body = resp.json()
         # read the header
         if "header" in resp_body:
@@ -254,7 +253,7 @@ class EtcdRestEngine(EtcdEngine):
                 resp.raise_for_status()
             except Exception as err:
                 raise EngineException(f"Not able to authenticate {self.auth.username}, {str(err)}")
-            assert resp.json().get("token") is not None, f"No token found in authentication response"
+            assert resp.json().get("token") is not None, "No token found in authentication response"
             self.auth.token = resp.json()["token"]
 
             logger.debug(f"User {self.auth.username} successfully authenticated")
@@ -266,7 +265,7 @@ class EtcdRestEngine(EtcdEngine):
         :param: key used for the server request
         :return: latest revision of the notification server.
         """
-        logger.debug(f"Querying notification server for latest revision")
+        logger.debug("Querying notification server for latest revision")
 
         url = self._base_url + "kv/range"
 
@@ -304,7 +303,7 @@ class EtcdRestEngine(EtcdEngine):
             # we got a good responce, exit from the loop
             break
 
-        logger.debug(f"Query for latest revision completed")
+        logger.debug("Query for latest revision completed")
         resp_body = resp.json()
         # read the header
         if "header" in resp_body:
@@ -338,7 +337,7 @@ class EtcdRestEngine(EtcdEngine):
         except Exception as err:
             raise EngineException(f"Not able to request a lease, {str(err)}")
 
-        logger.debug(f"Lease request completed")
+        logger.debug("Lease request completed")
         resp_body = resp.json()
         if "ID" in resp_body:
             logger.debug(f"Lease {resp_body.get('ID')} acquired")

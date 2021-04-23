@@ -8,7 +8,6 @@
 
 import json
 import logging
-from logging import Formatter
 from typing import Dict
 
 import gunicorn.app.base
@@ -138,7 +137,8 @@ class Frontend:
 
     def run_server(self):
         logger.info(
-            f"Running AVISO Frontend - version {__version__} with Aviso version {aviso_version}, aviso_monitoring module v.{monitoring_version} on server {self.config.server_type}"
+            f"Running AVISO Frontend - version {__version__} with Aviso version {aviso_version}, \
+                aviso_monitoring module v.{monitoring_version} on server {self.config.server_type}"
         )
         logger.info(f"Configuration loaded: {self.config}")
 

@@ -1,5 +1,4 @@
 import contextlib
-import json
 import logging
 import os
 import time
@@ -64,7 +63,7 @@ def test_echo_trigger(conf, listener_factory, caplog):
             assert record.levelname != "ERROR"
         # check  the trigger has logged the notification on the system log
         assert (
-            "{'event': 'flight', 'request': {'date': '20210101', 'country': 'italy', 'airport': 'FCO', 'number': 'AZ203'}, 'payload': 'Landed'}"
+            "{'date': '20210101', 'country': 'italy', 'airport': 'FCO', 'number': 'AZ203'}, 'payload': 'Landed'}"
             in caplog.text
         )
         assert "Echo Trigger completed" in caplog.text

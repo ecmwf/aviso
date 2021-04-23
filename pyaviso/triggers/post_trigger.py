@@ -45,12 +45,12 @@ class PostTrigger(trigger.Trigger):
         self.protocol = ProtocolType[protocol_params.get("type").lower()].get_class()(notification, protocol_params)
 
     def execute(self):
-        logger.info(f"Starting Post Trigger for (params.get('protocol'))...'")
+        logger.info("Starting Post Trigger for (params.get('protocol'))...'")
 
         # execute the specific protocol
         self.protocol.execute()
 
-        logger.debug(f"Post Trigger completed")
+        logger.debug("Post Trigger completed")
 
 
 class PostCloudEvent:
@@ -109,4 +109,4 @@ class PostCloudEvent:
                 f"status {resp.status_code}, {resp.reason}, {resp.content.decode()}"
             )
 
-        logger.debug(f"CloudEvents notification sent successfully")
+        logger.debug("CloudEvents notification sent successfully")

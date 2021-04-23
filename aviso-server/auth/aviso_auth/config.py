@@ -75,7 +75,7 @@ class Config:
             self.cache = cache
             self.monitoring = monitoring
 
-            logger.debug(f"Loading configuration completed")
+            logger.debug("Loading configuration completed")
 
         except Exception as e:
             logger.error(f"Error occurred while setting the configuration, exception: {type(e)} {e}")
@@ -169,7 +169,6 @@ class Config:
 
         # instantiate Aviso Monitoring config
         if "monitoring" in current_config:
-            # noinspection PyTypeChecker
             current_config["monitoring"] = MonitoringConfig(conf_from_file=current_config["monitoring"])
 
         return current_config
@@ -406,6 +405,7 @@ class HomeFolderLoader(yaml.Loader):
 
 HomeFolderLoader.add_implicit_resolver("!path", HomeFolderLoader.path_matcher, None)
 HomeFolderLoader.add_constructor("!path", HomeFolderLoader.path_constructor)
+
 
 # class to add hostname to the possible attributes to use in the logging
 class HostnameFilter(logging.Filter):

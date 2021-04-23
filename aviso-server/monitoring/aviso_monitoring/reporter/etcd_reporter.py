@@ -33,7 +33,7 @@ class EtcdReporter(OpsviewReporter):
         logger.debug("Etcd processing metrics...")
 
         # fetch the raw tlms provided by etcd
-        raw_tlms = OpsviewReporter.retrive_metrics(self.member_urls, self.req_timeout)
+        raw_tlms = OpsviewReporter.retrive_metrics(self.member_urls, self.req_timeout)  # noqa: F841
 
         # array of metric to return
         metrics = []
@@ -44,7 +44,8 @@ class EtcdReporter(OpsviewReporter):
             m_type = EtcdMetricType[tlm_type.lower()]
             checker = eval(
                 m_type.value
-                + "(tlm_type, msg_receiver=self.msg_receiver, raw_tlms=raw_tlms, **self.tlms[tlm_type], **self.etcd_config)"
+                + "(tlm_type, msg_receiver=self.msg_receiver, raw_tlms=raw_tlms, **self.tlms[tlm_type], \
+                    **self.etcd_config)"
             )
 
             # retrieve metric
@@ -91,7 +92,7 @@ class StoreSize(EtcdChecker):
 
         # defaults
         status = 0
-        message = f"Store size is nominal"
+        message = "Store size is nominal"
 
         store_logic = self.max_store_size("etcd_mvcc_db_total_size_in_use_in_bytes")
         store_physical = self.max_store_size("etcd_mvcc_db_total_size_in_bytes")
@@ -99,7 +100,7 @@ class StoreSize(EtcdChecker):
 
         if store_logic == -1:
             status = 2
-            message = f"Could not retrieve the store size"
+            message = "Could not retrieve the store size"
         else:
             utilisation = store_logic * 100 / store_quota
             if utilisation > 85:
@@ -148,7 +149,7 @@ class ClusterStatus(EtcdChecker):
 
     def metric(self):
         status = 0
-        message = f"Cluster status is nominal"
+        message = "Cluster status is nominal"
 
         # first retrieve the member size
         cluster_size = self.cluster_size(self.member_urls[0])  # any of the member should give the same info
@@ -173,7 +174,7 @@ class ClusterStatus(EtcdChecker):
                 leader = OpsviewReporter.read_from_metrics(self.raw_tlms[self.member_urls[0]], "etcd_server_has_leader")
                 if leader != "1":
                     status = 1
-                    message = f"Cluster has no leader"
+                    message = "Cluster has no leader"
 
         # build metric payload
         m_status = {
@@ -239,12 +240,12 @@ class TotalKeys(EtcdChecker):
     def metric(self):
         # defaults
         status = 0
-        message = f"Total number of keys is nominal"
+        message = "Total number of keys is nominal"
         # any member should reply the same
         t_keys = OpsviewReporter.read_from_metrics(self.raw_tlms[self.member_urls[0]], "etcd_debugging_mvcc_keys_total")
         if t_keys is None:
             status = 2
-            message = f"Cannot retrieve total number of keys"
+            message = "Cannot retrieve total number of keys"
 
         # build metric payload
         m_status = {
@@ -265,7 +266,7 @@ class ErrorLog(EtcdChecker):
     def metric(self):
         # defaults
         status = 0
-        message = f"No error to report"
+        message = "No error to report"
 
         # fetch the error log
         assert self.msg_receiver, "Msg receiver is None"

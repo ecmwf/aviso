@@ -39,9 +39,7 @@ class Frontend:
         """
         This method initialise a set of components and timers that are valid globally at application level or per worker
         """
-        # noinspection PyUnresolvedReferences
         self.authenticator = Authenticator(self.config, self.handler.cache)
-        # noinspection PyUnresolvedReferences
         self.authoriser = Authoriser(self.config, self.handler.cache)
         self.backend = BackendAdapter(self.config)
         # this is a time collector for the whole request
@@ -143,7 +141,8 @@ class Frontend:
 
     def run_server(self):
         logger.info(
-            f"Running aviso-auth - version {__version__} on server {self.config.frontend['server_type']}, aviso_monitoring module v.{monitoring_version}"
+            f"Running aviso-auth - version {__version__} on server {self.config.frontend['server_type']}, \
+                aviso_monitoring module v.{monitoring_version}"
         )
         logger.info(f"Configuration loaded: {self.config}")
 

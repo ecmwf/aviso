@@ -101,7 +101,10 @@ def receiver():
         },
     }
 
-    err_auth_log = '<191>1 2021-04-12T09:00:08.931717+00:00 aviso-auth-green-7f6d59848f-cg6zv aviso-auth 49 - [origin software="aviso"]  {"asctime": "2021-04-12 09:00:08,931", "hostname": "aviso-auth-green-7f6d59848f-cg6zv", "process": 49, "thread": 140428749499272, "name": "aviso-monitoring", "filename": "time_collector.py", "lineno": 38, "levelname": "ERROR", "message": "Time collected"}'
+    err_auth_log = '<191>1 2021-04-12T09:00:08.931717+00:00 aviso-auth-green-7f6d59848f-cg6zv aviso-auth 49 - \
+        [origin software="aviso"]  {"asctime": "2021-04-12 09:00:08,931", "hostname": \
+            "aviso-auth-green-7f6d59848f-cg6zv", "process": 49, "thread": 140428749499272, "name": "aviso-monitoring",\
+                 "filename": "time_collector.py", "lineno": 38, "levelname": "ERROR", "message": "Time collected"}'
 
     receiver = Receiver()
     receiver._incoming_tlms[time_type] = [time_tlm1, time_tlm2, time_tlm1t1, time_tlm2t1, time_tlm1t2, time_tlm2t2]

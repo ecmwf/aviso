@@ -43,7 +43,7 @@ class Config:
             self.etcd_reporter = etcd_reporter
             self.prometheus_reporter = prometheus_reporter
 
-            logger.debug(f"Loading configuration completed")
+            logger.debug("Loading configuration completed")
 
         except Exception as e:
             logger.error(f"Error occurred while setting the configuration, exception: {type(e)} {e}")

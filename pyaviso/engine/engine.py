@@ -144,7 +144,7 @@ class Engine(ABC):
         :param to_date: date until when to request notifications, if None it will be until now
         :return: True if the listener is in execution, False otherwise
         """
-        logger.debug(f"Calling listen...")
+        logger.debug("Calling listen...")
         for key in keys:
             try:
                 # create a background thread for the polling
@@ -173,7 +173,7 @@ class Engine(ABC):
         if len(self._listeners) > 0:
             if key is None:  # if not key is defined we simply stop all the listeners
                 # by removing its entry from this list the thread will automatically stop
-                logger.debug(f"Stopping all the polling")
+                logger.debug("Stopping all the polling")
                 self._remove_all_listeners()
                 return True
             elif key in self._listeners:
@@ -208,7 +208,6 @@ class Engine(ABC):
         :return: True if successful
         """
         # create the status payload
-        # noinspection PyUnresolvedReferences
         status = {
             "etcd_user": self.auth.username,
             "message": message,

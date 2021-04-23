@@ -30,7 +30,7 @@ class Compactor:
         """
         :return: the latest revision on the server
         """
-        logger.debug(f"Getting current server revision")
+        logger.debug("Getting current server revision")
 
         url = self.url + "/v3/kv/range"
 
@@ -43,7 +43,7 @@ class Compactor:
             f"Not able to request current revision, status {resp.status_code}, "
             f"{resp.reason}, {resp.content.decode()}"
         )
-        logger.debug(f"Query for current revision completed")
+        logger.debug("Query for current revision completed")
         resp_body = resp.json()
         # read the header
         if "header" in resp_body:
@@ -58,7 +58,7 @@ class Compactor:
         """
         :return: the history saved on the server
         """
-        logger.debug(f"Getting the history...")
+        logger.debug("Getting the history...")
 
         url = self.url + "/v3/kv/range"
 
@@ -70,7 +70,7 @@ class Compactor:
         assert resp.status_code == 200, (
             f"Not able to request history, status {resp.status_code}, " f"{resp.reason}, {resp.content.decode()}"
         )
-        logger.debug(f"Query for current history completed")
+        logger.debug("Query for current history completed")
 
         # decode the value and load it as yaml
         resp_body = resp.json()
@@ -91,7 +91,7 @@ class Compactor:
         :param history:
         :return: True if successful
         """
-        logger.debug(f"Saving the history...")
+        logger.debug("Saving the history...")
 
         url = self.url + "/v3/kv/put"
         history_s = json.dumps(history)
@@ -102,7 +102,7 @@ class Compactor:
         assert resp.status_code == 200, (
             f"Not able to save history, status {resp.status_code}, " f"{resp.reason}, {resp.content.decode()}"
         )
-        logger.debug(f"Saving history completed")
+        logger.debug("Saving history completed")
 
         # check the save was successful
         resp_body = resp.json()
@@ -184,7 +184,7 @@ class Compactor:
         assert resp.status_code == 200, (
             f"Not able to compact revision {rev}, status {resp.status_code}, " f"{resp.reason}, {resp.content.decode()}"
         )
-        logger.debug(f"Compacting revision completed")
+        logger.debug("Compacting revision completed")
 
         # check the save was successful
         resp_body = resp.json()
@@ -200,7 +200,7 @@ class Compactor:
         Defragment the the store space for each member
         :return: True if successful
         """
-        logger.debug(f"Defragmenting server ...")
+        logger.debug("Defragmenting server ...")
 
         url = self.url + "/v3/maintenance/defragment"
 
@@ -210,7 +210,7 @@ class Compactor:
             f"Error returned from defragmentation call on {url}, "
             f"status {resp.status_code}, {resp.reason}, {resp.content.decode()}"
         )
-        logger.debug(f"Defragmentation completed")
+        logger.debug("Defragmentation completed")
         return True
 
     def run(self, sec_ret_per=None):

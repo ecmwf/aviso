@@ -27,9 +27,9 @@ class EngineFactory:
         :param auth
         """
         assert engine_conf is not None, "Engine configuration required"
-        assert engine_conf.host is not "", "Server host is required"
-        assert engine_conf.port is not "", "Server port is required"
-        assert engine_conf.type is not "", "Server type is required"
+        assert engine_conf.host != "", "Server host is required"
+        assert engine_conf.port != "", "Server port is required"
+        assert engine_conf.type != "", "Server type is required"
         self._conf = engine_conf
         self._auth = auth
 
@@ -47,7 +47,7 @@ class EngineFactory:
             )
         elif self._conf.type == EngineType.FILE_BASED:
             # connect to the test file based server
-            logger.debug(f"Setting up file-based test engine")
+            logger.debug("Setting up file-based test engine")
         else:
             raise EngineException(f"Configuration error - Engine: {self._conf.type} is not recognised")
 

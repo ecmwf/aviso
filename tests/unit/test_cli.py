@@ -11,8 +11,8 @@ import os
 import pytest
 from click.testing import CliRunner
 
-from pyaviso import user_config
-from pyaviso.cli_aviso import *
+from pyaviso import logger, user_config
+from pyaviso.cli_aviso import cli, key, listen, notify, value
 from pyaviso.engine.engine_factory import EngineType
 
 
@@ -226,7 +226,7 @@ def test_key_bad_format2(conf):
     assert "Wrong structure for the notification string, it should be <key_name>=<key_value>,..." in result.output
 
 
-def test_key_missing_params(conf):
+def test_key_missing_all_params(conf):
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
     result = runner.invoke(key, [])

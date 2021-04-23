@@ -58,16 +58,16 @@ class BackendAdapter:
                 raise InvalidInputError("History not available")
             if resp.status_code == 408 or (resp.status_code >= 500 and resp.status_code < 600):
                 logger.warning(message)
-                raise BackendUnavailableException(f"Error connecting to backend")
+                raise BackendUnavailableException("Error connecting to backend")
             else:
                 logger.error(message)
-                raise InternalSystemError(f"Error connecting to backend, please contact the support team")
+                raise InternalSystemError("Error connecting to backend, please contact the support team")
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as err:
             logger.warning(f"Error connecting to backend {self.url}, {str(err)}")
-            raise BackendUnavailableException(f"Error connecting to backend")
+            raise BackendUnavailableException("Error connecting to backend")
         except Exception as e:
             logger.exception(e)
-            raise InternalSystemError(f"Error connecting to backend, please contact the support team")
+            raise InternalSystemError("Error connecting to backend, please contact the support team")
 
         # just in case requests does not always raise an error
         if resp.status_code != 200:
@@ -75,6 +75,6 @@ class BackendAdapter:
                 f"Error in forwarding requests to backend {self.url}, status {resp.status_code}, {resp.reason}, "
                 f"{resp.content.decode()}"
             )
-            raise InternalSystemError(f"Error connecting to backend, please contact the support team")
+            raise InternalSystemError("Error connecting to backend, please contact the support team")
         else:
             return resp.content

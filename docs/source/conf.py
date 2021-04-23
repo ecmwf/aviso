@@ -21,7 +21,7 @@ import sys
 top = os.path.realpath(os.path.dirname(os.path.dirname(__file__)))
 sys.path.insert(0, top)
 
-import pyaviso
+import pyaviso  # noqa: E402
 
 source_suffix = ".rst"
 master_doc = "index"

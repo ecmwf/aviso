@@ -120,7 +120,6 @@ def remove(service: str, doit: bool, configuration: UserConfig):
             # call the pull method of the ServiceConfigManager
             kvs = config_manager.pull(service, key_only=True)
             for kv in kvs:
-                # noinspection PyTypeChecker
                 file_name = kv["key"]
                 print(file_name)
             if len(kvs) > 0:

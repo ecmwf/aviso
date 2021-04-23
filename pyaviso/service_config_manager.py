@@ -82,7 +82,7 @@ class ServiceConfigManager:
                 kv: Dict[str, bytes] = {"key": key, "value": value}
                 kvs.append(kv)
                 pushed_files.append(f.name)
-                logger.debug(f"Pushing file")
+                logger.debug("Pushing file")
 
         # check if we need to delete any file
         ks_delete = []
@@ -183,13 +183,11 @@ class ServiceConfigManager:
             # save the files retrieved with .tmp suffix
             for kv in kvs:
                 # extract the file path and create the directory structure
-                # noinspection PyTypeChecker
                 relative_file_path = kv["key"][len(service_key) :]
                 full_path = os.path.join(directory, relative_file_path)
                 full_path_tmp = full_path + ".tmp"
                 os.makedirs(os.path.dirname(full_path_tmp), exist_ok=True)
                 with open(full_path_tmp, "wb") as f:
-                    # noinspection PyTypeChecker
                     f.write(kv["value"])
                     logger.debug(f"File successfully saved: {full_path_tmp}")
                     pulled_files.append(full_path)
@@ -232,7 +230,7 @@ class ServiceConfigManager:
             logger.error(f"Error in retrieving the status of service {service}, more than one KV returned")
             return {}
 
-        logger.debug(f"Reading status from retrieved result")
+        logger.debug("Reading status from retrieved result")
         status = kvs[0]["value"].decode()
         status = json.loads(status)
         # add version to it

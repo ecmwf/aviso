@@ -14,7 +14,7 @@ from aviso_monitoring.reporter.etcd_reporter import (
 """
 This test simulates the store size cycle day by day including:
 - notification submission of dissemination keys
-- daily compaction 
+- daily compaction
 - daily key deletion
 It is not performing submission of mars keys. These anyway account for a small percentage of the total.
 """
@@ -132,7 +132,6 @@ for day in range(run_days):
         # delete keys
         date = date - datetime.timedelta(days=ret_period)
         # print(f"Deleting keys for {date}")
-        # noinspection PyRedeclaration
         r = delete_destination_keys(date)
         # print(r)
         tot = 0

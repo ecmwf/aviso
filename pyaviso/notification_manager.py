@@ -6,7 +6,6 @@
 # granted to it by virtue of its status as an intergovernmental organisation
 # nor does it submit to any jurisdiction.
 
-import time
 from datetime import datetime
 from typing import Dict, List, Tuple
 
@@ -53,7 +52,7 @@ class NotificationManager:
             if hasattr(config, "listeners"):
                 listeners_list.append(config.listeners)
             else:
-                raise EventListenerException(f"Listeners not defined")
+                raise EventListenerException("Listeners not defined")
         else:
             listeners_list.append(listeners)
 

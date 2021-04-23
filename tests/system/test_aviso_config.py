@@ -13,8 +13,8 @@ from shutil import rmtree
 import pytest
 from click.testing import CliRunner
 
-from pyaviso import user_config
-from pyaviso.cli_aviso_config import *
+from pyaviso import logger, user_config
+from pyaviso.cli_aviso_config import cli
 from pyaviso.engine.engine_factory import EngineType
 
 test_svc = "test_svc/v1"
@@ -183,7 +183,6 @@ def test_push_and_pull_workflow1(conf):
     )
 
 
-# noinspection PyPep8
 @pytest.mark.parametrize("conf", confs)
 def test_push_and_pull_workflow2(conf):
     """
@@ -220,7 +219,6 @@ def test_push_and_pull_workflow2(conf):
     assert _print_diff_files(dcmp) == ""
 
 
-# noinspection PyPep8
 @pytest.mark.parametrize("conf", confs)
 def test_push_and_pull_workflow3(conf):
     """
@@ -272,7 +270,6 @@ def test_push_and_pull_workflow3(conf):
     )
 
 
-# noinspection PyPep8
 @pytest.mark.parametrize("conf", confs)
 def test_push_and_pull_workflow4(conf):
     """
@@ -331,7 +328,7 @@ def test_remove(conf):
     # remove with NO doit -> nothing is removed
     result = runner.invoke(cli, ["remove", test_svc])
     assert result.exit_code == 0
-    assert result.output.find(f"remove --doit to delete these files") != -1
+    assert result.output.find("remove --doit to delete these files") != -1
 
     # delete pull directory
     if os.path.exists(config_folder_to_pull):
@@ -373,7 +370,6 @@ def test_remove_doit(conf):
     assert result.output.find(f"No files found for service {test_svc}") != -1
 
 
-# noinspection PyShadowingNames
 @pytest.mark.parametrize("conf", confs)
 def test_revert(conf):
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])

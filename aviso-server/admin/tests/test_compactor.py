@@ -32,7 +32,7 @@ def clear_history():
     encoded_end_key = encode_to_str_base64(str(incr_last_byte(key), "utf-8"))
     body = {"key": encoded_key, "range_end": encoded_end_key}
     # make the call
-    resp = requests.post(url, json=body)
+    requests.post(url, json=body)
 
 
 def test_get_current_server_rev():
@@ -96,11 +96,11 @@ def test_compact_run():
     try:
         compactor.compact(rev_end - 6)
         assert False
-    except AssertionError as e:
+    except AssertionError:
         assert True
 
     try:
         compactor.compact(rev_end - 4)
         assert True
-    except AssertionError as e:
+    except AssertionError:
         assert False

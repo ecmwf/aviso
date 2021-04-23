@@ -22,11 +22,10 @@ class DateHandler(TypeHandler):
 
     def valid(self, value: any) -> bool:
         try:
-            # noinspection PyAttributeOutsideInit
             self._d_datetime = datetime.datetime.strptime(str(value), self.canonic)
             return True
         except ValueError as e:
-            raise ValueError(f"Date attribute is not complying with the format defined", e)
+            raise ValueError("Date attribute is not complying with the format defined", e)
 
     def canonise(self, value: any) -> str:
         # strptime tolerates months or days with no leading zero, we need to format it again to be sure they are there

@@ -60,7 +60,8 @@ class OpsviewReporter(ABC):
             "X-Opsview-Username": f"{m_server['username']}",
             "X-Opsview-Token": token,
         }
-        url = f"{m_server['url']}/detail?hostname={m_server['service_host']}&servicename=Passive Check: {metric.get('name')}"
+        url = f"{m_server['url']}/detail?hostname={m_server['service_host']}&servicename=Passive Check: \
+            {metric.get('name')}"
         data = {
             "passive_checks": {"enabled": 1},
             "set_state": {"result": metric.get("status"), "output": f"{metric.get('message')} "},
@@ -103,7 +104,6 @@ class OpsviewReporter(ABC):
             token = self.ms_authenticate(m_server)
             if token:
                 # send metrics
-                # noinspection PyTypeChecker
                 for m in metrics:
                     self.submit_metric(m_server, token, m)
             else:
@@ -181,7 +181,7 @@ class OpsviewReporter(ABC):
         aggr_values = []
         for tlm in r_tlms:
             for v in tlm[tlm_type + "_values"]:
-                if not v in aggr_values:
+                if v not in aggr_values:
                     aggr_values.append(v)
 
         agg_tlm = {

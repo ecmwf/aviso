@@ -26,11 +26,11 @@ class FunctionTrigger(trigger.Trigger):
         self.trigger_type = TriggerType.function
 
     def execute(self):
-        logger.info(f"Starting Function Trigger...")
+        logger.info("Starting Function Trigger...")
         logger.debug(f"calling function {self.function.__name__}")
 
         # run the function
         logger.debug("Running function trigger")
         self.function(self.notification)
 
-        logger.info(f"Function Trigger completed")
+        logger.info("Function Trigger completed")

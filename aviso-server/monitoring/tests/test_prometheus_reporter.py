@@ -9,13 +9,12 @@
 import datetime
 import os
 import time
-from multiprocessing import Process
 
 import pytest
 import requests
 from aviso_monitoring import logger
 from aviso_monitoring.config import Config
-from aviso_monitoring.receiver import AVISO_AUTH_APP_NAME, Receiver
+from aviso_monitoring.receiver import Receiver
 from aviso_monitoring.reporter.aviso_auth_reporter import AvisoAuthMetricType
 from aviso_monitoring.reporter.prometheus_reporter import PrometheusReporter
 

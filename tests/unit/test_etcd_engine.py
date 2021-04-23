@@ -59,7 +59,7 @@ def pre_post_test(engine):
     try:
         engine.delete("test")
         engine.stop()
-    except Exception as ignore:
+    except Exception:
         pass
 
 
@@ -402,7 +402,7 @@ def test_find_compacted_revision(engine):
 
     kvs = [{"key": "test/test0", "value": "0"}]
     assert engine.push_with_status(kvs, base_key="test/", message="test/test0")
-    revision0 = engine._latest_revision("test/")
+    engine._latest_revision("test/")
 
     time.sleep(0.1)
 
@@ -504,7 +504,7 @@ def test_automatic_retry(engine, caplog):
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
 
     # create a process listening to a port
-    out1 = subprocess.Popen(
+    subprocess.Popen(
         f"nc -l {10001}", shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE
     )
     # set timeout to 1s

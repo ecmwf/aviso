@@ -97,7 +97,8 @@ class Authoriser:
 
         # just in case requests does not always raise an error
         if resp.status_code != 200:
-            message = f"Not able to retrieve destinations for {username} from {self.url}, status {resp.status_code}, {resp.reason}, {resp.content.decode()}"
+            message = f"Not able to retrieve destinations for {username} from {self.url}, \
+                status {resp.status_code}, {resp.reason}, {resp.content.decode()}"
             logger.error(message)
             raise InternalSystemError(
                 f"Error in retrieving destinations for {username}, please contact the support team"
@@ -113,7 +114,7 @@ class Authoriser:
                 message += f', {resp_body.get("error")}'
                 raise UserNotFoundException(message)
             else:
-                message += f", please contact the support team"
+                message += ", please contact the support team"
                 raise InternalSystemError(message)
 
         destinations = []

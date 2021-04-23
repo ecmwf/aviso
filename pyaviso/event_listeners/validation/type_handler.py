@@ -27,7 +27,6 @@ class TypeHandler(ABC):
         if self.required and value is None:
             raise KeyError(f"{self.key} is a mandatory key")
         elif not self.required and value is None:
-            # noinspection PyTypeChecker
             return None
         else:
             # validate the key

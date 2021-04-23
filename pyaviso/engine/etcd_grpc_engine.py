@@ -19,7 +19,6 @@ from ..user_config import EngineConfig
 from .etcd_engine import MAX_KV_RETURNED, EtcdEngine
 
 
-# noinspection PyUnboundLocalVariable,PyUnresolvedReferences
 class EtcdGrpcEngine(EtcdEngine):
     """
     This class is a specialisation of the Engine class, able to connect to a etcd3 server directly via the gRPC
@@ -109,7 +108,7 @@ class EtcdGrpcEngine(EtcdEngine):
 
         # parse the result to return just key-value pairs
         new_kvs: List[Dict[str, bytes]] = []
-        logger.debug(f"Building key-value list")
+        logger.debug("Building key-value list")
         for kv in range_result.kvs:
             new_kv = self._parse_raw_kv(kv, key_only)
             new_kvs.append(new_kv)
@@ -161,7 +160,7 @@ class EtcdGrpcEngine(EtcdEngine):
         # parse the result to return just key-value pairs of what has been deleted
         del_kvs: List[Dict[str, bytes]] = []
         if hasattr(del_result, "prev_kvs"):
-            logger.debug(f"Building key-value list")
+            logger.debug("Building key-value list")
             for kv in del_result.prev_kvs:
                 new_kv = self._parse_raw_kv(kv)
                 del_kvs.append(new_kv)
@@ -177,8 +176,8 @@ class EtcdGrpcEngine(EtcdEngine):
         :param ttl: time to leave of the keys pushed, once expired the keys will be deleted
         :return: True if successful
         """
-        logger.debug(f"Calling push...")
-        logger.debug(f"Preparing the transaction statement")
+        logger.debug("Calling push...")
+        logger.debug("Preparing the transaction statement")
         ops = []
 
         # check if we need to request a lease for the ttl
@@ -229,8 +228,8 @@ class EtcdGrpcEngine(EtcdEngine):
                     self._initialise_server()
                 else:
                     raise e
-        assert txn_response.succeeded, f"Not able to execute the transaction"
-        logger.debug(f"Transaction completed")
+        assert txn_response.succeeded, "Not able to execute the transaction"
+        logger.debug("Transaction completed")
         # read the header
         if hasattr(txn_response, "header"):
             h = txn_response.header
@@ -245,7 +244,7 @@ class EtcdGrpcEngine(EtcdEngine):
         :param lock_id: Lock id
         :return: Lock if acquired otherwise exception if not acquired by the time the timeout expires
         """
-        logger.debug(f"Calling lock...")
+        logger.debug("Calling lock...")
         try_again = True
         while try_again:
             try:
@@ -272,7 +271,7 @@ class EtcdGrpcEngine(EtcdEngine):
         :param lock: Lock to release
         :return: True once released
         """
-        logger.debug(f"Calling unlock...")
+        logger.debug("Calling unlock...")
         try_again = True
         while try_again:
             try:
@@ -287,14 +286,14 @@ class EtcdGrpcEngine(EtcdEngine):
                 else:
                     raise e
 
-        logger.debug(f"Lock released")
+        logger.debug("Lock released")
         return res
 
     def _latest_revision(self, key: str) -> int:
         """
         :return: latest revision of the notification server.
         """
-        logger.debug(f"Querying notification server for latest revision")
+        logger.debug("Querying notification server for latest revision")
 
         # we need just the header back from the server
         range_request = self._server._build_get_range_request(key=key, keys_only=True)
@@ -318,7 +317,7 @@ class EtcdGrpcEngine(EtcdEngine):
                     self._initialise_server()
                 else:
                     raise e
-        logger.debug(f"Query for latest revision completed")
+        logger.debug("Query for latest revision completed")
 
         # read the header
         if hasattr(range_result, "header"):
@@ -364,7 +363,7 @@ class EtcdGrpcEngine(EtcdEngine):
             logger.debug(f"Lease {res.ID} acquired")
             return res.ID
         else:
-            raise EngineException(f"Not able to acquire lease")
+            raise EngineException("Not able to acquire lease")
 
     def _parse_raw_kv(self, kv, key_only: bool = False) -> Dict[str, any]:
         """

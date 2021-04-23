@@ -6,7 +6,6 @@
 # granted to it by virtue of its status as an intergovernmental organisation
 # nor does it submit to any jurisdiction.
 
-import datetime
 import os
 
 from aviso_monitoring import logger
@@ -50,7 +49,11 @@ def receiver():
         },
     ]
 
-    err_rest_log = '<191>1 2021-04-12T09:19:12.252093+00:00 aviso-rest-green-9c975dc86-mvplw aviso-rest 58 - [origin software="aviso"]  {"asctime": "2021-04-12 09:19:12,252", "hostname": "aviso-rest-green-9c975dc86-mvplw", "process": 58, "thread": 139943263611624, "name": "aviso-monitoring", "filename": "transmitter.py", "lineno": 74, "levelname": "ERROR", "message": "Telemetry transmitter cycle completed"}'
+    err_rest_log = '<191>1 2021-04-12T09:19:12.252093+00:00 aviso-rest-green-9c975dc86-mvplw aviso-rest 58 -\
+         [origin software="aviso"]  {"asctime": "2021-04-12 09:19:12,252", "hostname":\
+              "aviso-rest-green-9c975dc86-mvplw", "process": 58, "thread": 139943263611624, "name":\
+                   "aviso-monitoring", "filename": "transmitter.py", "lineno": 74, "levelname":\
+                        "ERROR", "message": "Telemetry transmitter cycle completed"}'
 
     receiver = Receiver()
     receiver._incoming_tlms[tlm_type] = tlms

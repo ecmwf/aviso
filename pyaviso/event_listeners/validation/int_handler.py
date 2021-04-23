@@ -31,7 +31,7 @@ class IntHandler(TypeHandler):
         except ValueError as e:
             raise ValueError(f"Key {self.key} has to be an integer", e)
         if self.range is not None:
-            assert len(self.range) == 2, f"Wrong schema structure, range can only have 2 elements"
+            assert len(self.range) == 2, "Wrong schema structure, range can only have 2 elements"
             if value < self.range[0] or value > self.range[1]:
                 raise ValueError(f"Value {value} for key {self.key} is outside the range defined")
         return True

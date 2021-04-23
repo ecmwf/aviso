@@ -16,7 +16,6 @@ from pyaviso import logger, user_config
 from pyaviso.authentication import auth
 from pyaviso.engine import engine_factory as ef
 from pyaviso.event_listeners import event_listener_factory as elf
-from pyaviso.event_listeners.listener_schema_parser import ListenerSchemaParser
 
 
 @pytest.fixture()
@@ -43,7 +42,7 @@ def test_empty_file(conf: user_config.UserConfig, schema):
         listeners_dict = yaml.safe_load(f.read())
     # parse it
     try:
-        listeners = listener_factory.create_listeners(listeners_dict)
+        listener_factory.create_listeners(listeners_dict)
     except AssertionError as e:
         assert e.args[0] == "Event listeners definition cannot be empty"
 
@@ -59,7 +58,7 @@ def test_no_listeners(conf: user_config.UserConfig, schema):
         listeners_dict = yaml.safe_load(f.read())
     # parse it
     try:
-        listeners: list = listener_factory.create_listeners(listeners_dict)
+        listener_factory.create_listeners(listeners_dict)
     except AssertionError as e:
         assert e.args[0] == "Event listeners definition must start with the keyword 'listeners'"
 
@@ -75,7 +74,7 @@ def test_bad_tree_structure(conf: user_config.UserConfig, schema):
         listeners_dict = yaml.safe_load(f.read())
     # parse it
     try:
-        listeners: list = listener_factory.create_listeners(listeners_dict)
+        listener_factory.create_listeners(listeners_dict)
     except AssertionError as e:
         assert e.args[0] == "Wrong file structure"
 
@@ -91,7 +90,7 @@ def test_bad_attribute(conf: user_config.UserConfig, schema):
         listeners_dict = yaml.safe_load(f.read())
     # parse it
     try:
-        listeners: list = listener_factory.create_listeners(listeners_dict)
+        listener_factory.create_listeners(listeners_dict)
     except AssertionError as e:
         assert e.args[0] == "Key day is not allowed"
 
@@ -107,7 +106,7 @@ def test_bad_format(conf: user_config.UserConfig, schema):
         listeners_dict = yaml.safe_load(f.read())
     # parse it
     try:
-        listeners: list = listener_factory.create_listeners(listeners_dict)
+        listener_factory.create_listeners(listeners_dict)
     except ValueError as e:
         assert e.args[0] == "Value 2021-01-01 is not valid for key date"
 
@@ -123,7 +122,7 @@ def test_no_trigger(conf: user_config.UserConfig, schema):
         listeners_dict = yaml.safe_load(f.read())
     # parse it
     try:
-        listeners: list = listener_factory.create_listeners(listeners_dict)
+        listener_factory.create_listeners(listeners_dict)
     except AssertionError as e:
         assert e.args[0] == "At least one trigger must be defined"
 
@@ -139,7 +138,7 @@ def test_bad_trigger_type(conf: user_config.UserConfig, schema):
         listeners_dict = yaml.safe_load(f.read())
     # parse it
     try:
-        listeners: list = listener_factory.create_listeners(listeners_dict)
+        listener_factory.create_listeners(listeners_dict)
     except KeyError as e:
         assert e.args[0] == "Trigger type logger not recognised"
 
@@ -155,7 +154,7 @@ def test_bad_trigger(conf: user_config.UserConfig, schema):
         listeners_dict = yaml.safe_load(f.read())
     # parse it
     try:
-        listeners: list = listener_factory.create_listeners(listeners_dict)
+        listener_factory.create_listeners(listeners_dict)
     except AssertionError as e:
         assert e.args[0] == "'type' is a mandatory field in trigger"
 

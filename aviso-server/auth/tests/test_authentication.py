@@ -7,7 +7,6 @@ from aviso_auth import config, logger
 from aviso_auth.authentication import Authenticator
 from aviso_auth.custom_exceptions import (
     AuthenticationUnavailableException,
-    InternalSystemError,
     TokenNotValidException,
 )
 
@@ -66,9 +65,7 @@ def test_timeout():
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     port = random.randint(10000, 20000)
     # create a process listening to a port
-    out1 = subprocess.Popen(
-        f"nc -l {port}", shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-    )
+    subprocess.Popen(f"nc -l {port}", shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     c = conf()
     c.authentication_server["url"] = f"https://127.0.0.1:{port}"
     c.authentication_server["req_timeout"] = 1

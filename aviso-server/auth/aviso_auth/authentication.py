@@ -162,5 +162,4 @@ class Authenticator:
             except Exception as e:
                 logger.exception(e)
                 raise InternalSystemError(f"Error in authenticating token {token}, please contact the support team")
-        # noinspection PyUnboundLocalVariable
         return resp

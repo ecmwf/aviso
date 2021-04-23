@@ -34,7 +34,7 @@ class UniqueCountCollector(Collector):
 
         # Collect and update the timestamp if already present
         if self.enabled:
-            if not res in self.tlm_buffer:
+            if res not in self.tlm_buffer:
                 self.tlm_buffer.append(res)
             logger.debug("Result collected")
         return res

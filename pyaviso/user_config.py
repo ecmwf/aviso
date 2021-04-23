@@ -165,7 +165,7 @@ class UserConfig:
             self.remote_schema = remote_schema
             self.listeners = listeners
 
-            logger.debug(f"Loading configuration completed")
+            logger.debug("Loading configuration completed")
 
         except Exception as e:
             logger.error(f"Error occurred while setting the configuration, {type(e)}, {e}")
@@ -587,7 +587,7 @@ class UserConfig:
 
     def _configure_default_log(self):
         try:
-            console = next(h for h in logging.getLogger().handlers if h.name == "console")
+            next(h for h in logging.getLogger().handlers if h.name == "console")
             # don't do anything, we already have a console handler
         except StopIteration:  # this is raised when the console logger could not be found
             # creating default console handler

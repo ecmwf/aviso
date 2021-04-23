@@ -47,7 +47,7 @@ class EventListenerFactory:
         listeners: List[el.EventListener] = []
 
         # parse the listeners dictionary
-        logger.debug(f"Parsing the listeners file")
+        logger.debug("Parsing the listeners file")
         assert listeners_dict is not None, "Event listeners definition cannot be empty"
         listener_list: Optional[List[Dict[str, any]]] = listeners_dict.get("listeners")
         assert listener_list is not None, "Event listeners definition must start with the keyword 'listeners'"
@@ -55,22 +55,22 @@ class EventListenerFactory:
         # Create the engine to connect to the notification server
         engine = self._engine_factory.create_engine()
 
-        for l in listener_list:
+        for listen in listener_list:
             # each listener is a dictionary
-            assert isinstance(l, dict), "Wrong file structure"
+            assert isinstance(listen, dict), "Wrong file structure"
 
             # extract the relevant listener schema
-            assert "event" in l, "Wrong file structure, 'event' could not be located"
-            event_type = l.get("event")
+            assert "event" in listen, "Wrong file structure, 'event' could not be located"
+            event_type = listen.get("event")
             assert event_type in self._listener_schema, f"Wrong schema structure, {event_type} could not be located"
             schema = self._listener_schema.get(event_type)
 
             # Parse the request and build the key to the forecast dataset
-            assert "request" in l, "Wrong file structure, 'request' could not be located"
-            request: Optional[Dict[str, any]] = l.get("request")
+            assert "request" in listen, "Wrong file structure, 'request' could not be located"
+            request: Optional[Dict[str, any]] = listen.get("request")
 
             # Parse the triggers
-            triggers: Optional[List[Dict[str, any]]] = self._parse_triggers(l)
+            triggers: Optional[List[Dict[str, any]]] = self._parse_triggers(listen)
 
             # create the listener
             listener = el.EventListener(event_type, engine, request, triggers, schema, from_date, to_date, payload_key)
