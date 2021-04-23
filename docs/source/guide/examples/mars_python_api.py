@@ -16,14 +16,9 @@ def retrieve_from_mars(notification):
     print(f"Notification for step {notification['request']['step']} received")
     # now do a MARS request with this notification...
     mars_server = ECMWFService("mars")
-    request = notification['request']
+    request = notification["request"]
     # extend the notification with the attributes needed
-    request.update({
-        "type": "fc",
-        "levtype": "sfc",
-        "param": 167.128,
-        "area": "75/-20/10/60"
-    })
+    request.update({"type": "fc", "levtype": "sfc", "param": 167.128, "area": "75/-20/10/60"})
     mars_server.execute(request, "my_data.grib")
 
 

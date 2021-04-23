@@ -1,5 +1,5 @@
 # (C) Copyright 1996- ECMWF.
-# 
+#
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -19,13 +19,15 @@ class Config:
     which can be defined by arguments, environment variables or defaults.
     """
 
-    def __init__(self,
-                 udp_server=None,
-                 monitor_servers=None,
-                 aviso_rest_reporter=None,
-                 aviso_auth_reporter=None,
-                 etcd_reporter=None,
-                 prometheus_reporter=None):
+    def __init__(
+        self,
+        udp_server=None,
+        monitor_servers=None,
+        aviso_rest_reporter=None,
+        aviso_auth_reporter=None,
+        etcd_reporter=None,
+        prometheus_reporter=None,
+    ):
 
         try:
             # we build the configuration in priority order from the lower to the higher
@@ -51,19 +53,17 @@ class Config:
     @staticmethod
     def _create_default_config() -> Dict:
 
-        udp_server = {
-            "host": "127.0.0.1",
-            "port": 1111,
-            "buffer_size": 64 * 1024
-        }
+        udp_server = {"host": "127.0.0.1", "port": 1111, "buffer_size": 64 * 1024}
 
         # this are the setting for sending the telemetry to a monitoring server like Opsview
-        monitor_servers = [{
-            "url": "https://localhost",
-            "username": "TBD",
-            "password": "TBD",
-            "service_host": "aviso",
-        }]
+        monitor_servers = [
+            {
+                "url": "https://localhost",
+                "username": "TBD",
+                "password": "TBD",
+                "service_host": "aviso",
+            }
+        ]
 
         aviso_rest_reporter = {
             "enabled": False,
@@ -73,33 +73,29 @@ class Config:
                     "warning_t": 10,  # s
                     "critical_t": 20,  # s
                 },
-                "rest_pod_available":{
+                "rest_pod_available": {
                     "warning_t": 2,  # pods
                     "critical_t": 1,  # pods
                     "req_timeout": 60,
-                    "metric_server_url": None
+                    "metric_server_url": None,
                 },
-                "rest_error_log": {}
-            }
+                "rest_error_log": {},
+            },
         }
 
         aviso_auth_reporter = {
             "enabled": False,
             "frequency": 1,  # in minutes
             "tlms": {
-                "auth_resp_time": {
-                    "warning_t": 10,  # s
-                    "critical_t": 20,  # s
-                    "sub_tlms": []
-                },
-                "auth_pod_available":{
+                "auth_resp_time": {"warning_t": 10, "critical_t": 20, "sub_tlms": []},  # s  # s
+                "auth_pod_available": {
                     "warning_t": 2,  # pods
                     "critical_t": 1,  # pods
                     "req_timeout": 60,
-                    "metric_server_url": None
+                    "metric_server_url": None,
                 },
-                "auth_error_log": {}
-            }
+                "auth_error_log": {},
+            },
         }
 
         etcd_reporter = {
@@ -107,11 +103,7 @@ class Config:
             "frequency": 5,  # min
             "member_urls": ["http://localhost:2379"],
             "req_timeout": 60,  # s
-            "tlms": {
-                "etcd_store_size": {},
-                "etcd_cluster_status": {},
-                "etcd_error_log": {}
-            }
+            "tlms": {"etcd_store_size": {}, "etcd_cluster_status": {}, "etcd_error_log": {}},
         }
 
         prometheus_reporter = {
@@ -119,10 +111,8 @@ class Config:
             "host": "127.0.0.1",
             "port": 8080,
             "tlms": {
-                "auth_users_counter": {
-                    "retention_window": 24  # h
-                },
-            }
+                "auth_users_counter": {"retention_window": 24},  # h
+            },
         }
 
         # main config
@@ -260,12 +250,12 @@ class Config:
 
     def __str__(self):
         config_string = (
-                f"udp_server: {self.udp_server}" +
-                f", monitor_servers: {self.monitor_servers}" +
-                f", aviso_rest_reporter: {self.aviso_rest_reporter}" +
-                f", aviso_auth_reporter: {self.aviso_auth_reporter}" +
-                f", etcd_reporter: {self.etcd_reporter}" +
-                f", prometheus_reporter: {self.prometheus_reporter}"
+            f"udp_server: {self.udp_server}"
+            + f", monitor_servers: {self.monitor_servers}"
+            + f", aviso_rest_reporter: {self.aviso_rest_reporter}"
+            + f", aviso_auth_reporter: {self.aviso_auth_reporter}"
+            + f", etcd_reporter: {self.etcd_reporter}"
+            + f", prometheus_reporter: {self.prometheus_reporter}"
         )
         return config_string
 

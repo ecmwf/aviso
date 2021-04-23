@@ -1,5 +1,5 @@
 # (C) Copyright 1996- ECMWF.
-# 
+#
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -28,18 +28,17 @@ from pyaviso.custom_exceptions import InvalidInputError
 from pyaviso.notification_manager import NotificationManager
 from pyaviso.version import __version__ as aviso_version
 
-SWAGGER_URL = '/openapi'
-API_URL = 'frontend/web/openapi.yaml'
+SWAGGER_URL = "/openapi"
+API_URL = "frontend/web/openapi.yaml"
 
 
 class Frontend:
-
     def __init__(self, config):
         self.config = config
         # initialise the handler
         self.handler = self.create_handler()
         self.notification_manager = NotificationManager()
-        # we need to create the timer object here if this app runs in Flask, 
+        # we need to create the timer object here if this app runs in Flask,
         # if instead it runs in Gunicorn the hook post_worker_init will take over, and this timer will not be used
         self.init_timer()
 
@@ -67,27 +66,29 @@ class Frontend:
 
         def bad_request(m):
             logging.error(f"Request: {request.json}")
-            return json.dumps({"message": str(m)}), 400, {'Content-Type': 'application/json'}
+            return json.dumps({"message": str(m)}), 400, {"Content-Type": "application/json"}
 
         def ok(m):
-            return json.dumps({"message": str(m)}), 200, {'Content-Type': 'application/json'}
+            return json.dumps({"message": str(m)}), 200, {"Content-Type": "application/json"}
 
         @handler.errorhandler(Exception)
         def default_error_handler(error):
             logging.exception(str(error))
             logging.error(f"Request: {request.json}")
-            return json.dumps(
-                {"message": "Server error occurred", "details": str(error)}
-            ), getattr(error, 'code', 500), {'Content-Type': 'application/json'}
+            return (
+                json.dumps({"message": "Server error occurred", "details": str(error)}),
+                getattr(error, "code", 500),
+                {"Content-Type": "application/json"},
+            )
 
-        @handler.route("/", methods=['GET'])
+        @handler.route("/", methods=["GET"])
         def root():
             with open("aviso_rest/web/index.html") as fh:
                 content = fh.read()
             content = content.format(
                 page_title="Aviso",
                 welcome_title=f"Aviso v. {__version__} homepage",
-                welcome_text="This is the RESTful frontend of the Aviso notification system"
+                welcome_text="This is the RESTful frontend of the Aviso notification system",
             )
             return content
 
@@ -104,11 +105,11 @@ class Frontend:
                 # parse the body as cloud event
                 notification = self._parse_cloud_event(request)
                 logger.info(f"New event received: {notification}")
-                
+
                 # check the skips
-                if(self._skip_request(notification, self.config.skips)):
+                if self._skip_request(notification, self.config.skips):
                     logger.info("Notification skipped")
-                    return ok("Notification skipped") 
+                    return ok("Notification skipped")
 
                 # send the notification and time it
                 self.timed_notify(notification, config=self.config.aviso)
@@ -124,7 +125,7 @@ class Frontend:
         This method allows to submit a notification to the store and to time it
         """
         return self.timer(self.notification_manager.notify, args=(notification, config))
-    
+
     def _skip_request(self, notification, skips) -> bool:
         """
         This method looks at the skips dict and check the notification against each entry
@@ -136,17 +137,21 @@ class Frontend:
         return False
 
     def run_server(self):
-        logger.info(f"Running AVISO Frontend - version {__version__} with Aviso version {aviso_version}, aviso_monitoring module v.{monitoring_version} on server {self.config.server_type}")
+        logger.info(
+            f"Running AVISO Frontend - version {__version__} with Aviso version {aviso_version}, aviso_monitoring module v.{monitoring_version} on server {self.config.server_type}"
+        )
         logger.info(f"Configuration loaded: {self.config}")
 
         if self.config.server_type == "flask":
             # flask internal server for non-production environments
             # should only be used for testing and debugging
-            self.handler.run(debug=self.config.debug, host=self.config.host,
-                             port=self.config.port, use_reloader=False)
+            self.handler.run(debug=self.config.debug, host=self.config.host, port=self.config.port, use_reloader=False)
         elif self.config.server_type == "gunicorn":
-            options = {"bind": f"{self.config.host}:{self.config.port}", 
-                       "workers": self.config.workers, "post_worker_init": self.post_worker_init}
+            options = {
+                "bind": f"{self.config.host}:{self.config.port}",
+                "workers": self.config.workers,
+                "post_worker_init": self.post_worker_init,
+            }
             GunicornServer(self.handler, options).run()
         else:
             logging.error(f"server_type {self.config.server_type} not supported")
@@ -195,20 +200,20 @@ def main():
 
 
 class GunicornServer(gunicorn.app.base.BaseApplication):
-
     def __init__(self, app, options=None):
         self.options = options or {}
         self.application = app
         super(GunicornServer, self).__init__()
 
     def load_config(self):
-        config = dict([(key, value) for key, value in iteritems(self.options)
-                       if key in self.cfg.settings and value is not None])
+        config = dict(
+            [(key, value) for key, value in iteritems(self.options) if key in self.cfg.settings and value is not None]
+        )
         for key, value in iteritems(config):
             self.cfg.set(key.lower(), value)
 
-        #this approach does not support custom filters, therefore it's better to disable it
-        #self.cfg.set('logger_class', GunicornServer.CustomLogger)
+        # this approach does not support custom filters, therefore it's better to disable it
+        # self.cfg.set('logger_class', GunicornServer.CustomLogger)
 
     def load(self):
         return self.application
@@ -223,9 +228,7 @@ class GunicornServer(gunicorn.app.base.BaseApplication):
             formatter = logging.getLogger().handlers[0].formatter
 
             # Override Gunicorn's `error_log` configuration.
-            self._set_handler(
-                self.error_log, cfg.errorlog, formatter
-            )
+            self._set_handler(self.error_log, cfg.errorlog, formatter)
 
 
 # when running directly from this file

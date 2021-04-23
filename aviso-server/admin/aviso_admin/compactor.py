@@ -19,7 +19,6 @@ DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 
 
 class Compactor:
-
     def __init__(self, config):
         self.url = config["url"]
         self.req_timeout = config["req_timeout"]
@@ -37,18 +36,17 @@ class Compactor:
 
         # we need just the header back from the server
         encoded_key = encode_to_str_base64("/")
-        body = {
-            "key": encoded_key,
-            "keys_only": True
-        }
+        body = {"key": encoded_key, "keys_only": True}
         # make the call
         resp = requests.post(url, json=body, timeout=self.req_timeout)
-        assert resp.status_code == 200, f'Not able to request current revision, status {resp.status_code}, ' \
-            f'{resp.reason}, {resp.content.decode()}'
+        assert resp.status_code == 200, (
+            f"Not able to request current revision, status {resp.status_code}, "
+            f"{resp.reason}, {resp.content.decode()}"
+        )
         logger.debug(f"Query for current revision completed")
         resp_body = resp.json()
         # read the header
-        if 'header' in resp_body:
+        if "header" in resp_body:
             h = resp_body["header"]
             rev = int(h["revision"])
         else:
@@ -69,13 +67,14 @@ class Compactor:
         }
         # make the call
         resp = requests.post(url, json=body, timeout=self.req_timeout)
-        assert resp.status_code == 200, f'Not able to request history, status {resp.status_code}, ' \
-            f'{resp.reason}, {resp.content.decode()}'
+        assert resp.status_code == 200, (
+            f"Not able to request history, status {resp.status_code}, " f"{resp.reason}, {resp.content.decode()}"
+        )
         logger.debug(f"Query for current history completed")
 
         # decode the value and load it as yaml
         resp_body = resp.json()
-        if 'kvs' in resp_body:
+        if "kvs" in resp_body:
             assert len(resp_body["kvs"]) == 1, f"Retrieved more than a key on history path, {resp_body['kvs']}"
             kv = resp_body["kvs"][0]
             history_s = decode_to_bytes(kv["value"]).decode()
@@ -97,20 +96,18 @@ class Compactor:
         url = self.url + "/v3/kv/put"
         history_s = json.dumps(history)
 
-        body = {
-            "key": encode_to_str_base64(self.history_path),
-            "value": encode_to_str_base64(history_s)
-        }
+        body = {"key": encode_to_str_base64(self.history_path), "value": encode_to_str_base64(history_s)}
         # make the call
         resp = requests.post(url, json=body, timeout=self.req_timeout)
-        assert resp.status_code == 200, f'Not able to save history, status {resp.status_code}, ' \
-            f'{resp.reason}, {resp.content.decode()}'
+        assert resp.status_code == 200, (
+            f"Not able to save history, status {resp.status_code}, " f"{resp.reason}, {resp.content.decode()}"
+        )
         logger.debug(f"Saving history completed")
 
         # check the save was successful
         resp_body = resp.json()
         # read the header
-        if 'header' in resp_body:
+        if "header" in resp_body:
             h = resp_body["header"]
             rev = int(h["revision"])
             logger.debug(f"New server revision {rev}")
@@ -147,8 +144,9 @@ class Compactor:
 
         # read from the history all the revisions older than date
         history = self.get_history()
-        old_revs = list(filter(
-            lambda he: datetime.datetime.strptime(he.get("timestamp"), DATE_FORMAT) <= ret_per_start, history))
+        old_revs = list(
+            filter(lambda he: datetime.datetime.strptime(he.get("timestamp"), DATE_FORMAT) <= ret_per_start, history)
+        )
 
         # remove all the old revisions and save the history
         new_hist = [h for h in history if h not in old_revs]
@@ -180,20 +178,18 @@ class Compactor:
 
         url = self.url + "/v3/kv/compaction"
 
-        body = {
-            "revision": rev,
-            "physical": True
-        }
+        body = {"revision": rev, "physical": True}
         # make the call
         resp = requests.post(url, json=body, timeout=self.req_timeout)
-        assert resp.status_code == 200, f'Not able to compact revision {rev}, status {resp.status_code}, ' \
-            f'{resp.reason}, {resp.content.decode()}'
+        assert resp.status_code == 200, (
+            f"Not able to compact revision {rev}, status {resp.status_code}, " f"{resp.reason}, {resp.content.decode()}"
+        )
         logger.debug(f"Compacting revision completed")
 
         # check the save was successful
         resp_body = resp.json()
         # read the header
-        if 'header' in resp_body:
+        if "header" in resp_body:
             h = resp_body["header"]
             rev = int(h["revision"])
             logger.debug(f"Compacted revision {rev}")
@@ -210,8 +206,10 @@ class Compactor:
 
         # TBD make the call for each member
         resp = requests.post(url, data={}, timeout=self.req_timeout)
-        assert resp.status_code == 200, f'Error returned from defragmentation call on {url}, ' \
-            f'status {resp.status_code}, {resp.reason}, {resp.content.decode()}'
+        assert resp.status_code == 200, (
+            f"Error returned from defragmentation call on {url}, "
+            f"status {resp.status_code}, {resp.reason}, {resp.content.decode()}"
+        )
         logger.debug(f"Defragmentation completed")
         return True
 

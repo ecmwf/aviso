@@ -56,12 +56,11 @@ def main():
     etcd_reporter = EtcdReporter(config.monitoring, receiver)
     if etcd_reporter.enabled:
         schedule.every(etcd_reporter.frequency).minutes.do(etcd_reporter.run)
-    
-    
+
     # launch the prometheus reporter, this expose some tlms to /metrics
     prometheus_reporter = PrometheusReporter(config.monitoring, receiver)
     if prometheus_reporter.enabled:
-       prometheus_reporter.start() 
+        prometheus_reporter.start()
 
     # Loop so that the scheduling task keeps on running all time.
     while True:
@@ -73,4 +72,3 @@ def main():
 # when running directly from this file
 if __name__ == "__main__":
     main()
-

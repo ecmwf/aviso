@@ -1,5 +1,5 @@
 # (C) Copyright 1996- ECMWF.
-# 
+#
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -77,7 +77,7 @@ def _print_diff_files(dcmp) -> str:
 
 @pytest.mark.parametrize("conf", confs)
 def test_help(conf):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
     result = runner.invoke(cli, ["-h"])
     # run successfully
@@ -118,10 +118,9 @@ def test_help(conf):
 
 @pytest.mark.parametrize("conf", confs)
 def test_push_and_pull(conf):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
-    result = runner.invoke(cli, ["push", test_svc, "-D", config_folder_to_push1,
-                                 "-m", "test configuration"])
+    result = runner.invoke(cli, ["push", test_svc, "-D", config_folder_to_push1, "-m", "test configuration"])
     # run successfully
     assert result.exit_code == 0
     # display the operation completed
@@ -152,7 +151,7 @@ def test_push_and_pull_workflow1(conf):
     :param conf:
     :return:
     """
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
     # First push larger set
     result = runner.invoke(cli, ["push", test_svc, "-D", config_folder_to_push1, "-m", "test configuration"])
@@ -176,10 +175,12 @@ def test_push_and_pull_workflow1(conf):
     # check that is like the larger set
     assert os.path.exists(config_folder_to_pull)
     dcmp = dircmp(config_folder_to_push1, config_folder_to_pull)
-    assert _print_diff_files(dcmp) == 'diff_file config1.json found in tests/system/fixtures/config_test_push1 ' \
-                                      'and tests/system/fixtures/config_test_pull1diff_file config2.json found ' \
-                                      'in tests/system/fixtures/config_test_push1 and tests/system/' \
-                                      'fixtures/config_test_pull1'
+    assert (
+        _print_diff_files(dcmp) == "diff_file config1.json found in tests/system/fixtures/config_test_push1 "
+        "and tests/system/fixtures/config_test_pull1diff_file config2.json found "
+        "in tests/system/fixtures/config_test_push1 and tests/system/"
+        "fixtures/config_test_pull1"
+    )
 
 
 # noinspection PyPep8
@@ -190,7 +191,7 @@ def test_push_and_pull_workflow2(conf):
     :param conf:
     :return:
     """
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
     # First push larger set
     result = runner.invoke(cli, ["push", test_svc, "-D", config_folder_to_push1, "-m", "test configuration"])
@@ -198,7 +199,9 @@ def test_push_and_pull_workflow2(conf):
     assert result.output.find(f"Push operation for service {test_svc} successfully executed") != -1
 
     # Push smaller set
-    result = runner.invoke(cli, ["push", test_svc, "-D", config_folder_to_push2, "-m", "test configuration", "--delete"])
+    result = runner.invoke(
+        cli, ["push", test_svc, "-D", config_folder_to_push2, "-m", "test configuration", "--delete"]
+    )
     assert result.exit_code == 0
     assert result.output.find(f"Push operation for service {test_svc} successfully executed") != -1
 
@@ -226,7 +229,7 @@ def test_push_and_pull_workflow3(conf):
     :param conf:
     :return:
     """
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
     # First push larger set
     result = runner.invoke(cli, ["push", test_svc, "-D", config_folder_to_push1, "-m", "test configuration"])
@@ -248,7 +251,9 @@ def test_push_and_pull_workflow3(conf):
     assert _print_diff_files(dcmp) == ""
 
     # Push smaller set
-    result = runner.invoke(cli, ["push", test_svc, "-D", config_folder_to_push2, "-m", "test configuration", "--delete"])
+    result = runner.invoke(
+        cli, ["push", test_svc, "-D", config_folder_to_push2, "-m", "test configuration", "--delete"]
+    )
     assert result.exit_code == 0
     assert result.output.find(f"Push operation for service {test_svc} successfully executed") != -1
 
@@ -259,10 +264,12 @@ def test_push_and_pull_workflow3(conf):
     # check that is like the larger set
     assert os.path.exists(config_folder_to_pull)
     dcmp = dircmp(config_folder_to_push1, config_folder_to_pull)
-    assert _print_diff_files(dcmp) == 'diff_file config1.json found in tests/system/fixtures/config_test_push1 ' \
-                                      'and tests/system/fixtures/config_test_pull1diff_file config2.json found ' \
-                                      'in tests/system/fixtures/config_test_push1 and tests/system/' \
-                                      'fixtures/config_test_pull1'
+    assert (
+        _print_diff_files(dcmp) == "diff_file config1.json found in tests/system/fixtures/config_test_push1 "
+        "and tests/system/fixtures/config_test_pull1diff_file config2.json found "
+        "in tests/system/fixtures/config_test_push1 and tests/system/"
+        "fixtures/config_test_pull1"
+    )
 
 
 # noinspection PyPep8
@@ -274,7 +281,7 @@ def test_push_and_pull_workflow4(conf):
     :param conf:
     :return:
     """
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
     # First push larger set
     result = runner.invoke(cli, ["push", test_svc, "-D", config_folder_to_push1, "-m", "test configuration"])
@@ -296,7 +303,9 @@ def test_push_and_pull_workflow4(conf):
     assert _print_diff_files(dcmp) == ""
 
     # Push smaller set
-    result = runner.invoke(cli, ["push", test_svc, "-D", config_folder_to_push2, "-m", "test configuration", "--delete"])
+    result = runner.invoke(
+        cli, ["push", test_svc, "-D", config_folder_to_push2, "-m", "test configuration", "--delete"]
+    )
     assert result.exit_code == 0
     assert result.output.find(f"Push operation for service {test_svc} successfully executed") != -1
 
@@ -312,7 +321,7 @@ def test_push_and_pull_workflow4(conf):
 
 @pytest.mark.parametrize("conf", confs)
 def test_remove(conf):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
     # First push
     result = runner.invoke(cli, ["push", test_svc, "-D", config_folder_to_push1, "-m", "test configuration"])
@@ -341,7 +350,7 @@ def test_remove(conf):
 
 @pytest.mark.parametrize("conf", confs)
 def test_remove_doit(conf):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
     # First push
     result = runner.invoke(cli, ["push", test_svc, "-D", config_folder_to_push1, "-m", "test configuration"])
@@ -367,7 +376,7 @@ def test_remove_doit(conf):
 # noinspection PyShadowingNames
 @pytest.mark.parametrize("conf", confs)
 def test_revert(conf):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
     # First push
     result = runner.invoke(cli, ["push", test_svc, "-D", config_folder_to_push1, "-m", "test configuration"])
@@ -422,7 +431,7 @@ def test_revert(conf):
 
 @pytest.mark.parametrize("conf", confs)
 def test_status(conf):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
     # First push
     result = runner.invoke(cli, ["push", test_svc, "-D", config_folder_to_push1, "-m", "test configuration"])
@@ -437,7 +446,7 @@ def test_status(conf):
 
 @pytest.mark.parametrize("conf", confs)
 def test_pull_nothing(conf):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
     result = runner.invoke(cli, ["pull", test_svc, "-D", config_folder_to_pull])
     assert result.exit_code == 0
@@ -446,7 +455,7 @@ def test_pull_nothing(conf):
 
 @pytest.mark.parametrize("conf", confs)
 def test_remove_nothing(conf):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
     result = runner.invoke(cli, ["remove", test_svc, "-f"])
     assert result.exit_code == 0
@@ -455,7 +464,7 @@ def test_remove_nothing(conf):
 
 @pytest.mark.parametrize("conf", confs)
 def test_revert_nothing(conf):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
     result = runner.invoke(cli, ["revert", test_svc])
     assert result.exit_code == 0
@@ -464,7 +473,7 @@ def test_revert_nothing(conf):
 
 @pytest.mark.parametrize("conf", confs)
 def test_status_nothing(conf):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
     result = runner.invoke(cli, ["status", test_svc])
     assert result.exit_code == 0

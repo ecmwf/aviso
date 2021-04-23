@@ -1,5 +1,5 @@
 # (C) Copyright 1996- ECMWF.
-# 
+#
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -37,12 +37,15 @@ class FileBasedEngine(Engine):
         self._host = "localhost"
         self._port = ""
 
-    def pull(self, key: str,
-             key_only: bool = False,
-             rev: int = None,
-             prefix: bool = True,
-             min_rev: int = None,
-             max_rev: int = None) -> List[Dict[str, any]]:
+    def pull(
+        self,
+        key: str,
+        key_only: bool = False,
+        rev: int = None,
+        prefix: bool = True,
+        min_rev: int = None,
+        max_rev: int = None,
+    ) -> List[Dict[str, any]]:
         """
         This method implements a query to the notification server for all the key-values associated to the key as input.
         This key by default is a prefix, it can therefore return a set of key-values
@@ -158,7 +161,7 @@ class FileBasedEngine(Engine):
             v = kv["value"]
             file_name: str = k.split("/").pop()
             if not file_name == "":
-                folder_path = k[:-len(file_name)]
+                folder_path = k[: -len(file_name)]
             else:  # if k ends in / it means it the base directory, this is used to saved the status
                 folder_path = k
                 k += "status"
@@ -181,12 +184,14 @@ class FileBasedEngine(Engine):
 
         return True
 
-    def _polling(self,
-                 key: str,
-                 callback: callable([str, str]),
-                 channel: Queue,
-                 from_date: datetime = None,
-                 to_date: datetime = None):
+    def _polling(
+        self,
+        key: str,
+        callback: callable([str, str]),
+        channel: Queue,
+        from_date: datetime = None,
+        to_date: datetime = None,
+    ):
         """
         This method implements the active polling
         :param key: key to watch as a prefix
@@ -261,4 +266,3 @@ class FileBasedEngine(Engine):
             logger.error(f"Error while listening to key {key}, {e}")
             logger.debug("", exc_info=True)
             _thread.interrupt_main()
-

@@ -1,23 +1,24 @@
 # (C) Copyright 1996- ECMWF.
-# 
+#
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
 # granted to it by virtue of its status as an intergovernmental organisation
 # nor does it submit to any jurisdiction.
 
+import contextlib
 import datetime
 import json
+import logging
 import os
+import subprocess
 import time
 from shutil import rmtree
-import subprocess
-import contextlib
-import logging
-import pytest
 from threading import Thread
 
-from pyaviso import user_config, HOME_FOLDER, logger
+import pytest
+
+from pyaviso import HOME_FOLDER, logger, user_config
 from pyaviso.authentication import auth
 from pyaviso.engine.etcd_engine import LOCAL_STATE_FOLDER
 from pyaviso.engine.etcd_grpc_engine import EtcdGrpcEngine
@@ -64,7 +65,7 @@ def pre_post_test(engine):
 
 @pytest.mark.parametrize("engine", [rest_engine()])
 def test_authenticate(engine):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     assert engine._authenticate()
 
 
@@ -96,7 +97,7 @@ def test_locks(engine):
 
 @pytest.mark.parametrize("engine", engines)
 def test_pull(engine):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     # first create 2 keys
     kv1 = {"key": "test1", "value": "1"}
     kv2 = {"key": "test11", "value": "2"}
@@ -131,7 +132,7 @@ def test_pull(engine):
 
 @pytest.mark.parametrize("engine", engines)
 def test_push_delete(engine):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     # create 2 kvs and pushed them
     kv1 = {"key": "test1", "value": "1"}
     kv2 = {"key": "test2", "value": "2"}
@@ -157,7 +158,7 @@ def test_push_delete(engine):
 
 @pytest.mark.parametrize("engine", engines)
 def test_revisions(engine):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     # first create some keys
     kvs = [{"key": "test0", "value": "0"}]
     assert engine.push(kvs)
@@ -189,7 +190,7 @@ def test_revisions(engine):
 
 @pytest.mark.parametrize("engine", engines)
 def test_listen(engine):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     callback_list = []
 
     def callback(key, value):
@@ -229,7 +230,7 @@ def test_listen(engine):
 
 @pytest.mark.parametrize("engine", engines)
 def test_listen_old_state(engine):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     callback_list = []
 
     def callback(key, value):
@@ -411,6 +412,7 @@ def test_find_compacted_revision(engine):
 
     # compact revision 1 so revision 0 is no longer accessible
     import etcd3
+
     etcd = etcd3.client(host=engine.host, port=engine.port)
     etcd.compact(revision1)
 
@@ -447,36 +449,36 @@ def test_push_with_lease(engine):
 @pytest.mark.parametrize("engine", engines)
 def test_status_as_linked_list(engine):
 
-    status0 = {"date_time": '2020-08-28T10:58:17.829Z'}
+    status0 = {"date_time": "2020-08-28T10:58:17.829Z"}
     kv0 = {"mod_rev": "100", "value": json.dumps(status0).encode()}
 
-    status1 = {"date_time": '2020-08-28T15:58:17.829Z'}  # same day, a bit later
+    status1 = {"date_time": "2020-08-28T15:58:17.829Z"}  # same day, a bit later
     engine._status_as_linked_list(status1, [kv0])
-    assert status1.get('prev_rev') == "100"
-    assert status1.get('last_prev_day_rev') is None
+    assert status1.get("prev_rev") == "100"
+    assert status1.get("last_prev_day_rev") is None
     kv1 = {"mod_rev": "101", "value": json.dumps(status1).encode()}
 
-    status2 = {"date_time": '2020-08-28T20:58:17.829Z'}  # same day, a bit later
+    status2 = {"date_time": "2020-08-28T20:58:17.829Z"}  # same day, a bit later
     engine._status_as_linked_list(status2, [kv1])
-    assert status2.get('prev_rev') == "101"
-    assert status2.get('last_prev_day_rev') is None
+    assert status2.get("prev_rev") == "101"
+    assert status2.get("last_prev_day_rev") is None
     kv2 = {"mod_rev": "102", "value": json.dumps(status2).encode()}
 
-    status3 = {"date_time": '2020-08-29T10:58:17.829Z'}  # day after -> first_of_day
+    status3 = {"date_time": "2020-08-29T10:58:17.829Z"}  # day after -> first_of_day
     engine._status_as_linked_list(status3, [kv2])
-    assert status3.get('prev_rev') == "102"
-    assert status3.get('last_prev_day_rev') == "102"
+    assert status3.get("prev_rev") == "102"
+    assert status3.get("last_prev_day_rev") == "102"
     kv3 = {"mod_rev": "103", "value": json.dumps(status3).encode()}
 
-    status4 = {"date_time": '2020-08-29T15:58:17.829Z'}  # same day, a bit later
+    status4 = {"date_time": "2020-08-29T15:58:17.829Z"}  # same day, a bit later
     engine._status_as_linked_list(status4, [kv3])
-    assert status4.get('prev_rev') == "103"
-    assert status4.get('last_prev_day_rev') == "102"
+    assert status4.get("prev_rev") == "103"
+    assert status4.get("last_prev_day_rev") == "102"
 
 
 @pytest.mark.parametrize("engine", engines)
 def test_save_delete_state(engine):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     # first save state revision
     last_rev = 10
     assert engine._save_last_revision(last_rev)
@@ -485,6 +487,7 @@ def test_save_delete_state(engine):
     # delete it
     engine._delete_saved_revision()
     assert engine._last_saved_revision() == -1
+
 
 @contextlib.contextmanager
 def caplog_for_logger(caplog):  # this is needed to assert over the logging output
@@ -495,10 +498,11 @@ def caplog_for_logger(caplog):  # this is needed to assert over the logging outp
     yield
     lo.removeHandler(caplog.handler)
 
+
 @pytest.mark.parametrize("engine", [rest_engine()])
 def test_automatic_retry(engine, caplog):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
-    
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
+
     # create a process listening to a port
     out1 = subprocess.Popen(
         f"nc -l {10001}", shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE
@@ -507,7 +511,7 @@ def test_automatic_retry(engine, caplog):
     engine.timeout = 1
     engine._base_url = "http://127.0.0.1:10001/v3/"
 
-     # run a basic pull as background thread and check the log 
+    # run a basic pull as background thread and check the log
     server = Thread(target=engine.pull, daemon=True, kwargs={"key": "test1"})
     server.start()
     time.sleep(2)

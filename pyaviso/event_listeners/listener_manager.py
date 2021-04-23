@@ -1,5 +1,5 @@
 # (C) Copyright 1996- ECMWF.
-# 
+#
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -110,12 +110,14 @@ class ListenerManager:
         # now remove all of them from the internal list
         self._listeners.clear()
 
-    def listen(self,
-               listeners: List[Dict[str, any]],
-               listener_schema: Dict[str, any],
-               config: user_config.UserConfig = None,
-               from_date: datetime = None,
-               to_date: datetime = None) -> int :
+    def listen(
+        self,
+        listeners: List[Dict[str, any]],
+        listener_schema: Dict[str, any],
+        config: user_config.UserConfig = None,
+        from_date: datetime = None,
+        to_date: datetime = None,
+    ) -> int:
         """
         This method implements the main workflow to instantiate and execute new listeners
         :param listeners: listeners as list of dictionaries
@@ -157,6 +159,6 @@ class ListenerManager:
                 raise EventListenerException("Listeners could not start, please check logs")
             else:
                 logger.error("One or more listeners were not able to start")
-                
-        # return the number of listeners running        
+
+        # return the number of listeners running
         return len(self.listeners)

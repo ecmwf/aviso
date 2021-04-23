@@ -20,17 +20,12 @@ config = {
         "member_urls": ["http://localhost:2379"],
     },
     # this are the setting for sending the telemetry to a monitoring server like Opsview
-    "monitor_servers": [{
-        "url": "https://monitoring-dev.ecmwf.int/rest",
-        "username": "TBD",
-        "password": "TBD",
-        "service_host": "aviso"
-    }],
-    "udp_server": {
-        "host": "127.0.0.1",
-        "port": 1115
-    }
+    "monitor_servers": [
+        {"url": "https://monitoring-dev.ecmwf.int/rest", "username": "TBD", "password": "TBD", "service_host": "aviso"}
+    ],
+    "udp_server": {"host": "127.0.0.1", "port": 1115},
 }
+
 
 def receiver():
     warn_etcd_log = '<189>1 2021-04-13T09:02:09+00:00 aviso-etcd-4-7cc86d75b4-zrtnf etcd - - [origin enterpriseId="7464" software="aviso"][meta sequenceId="1"] 09:02:09.076897 W | etcdmain: no data-dir provided, using default data-dir ./default.etcd'
@@ -41,15 +36,16 @@ def receiver():
     receiver._incoming_errors[ETCD_APP_NAME] = [warn_etcd_log, err_etcd_log]
     return receiver
 
+
 # you need to set the connection to opsview to run this test and select a tml_type associated to a passive check
 def test_run_reporter():
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     reporter = EtcdReporter(Config(**config), receiver())
     reporter.run()
 
 
 def test_process_tlms():
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     reporter = EtcdReporter(Config(**config), receiver())
     metrics = reporter.process_messages()
     assert len(metrics) == 3

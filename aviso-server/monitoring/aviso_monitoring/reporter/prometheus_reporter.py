@@ -22,7 +22,7 @@ from .aviso_auth_reporter import AvisoAuthMetricType
 
 class PrometheusReporter(Thread):
     """
-    This class provides an endpoint for the Prometheus scraper. It is meant to provide to Prometheus the metrics not required by Opsview but still useful for 
+    This class provides an endpoint for the Prometheus scraper. It is meant to provide to Prometheus the metrics not required by Opsview but still useful for
     investigation
     """
 
@@ -36,10 +36,9 @@ class PrometheusReporter(Thread):
         self.msg_receiver = msg_receiver
         # run in the background
         self.setDaemon(True)
-        log = logging.getLogger('werkzeug')
+        log = logging.getLogger("werkzeug")
         log.setLevel(logging.ERROR)
         self.handler = self.create_handler()
-        
 
     def create_handler(self) -> Flask:
         handler = Flask(__name__)
@@ -47,7 +46,7 @@ class PrometheusReporter(Thread):
         logger.handlers = handler.logger.handlers
 
         def json_response(m, code, header=None):
-            h = {'Content-Type': 'application/json'}
+            h = {"Content-Type": "application/json"}
             if header:
                 h.update(header)
             return json.dumps({"message": str(m)}), code, h
@@ -75,7 +74,6 @@ class PrometheusReporter(Thread):
 
         return handler
 
-
     def aggregate_unique_counter_tlms(tlms):
         """
         This method aggregates the counter TLMs passed for unique values
@@ -88,16 +86,16 @@ class PrometheusReporter(Thread):
         """
         if len(tlms) == 0:
             return None
-        
+
         # read only the telemetry field of the tlm
         r_tlms = list(map(lambda t: t.get("telemetry"), tlms))
 
         # determine tlm_type
         first_key = list(r_tlms[0].keys())[0]
-        tlm_type = first_key[:first_key.rfind("_")]
+        tlm_type = first_key[: first_key.rfind("_")]
 
         # create a unique list of values
-        aggr_values= []
+        aggr_values = []
         for tlm in r_tlms:
             for v in tlm[tlm_type + "_values"]:
                 if not v in aggr_values:
@@ -111,17 +109,13 @@ class PrometheusReporter(Thread):
 
     def run(self):
         logger.info(f"Running prometheus reporter on server flask")
-        
+
         # flask internal server for non-production environments but it's fine for this usecase
         # Gunicorn does not work because spread the request over independent processes and therefore the Receiver object cannot be shared in this way
-        self.handler.run( 
-            host=self.host,
-            port=self.port, 
-            use_reloader=False)
-    
+        self.handler.run(host=self.host, port=self.port, use_reloader=False)
 
-class UsersCounter():
 
+class UsersCounter:
     def __init__(self, tlm_type, *args, **kwargs):
         self.metric_name = tlm_type
         self.retention_window = kwargs["retention_window"]
@@ -169,12 +163,12 @@ class UsersCounter():
         metric = "# HELP aviso_auth_users Number of users in the last 24 hours\n# TYPE aviso_auth_users gauge\naviso_auth_users "
         if tlm:
             users_count = tlm.get(self.metric_name + "_counter")
-            metric+=f"{users_count}\n"
+            metric += f"{users_count}\n"
             users = tlm.get(self.metric_name + "_values")
-            metric+=f'# Users: {users}\n'
+            metric += f"# Users: {users}\n"
 
         else:  # default metrics when no tlm have been received
-            metric+="0\n"
+            metric += "0\n"
             users = ""
         logger.debug(f"{self.metric_name} metric: {metric} for users: {users}")
         return metric

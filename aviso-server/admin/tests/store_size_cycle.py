@@ -59,8 +59,9 @@ def delete_destination_keys(date):
 
 def store_size():
     reporter = EtcdReporter(conf().monitoring)
-    checker = StoreSize(EtcdMetricType.etcd_store_size, member_urls=reporter.member_urls,
-                        raw_tlms=reporter.retrive_raw_tlms())
+    checker = StoreSize(
+        EtcdMetricType.etcd_store_size, member_urls=reporter.member_urls, raw_tlms=reporter.retrive_raw_tlms()
+    )
     size = checker.max_store_size("etcd_mvcc_db_total_size_in_use_in_bytes")
     return size
 

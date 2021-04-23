@@ -1,5 +1,5 @@
 # (C) Copyright 1996- ECMWF.
-# 
+#
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -27,7 +27,7 @@ class UniqueCountCollector(Collector):
             kwargs(dict): Function arguments
         """
         if type(args) is not tuple and type(args) is not list:
-            args = [args] 
+            args = [args]
         if not kwargs:
             kwargs = {}
         res = f(*args, **kwargs)
@@ -49,9 +49,9 @@ class UniqueCountCollector(Collector):
         """
         if len(tlms):
             agg_tlm = {
-                self.telemetry_name+"_counter": len(tlms),
-                self.telemetry_name+"_values": tlms,
+                self.telemetry_name + "_counter": len(tlms),
+                self.telemetry_name + "_values": tlms,
             }
             return agg_tlm
-        else: 
+        else:
             return {}

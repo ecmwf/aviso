@@ -1,5 +1,5 @@
 # (C) Copyright 1996- ECMWF.
-# 
+#
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -52,12 +52,14 @@ class EtcdEngine(Engine, ABC):
         """
         pass
 
-    def _polling(self,
-                 key: str,
-                 callback: callable([str, str]),
-                 channel: Queue,
-                 from_date: datetime = None,
-                 to_date: datetime = None):
+    def _polling(
+        self,
+        key: str,
+        callback: callable([str, str]),
+        channel: Queue,
+        from_date: datetime = None,
+        to_date: datetime = None,
+    ):
         """
         This method implements the active polling
         :param key: key to watch as a prefix
@@ -99,7 +101,7 @@ class EtcdEngine(Engine, ABC):
                     # we start from now
                     next_rev = self._latest_revision(key) + 1
 
-            else: # start date defined
+            else:  # start date defined
                 logger.info("Searching for past notifications...")
                 next_rev, final_rev = self._from_to_revisions(key, from_date=from_date, to_date=to_date)
                 if next_rev == -1 and final_rev == -1:
@@ -152,7 +154,7 @@ class EtcdEngine(Engine, ABC):
                         trigger_callback(kvs)
                     # wait the polling interval before trying again
                     time.sleep(self._polling_interval)
-                    
+
         except Exception as e:
             logger.error(f"Error while listening to key {key}: {e}")
             logger.debug("", exc_info=True)
@@ -215,7 +217,7 @@ class EtcdEngine(Engine, ABC):
                 "last_revision": rev,
                 "date_time": datetime.utcnow().strftime(DATE_FORMAT),
                 "server_host": self.host,
-                "server_port": self.port
+                "server_port": self.port,
             }
             # build the path where the last revision will be saved
             full_home_path = os.path.expanduser(HOME_FOLDER)
@@ -322,12 +324,14 @@ class EtcdEngine(Engine, ABC):
         while status_date > from_date and status_prev_rev != -1:
             if status_date.date() == from_date.date():  # same day
                 # go back one revision
-                status_rev, status_date, status_prev_rev, status_last_prev_day_rev = \
-                    self._retrieve_status_history(key, status_prev_rev)
+                status_rev, status_date, status_prev_rev, status_last_prev_day_rev = self._retrieve_status_history(
+                    key, status_prev_rev
+                )
             elif status_last_prev_day_rev:
                 # go back to the revision of the last of the previous day -> we skip a day
-                status_rev, status_date, status_prev_rev, status_last_prev_day_rev = \
-                    self._retrieve_status_history(key, status_last_prev_day_rev)
+                status_rev, status_date, status_prev_rev, status_last_prev_day_rev = self._retrieve_status_history(
+                    key, status_last_prev_day_rev
+                )
             elif status_last_prev_day_rev is None:  # it is the last point of history
                 logger.warning("Reached the end of history available")
                 break

@@ -1,5 +1,5 @@
 # (C) Copyright 1996- ECMWF.
-# 
+#
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -29,17 +29,19 @@ KEY_FILE = "key"
 
 
 class EngineConfig:
-    def __init__(self,
-                 host: str,
-                 port: int,
-                 type: str,
-                 polling_interval: Optional[int] = None,
-                 max_file_size: Optional[int] = None,
-                 timeout: Optional[int] = None,
-                 service: Optional[str] = None,
-                 https: bool = False,
-                 catchup: Optional[bool] = None,
-                 automatic_retry_delay: Optional[int] = None):
+    def __init__(
+        self,
+        host: str,
+        port: int,
+        type: str,
+        polling_interval: Optional[int] = None,
+        max_file_size: Optional[int] = None,
+        timeout: Optional[int] = None,
+        service: Optional[str] = None,
+        https: bool = False,
+        catchup: Optional[bool] = None,
+        automatic_retry_delay: Optional[int] = None,
+    ):
         """
         :param host: endpoint host of the notification server
         :param port: endpoint port of the notification server
@@ -66,16 +68,16 @@ class EngineConfig:
 
     def __str__(self):
         config_string = (
-                f"host: {self.host}" +
-                f", port: {self.port}" +
-                f", https: {self.https}" +
-                f", type: {self.type.name}" +
-                f", polling_interval: {self.polling_interval}" +
-                f", timeout: {self.timeout}" +
-                f", max_file_size: {self.max_file_size}" +
-                f", service: {self.service}" +
-                f", catchup: {self.catchup}"+
-                f", automatic_retry_delay: {self.automatic_retry_delay}"
+            f"host: {self.host}"
+            + f", port: {self.port}"
+            + f", https: {self.https}"
+            + f", type: {self.type.name}"
+            + f", polling_interval: {self.polling_interval}"
+            + f", timeout: {self.timeout}"
+            + f", max_file_size: {self.max_file_size}"
+            + f", service: {self.service}"
+            + f", catchup: {self.catchup}"
+            + f", automatic_retry_delay: {self.automatic_retry_delay}"
         )
         return config_string
 
@@ -86,23 +88,25 @@ class UserConfig:
     environment variables, configuration files or defaults.
     """
 
-    def __init__(self,
-                 conf_path: Optional[str] = None,
-                 conf_from_file: Optional[Dict[str, any]] = None,
-                 logging_path: Optional[str] = None,
-                 notification_engine: Optional[Dict[str, any]] = None,
-                 configuration_engine: Optional[Dict[str, any]] = None,
-                 debug: Optional[bool] = None,
-                 quiet: Optional[bool] = None,
-                 no_fail: Optional[bool] = None,
-                 username: Optional[str] = None,
-                 username_file: Optional[str] = None,
-                 key_file: Optional[str] = None,
-                 auth_type: Optional[str] = None,
-                 key_ttl: Optional[int] = None,
-                 schema_parser: Optional[str] = None,
-                 remote_schema: Optional[bool] = None,
-                 listeners: Optional[Dict[str, any]] = None):
+    def __init__(
+        self,
+        conf_path: Optional[str] = None,
+        conf_from_file: Optional[Dict[str, any]] = None,
+        logging_path: Optional[str] = None,
+        notification_engine: Optional[Dict[str, any]] = None,
+        configuration_engine: Optional[Dict[str, any]] = None,
+        debug: Optional[bool] = None,
+        quiet: Optional[bool] = None,
+        no_fail: Optional[bool] = None,
+        username: Optional[str] = None,
+        username_file: Optional[str] = None,
+        key_file: Optional[str] = None,
+        auth_type: Optional[str] = None,
+        key_ttl: Optional[int] = None,
+        schema_parser: Optional[str] = None,
+        remote_schema: Optional[bool] = None,
+        listeners: Optional[Dict[str, any]] = None,
+    ):
         """
         :param conf_path: path to the system configuration file. If not provided,
         the default location is HOME_FOLDER/config.yaml.
@@ -180,7 +184,7 @@ class UserConfig:
         notification_engine["timeout"] = 60  # seconds
         notification_engine["service"] = "aviso/v1"
         notification_engine["catchup"] = True
-        notification_engine["automatic_retry_delay"] = 15 # seconds
+        notification_engine["automatic_retry_delay"] = 15  # seconds
 
         # configuration engine
         configuration_engine = {}
@@ -190,7 +194,7 @@ class UserConfig:
         configuration_engine["type"] = "etcd_rest"
         configuration_engine["max_file_size"] = 500  # KiB
         configuration_engine["timeout"] = 60  # seconds
-        configuration_engine["automatic_retry_delay"] = 15 # seconds
+        configuration_engine["automatic_retry_delay"] = 15  # seconds
 
         # main config
         config = {}
@@ -209,7 +213,7 @@ class UserConfig:
         return config
 
     def _read_key(self) -> str:
-        assert self.key_file is not None, 'Key file not found'
+        assert self.key_file is not None, "Key file not found"
         full_key_path = os.path.expanduser(self.key_file)
         try:
             with open(full_key_path, "r") as k:
@@ -220,7 +224,7 @@ class UserConfig:
             sys.exit(-1)
 
     def _read_username_file(self) -> str:
-        assert self.username_file is not None, 'Username file not found'
+        assert self.username_file is not None, "Username file not found"
         full_username_path = os.path.expanduser(self.username_file)
         try:
             with open(full_username_path, "r") as u:
@@ -323,7 +327,11 @@ class UserConfig:
             config["notification_engine"]["timeout"] = timeout
             config["configuration_engine"]["timeout"] = timeout
         if "AVISO_AUTOMATIC_RETRY_DELAY" in os.environ:  # one variable for both engine
-            automatic_retry_delay = None if os.environ["AVISO_AUTOMATIC_RETRY_DELAY"] == "null" else int(os.environ["AVISO_AUTOMATIC_RETRY_DELAY"])
+            automatic_retry_delay = (
+                None
+                if os.environ["AVISO_AUTOMATIC_RETRY_DELAY"] == "null"
+                else int(os.environ["AVISO_AUTOMATIC_RETRY_DELAY"])
+            )
             config["notification_engine"]["automatic_retry_delay"] = automatic_retry_delay
             config["configuration_engine"]["automatic_retry_delay"] = automatic_retry_delay
         return config
@@ -382,8 +390,7 @@ class UserConfig:
         assert "service" in ne, "notification_engine service has not been configured"
         assert "catchup" in ne, "notification_engine catchup has not been configured"
         assert "automatic_retry_delay" in ne, "notification_engine automatic_retry_delay has not been configured"
-        assert "polling_interval" in ne, \
-            "notification_engine polling_interval has not been configured"
+        assert "polling_interval" in ne, "notification_engine polling_interval has not been configured"
         assert "timeout" in ne, "notification_engine timeout has not been configured"
         if type(ne["https"]) is str:
             ne["https"] = ne["https"].casefold() == "true".casefold()
@@ -392,9 +399,16 @@ class UserConfig:
 
         # translate the ne in a NotificationEngineConfig
         self._notification_engine = EngineConfig(
-            ne["host"], ne["port"], ne["type"], polling_interval=ne["polling_interval"],
-            timeout=ne["timeout"], https=ne["https"], service=ne["service"], catchup=ne["catchup"],
-            automatic_retry_delay=ne["automatic_retry_delay"])
+            ne["host"],
+            ne["port"],
+            ne["type"],
+            polling_interval=ne["polling_interval"],
+            timeout=ne["timeout"],
+            https=ne["https"],
+            service=ne["service"],
+            catchup=ne["catchup"],
+            automatic_retry_delay=ne["automatic_retry_delay"],
+        )
 
     @property
     def configuration_engine(self) -> EngineConfig:
@@ -413,8 +427,7 @@ class UserConfig:
         assert "port" in ce, "configuration_engine port has not been configured"
         assert "type" in ce, "configuration_engine type has not been configured"
         assert "https" in ce, "configuration_engine https has not been configured"
-        assert "max_file_size" in ce, \
-            "configuration_engine max_file_size has not been configured"
+        assert "max_file_size" in ce, "configuration_engine max_file_size has not been configured"
         assert "timeout" in ce, "configuration_engine timeout has not been configured"
         assert "automatic_retry_delay" in ce, "configuration_engine automatic_retry_delay has not been configured"
         if type(ce["https"]) is str:
@@ -424,8 +437,14 @@ class UserConfig:
         assert ce["type"].casefold() != "file_based", "File_based engine not available as configuration engine"
         # translate the ce in a ConfigurationEngineConfig
         self._configuration_engine = EngineConfig(
-            ce["host"], ce["port"], ce["type"], max_file_size=ce["max_file_size"],
-            timeout=ce["timeout"], https=ce["https"], automatic_retry_delay=ce["automatic_retry_delay"])
+            ce["host"],
+            ce["port"],
+            ce["type"],
+            max_file_size=ce["max_file_size"],
+            timeout=ce["timeout"],
+            https=ce["https"],
+            automatic_retry_delay=ce["automatic_retry_delay"],
+        )
 
     @property
     def schema_parser(self) -> ListenerSchemaParserType:
@@ -552,17 +571,17 @@ class UserConfig:
 
     def __str__(self):
         config_string = (
-                f"notification_engine: {self.notification_engine}" +
-                f", configuration_engine: {self.configuration_engine}" +
-                f", auth_type: {self.auth_type}" +
-                f", debug: {self.debug}" +
-                f", quiet: {self.quiet}" +
-                f", username: {self.username}" +
-                f", username_file: {self.username_file}" +
-                f", no_fail: {self.no_fail}" +
-                f", key_ttl: {self.key_ttl}" +
-                f", schema_parser: {self.schema_parser}" +
-                f", remote_schema: {self.remote_schema}"
+            f"notification_engine: {self.notification_engine}"
+            + f", configuration_engine: {self.configuration_engine}"
+            + f", auth_type: {self.auth_type}"
+            + f", debug: {self.debug}"
+            + f", quiet: {self.quiet}"
+            + f", username: {self.username}"
+            + f", username_file: {self.username_file}"
+            + f", no_fail: {self.no_fail}"
+            + f", key_ttl: {self.key_ttl}"
+            + f", schema_parser: {self.schema_parser}"
+            + f", remote_schema: {self.remote_schema}"
         )
         return config_string
 
@@ -575,7 +594,7 @@ class UserConfig:
             console_handler = logging.StreamHandler()
             console_handler.name = "console"
             console_handler.setLevel(logging.INFO)
-            console_handler.setFormatter(logging.Formatter('%(message)s'))
+            console_handler.setFormatter(logging.Formatter("%(message)s"))
             logging.getLogger().addHandler(console_handler)
 
     def _configure_property(self, param, name, nullable=False):
@@ -603,12 +622,12 @@ class UserConfig:
 
 # class to allow yaml loader to replace ~ with HOME directory
 class HomeFolderLoader(yaml.SafeLoader):
-    path_matcher = re.compile('~')
+    path_matcher = re.compile("~")
 
     @staticmethod
     def path_constructor(loader, node):
         return os.path.expanduser(node.value)
 
 
-HomeFolderLoader.add_implicit_resolver('!path', HomeFolderLoader.path_matcher, None)
-HomeFolderLoader.add_constructor('!path', HomeFolderLoader.path_constructor)
+HomeFolderLoader.add_implicit_resolver("!path", HomeFolderLoader.path_matcher, None)
+HomeFolderLoader.add_constructor("!path", HomeFolderLoader.path_constructor)

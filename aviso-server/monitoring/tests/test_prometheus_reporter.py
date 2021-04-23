@@ -20,20 +20,11 @@ from aviso_monitoring.reporter.aviso_auth_reporter import AvisoAuthMetricType
 from aviso_monitoring.reporter.prometheus_reporter import PrometheusReporter
 
 counter_type = AvisoAuthMetricType.auth_users_counter.name
-config = {
-    "prometheus_reporter": {
-        "enabled": True,
-        "port": 8090
-    },
-    "udp_server": {
-        "host": "127.0.0.1",
-        "port": 1120
-    }
-}
+config = {"prometheus_reporter": {"enabled": True, "port": 8090}, "udp_server": {"host": "127.0.0.1", "port": 1120}}
 
 
 def receiver():
-    
+
     counter_tlm1 = {
         "telemetry_type": counter_type,
         "component_name": "counter_comp",
@@ -42,7 +33,7 @@ def receiver():
         "telemetry": {
             f"{counter_type}_counter": 1,
             f"{counter_type}_values": ["apple"],
-        }
+        },
     }
     counter_tlm2 = {
         "telemetry_type": counter_type,
@@ -52,7 +43,7 @@ def receiver():
         "telemetry": {
             f"{counter_type}_counter": 2,
             f"{counter_type}_values": ["apple", "pear"],
-        }
+        },
     }
 
     receiver = Receiver()
@@ -68,8 +59,9 @@ def prepost_module():
     time.sleep(3)
     yield
 
+
 def test_metrics():
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     conf = Config(**config)
     resp = requests.get(f"http://{conf.prometheus_reporter['host']}:{conf.prometheus_reporter['port']}/metrics")
     assert resp.status_code == 200

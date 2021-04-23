@@ -1,5 +1,5 @@
 # (C) Copyright 1996- ECMWF.
-# 
+#
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -19,7 +19,7 @@ from .user_config import UserConfig
 
 # main ServiceConfigManager object, we can use this for all commands
 
-CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
+CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
 
 def configuration_server_setup(f):
@@ -27,11 +27,11 @@ def configuration_server_setup(f):
     @click.option("--port", "-P", help="Configuration server port.", type=int)
     @functools.wraps(f)
     def functor(*args, **kwargs):
-        if kwargs['host'] is not None:
-            kwargs['configuration'].configuration_engine.host = kwargs['host']
+        if kwargs["host"] is not None:
+            kwargs["configuration"].configuration_engine.host = kwargs["host"]
         kwargs.pop("host")
-        if kwargs['port'] is not None:
-            kwargs['configuration'].configuration_engine.port = kwargs['port']
+        if kwargs["port"] is not None:
+            kwargs["configuration"].configuration_engine.port = kwargs["port"]
         kwargs.pop("port")
 
         return f(*args, **kwargs)
@@ -41,18 +41,21 @@ def configuration_server_setup(f):
 
 @click.group(context_settings=CONTEXT_SETTINGS)
 @click.version_option(version=__version__)
-def cli(): pass
+def cli():
+    pass
 
 
-@click.command(help='Push all files from the directory selected to the service defined, respecting the '
-                    'subdirectory structure.')
+@click.command(
+    help="Push all files from the directory selected to the service defined, respecting the " "subdirectory structure."
+)
 @user_config_setup
 @configuration_server_setup
-@click.argument('service', required=True)
-@click.option('--dir', '-D', help='Directory to push.', required=True)
-@click.option('--message', '-m', help='Message to associate to the push.', required=True)
-@click.option('--delete', help='Allows delete of files on server if they don`t exist locally.',
-              is_flag=True, default=False)
+@click.argument("service", required=True)
+@click.option("--dir", "-D", help="Directory to push.", required=True)
+@click.option("--message", "-m", help="Message to associate to the push.", required=True)
+@click.option(
+    "--delete", help="Allows delete of files on server if they don`t exist locally.", is_flag=True, default=False
+)
 def push(service: str, dir: str, message: str, delete: bool, configuration: UserConfig):
     config_manager = ServiceConfigManager(configuration)
     # call the push method of the ServiceConfigManager
@@ -70,19 +73,19 @@ def push(service: str, dir: str, message: str, delete: bool, configuration: User
         logger.debug("", exc_info=True)
         sys.exit(-1)
     except Exception as e:
-        logger.error(f"Error occurred while pushing the directory {dir} to the service {service}, "
-                     f"{e}")
+        logger.error(f"Error occurred while pushing the directory {dir} to the service {service}, " f"{e}")
         logger.debug("", exc_info=True)
         sys.exit(-1)
 
 
-@click.command(help='Pull all files associated with the service defined.')
+@click.command(help="Pull all files associated with the service defined.")
 @user_config_setup
 @configuration_server_setup
-@click.argument('service', required=True)
-@click.option('--dir', '-D', help='Directory to push.', default=".")
-@click.option('--delete', help='Allows delete of local files if they don`t exist on server.',
-              is_flag=True, default=False)
+@click.argument("service", required=True)
+@click.option("--dir", "-D", help="Directory to push.", default=".")
+@click.option(
+    "--delete", help="Allows delete of local files if they don`t exist on server.", is_flag=True, default=False
+)
 def pull(service: str, dir: str, delete: bool, configuration: UserConfig):
     config_manager = ServiceConfigManager(configuration)
     # call the pull_and_save method of the ServiceConfigManager
@@ -100,17 +103,16 @@ def pull(service: str, dir: str, delete: bool, configuration: UserConfig):
         logger.debug("", exc_info=True)
         sys.exit(-1)
     except Exception as e:
-        logger.error(f"Error occurred while pull the service {service}, "
-                     f"{e}")
+        logger.error(f"Error occurred while pull the service {service}, " f"{e}")
         logger.debug("", exc_info=True)
         sys.exit(-1)
 
 
-@click.command(help='Remove all files associated with the service defined.')
+@click.command(help="Remove all files associated with the service defined.")
 @user_config_setup
 @configuration_server_setup
-@click.argument('service', required=True)
-@click.option('--doit', '-f', help='Remove without prompt.', is_flag=True, default=None)
+@click.argument("service", required=True)
+@click.option("--doit", "-f", help="Remove without prompt.", is_flag=True, default=None)
 def remove(service: str, doit: bool, configuration: UserConfig):
     config_manager = ServiceConfigManager(configuration)
     try:
@@ -139,16 +141,15 @@ def remove(service: str, doit: bool, configuration: UserConfig):
         logger.debug("", exc_info=True)
         sys.exit(-1)
     except Exception as e:
-        logger.error(f"Error occurred while removing all files associated to the service {service}, "
-                     f"{e}")
+        logger.error(f"Error occurred while removing all files associated to the service {service}, " f"{e}")
         logger.debug("", exc_info=True)
         sys.exit(-1)
 
 
-@click.command(help='Revert all files associated with the service defined to the previous version.')
+@click.command(help="Revert all files associated with the service defined to the previous version.")
 @user_config_setup
 @configuration_server_setup
-@click.argument('service', required=True)
+@click.argument("service", required=True)
 def revert(service: str, configuration: UserConfig):
     config_manager = ServiceConfigManager(configuration)
     # call the revert method of the ServiceConfigManager
@@ -166,16 +167,15 @@ def revert(service: str, configuration: UserConfig):
         logger.debug("", exc_info=True)
         sys.exit(-1)
     except Exception as e:
-        logger.error(f"Error occurred while reverting the service {service}, "
-                     f"{e}")
+        logger.error(f"Error occurred while reverting the service {service}, " f"{e}")
         logger.debug("", exc_info=True)
         sys.exit(-1)
 
 
-@click.command(help='Retrieve the status of the service defined.')
+@click.command(help="Retrieve the status of the service defined.")
 @user_config_setup
 @configuration_server_setup
-@click.argument('service', required=True)
+@click.argument("service", required=True)
 def status(service: str, configuration: UserConfig):
     config_manager = ServiceConfigManager(configuration)
     # call the status method of the ServiceConfigManager
@@ -189,8 +189,7 @@ def status(service: str, configuration: UserConfig):
         logger.debug("", exc_info=True)
         sys.exit(-1)
     except Exception as e:
-        logger.error(f"Error occurred while retrieving version for the service {service}, "
-                     f"{e}")
+        logger.error(f"Error occurred while retrieving version for the service {service}, " f"{e}")
         logger.debug("", exc_info=True)
         sys.exit(-1)
 

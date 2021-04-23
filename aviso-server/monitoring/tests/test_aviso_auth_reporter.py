@@ -22,23 +22,18 @@ config = {
     "aviso_auth_reporter": {
         "enabled": True,
         "frequency": 2,  # in minutes
-        "tlms": {
-            "auth_resp_time": {
-                "sub_tlms": ["t1", "t2"]
-            }
-        }
+        "tlms": {"auth_resp_time": {"sub_tlms": ["t1", "t2"]}},
     },
     # this are the setting for sending the telemetry to a monitoring server like Opsview
-    "monitor_servers": [{
-        "url": "https://monitoring-dev.ecmwf.int/rest",
-        "username": "TBD",
-        "password": "TBD",
-        "service_host": "aviso",
-    }],
-    "udp_server": {
-        "host": "127.0.0.1",
-        "port": 1110
-    }
+    "monitor_servers": [
+        {
+            "url": "https://monitoring-dev.ecmwf.int/rest",
+            "username": "TBD",
+            "password": "TBD",
+            "service_host": "aviso",
+        }
+    ],
+    "udp_server": {"host": "127.0.0.1", "port": 1110},
 }
 
 
@@ -48,24 +43,14 @@ def receiver():
         "component_name": "time_comp",
         "hostname": "me",
         "time": datetime.datetime.timestamp(datetime.datetime.utcnow()),
-        "telemetry": {
-            f"{time_type}_counter": 2,
-            f"{time_type}_avg": 2,
-            f"{time_type}_max": 3,
-            f"{time_type}_min": 1
-        }
+        "telemetry": {f"{time_type}_counter": 2, f"{time_type}_avg": 2, f"{time_type}_max": 3, f"{time_type}_min": 1},
     }
     time_tlm2 = {
         "telemetry_type": time_type,
         "component_name": "time_comp",
         "hostname": "me",
         "time": datetime.datetime.timestamp(datetime.datetime.utcnow()),
-        "telemetry": {
-            f"{time_type}_counter": 2,
-            f"{time_type}_avg": 3,
-            f"{time_type}_max": 4,
-            f"{time_type}_min": 2
-        }
+        "telemetry": {f"{time_type}_counter": 2, f"{time_type}_avg": 3, f"{time_type}_max": 4, f"{time_type}_min": 2},
     }
     time_tlm1t1 = {
         "telemetry_type": time_type,
@@ -76,8 +61,8 @@ def receiver():
             f"{time_type}_t1_counter": 20,
             f"{time_type}_t1_avg": 20,
             f"{time_type}_t1_max": 30,
-            f"{time_type}_t1_min": 10
-        }
+            f"{time_type}_t1_min": 10,
+        },
     }
     time_tlm2t1 = {
         "telemetry_type": time_type,
@@ -88,8 +73,8 @@ def receiver():
             f"{time_type}_t1_counter": 20,
             f"{time_type}_t1_avg": 30,
             f"{time_type}_t1_max": 40,
-            f"{time_type}_t1_min": 20
-        }
+            f"{time_type}_t1_min": 20,
+        },
     }
     time_tlm1t2 = {
         "telemetry_type": time_type,
@@ -100,8 +85,8 @@ def receiver():
             f"{time_type}_t2_counter": 200,
             f"{time_type}_t2_avg": 200,
             f"{time_type}_t2_max": 300,
-            f"{time_type}_t2_min": 100
-        }
+            f"{time_type}_t2_min": 100,
+        },
     }
     time_tlm2t2 = {
         "telemetry_type": time_type,
@@ -112,10 +97,10 @@ def receiver():
             f"{time_type}_t2_counter": 200,
             f"{time_type}_t2_avg": 300,
             f"{time_type}_t2_max": 400,
-            f"{time_type}_t2_min": 200
-        }
+            f"{time_type}_t2_min": 200,
+        },
     }
-    
+
     err_auth_log = '<191>1 2021-04-12T09:00:08.931717+00:00 aviso-auth-green-7f6d59848f-cg6zv aviso-auth 49 - [origin software="aviso"]  {"asctime": "2021-04-12 09:00:08,931", "hostname": "aviso-auth-green-7f6d59848f-cg6zv", "process": 49, "thread": 140428749499272, "name": "aviso-monitoring", "filename": "time_collector.py", "lineno": 38, "levelname": "ERROR", "message": "Time collected"}'
 
     receiver = Receiver()
@@ -126,13 +111,13 @@ def receiver():
 
 # you need to set the connection to opsview to run this test and select a tml_type associated to a passive check
 def test_run_reporter():
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     reporter = AvisoAuthReporter(Config(**config), receiver())
     reporter.run()
 
 
 def test_process_tlms():
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     reporter = AvisoAuthReporter(Config(**config), receiver())
     metrics = reporter.process_messages()
     assert len(metrics) == 3

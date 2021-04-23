@@ -19,7 +19,6 @@ from ..config import Config
 
 
 class OpsviewReporter(ABC):
-
     def __init__(self, config: Config, msg_receiver=None):
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         self.monitor_servers = config.monitor_servers
@@ -31,17 +30,20 @@ class OpsviewReporter(ABC):
         :return: token if successfully authenticated, None otherwise
         """
         headers = {"Content-type": "application/json", "Accept": "application/json"}
-        data = {"username": m_server['username'], "password": m_server['password']}
+        data = {"username": m_server["username"], "password": m_server["password"]}
         try:
-            resp = requests.post(m_server['url'] + "/login", data=json.dumps(data), headers=headers,
-                                 verify=False, timeout=60)
+            resp = requests.post(
+                m_server["url"] + "/login", data=json.dumps(data), headers=headers, verify=False, timeout=60
+            )
         except Exception as e:
             logger.error("Not able to authenticate with monitoring server")
             logger.exception(e)
             return None
         if resp.status_code != 200:
-            logger.error(f"Not able to authenticate with monitoring server for {m_server['username']} from {m_server['url']}, "
-                         f"status {resp.status_code}, {resp.reason}, {resp.content.decode()}")
+            logger.error(
+                f"Not able to authenticate with monitoring server for {m_server['username']} from {m_server['url']}, "
+                f"status {resp.status_code}, {resp.reason}, {resp.content.decode()}"
+            )
             return None
 
         return json.loads(resp.text)["token"]
@@ -53,12 +55,15 @@ class OpsviewReporter(ABC):
         :param metric:
         :return: True if successful, False otherwise
         """
-        headers = {"Content-type": "application/json", "X-Opsview-Username": f"{m_server['username']}",
-                   "X-Opsview-Token": token}
+        headers = {
+            "Content-type": "application/json",
+            "X-Opsview-Username": f"{m_server['username']}",
+            "X-Opsview-Token": token,
+        }
         url = f"{m_server['url']}/detail?hostname={m_server['service_host']}&servicename=Passive Check: {metric.get('name')}"
         data = {
             "passive_checks": {"enabled": 1},
-            "set_state": {"result": metric.get('status'), "output": f"{metric.get('message')} "}
+            "set_state": {"result": metric.get("status"), "output": f"{metric.get('message')} "},
         }
         if metric.get("metrics"):
             data["set_state"]["output"] += "| "
@@ -71,15 +76,16 @@ class OpsviewReporter(ABC):
             logger.exception(e)
             return False
         if resp.status_code != 200:
-            logger.error(f"Not able to post metric to {url}, "
-                         f"status {resp.status_code}, {resp.reason}, {resp.content.decode()}")
+            logger.error(
+                f"Not able to post metric to {url}, "
+                f"status {resp.status_code}, {resp.reason}, {resp.content.decode()}"
+            )
             return False
 
         return True
 
     def process_messages(self):
         pass
-        
 
     def run(self):
         """
@@ -124,22 +130,28 @@ class OpsviewReporter(ABC):
 
         # determine tlm_type
         first_key = list(r_tlms[0].keys())[0]
-        tlm_type = first_key[:first_key.rfind("_")]
+        tlm_type = first_key[: first_key.rfind("_")]
 
-        # setup the aggregated tlm to return 
+        # setup the aggregated tlm to return
         agg_tlm = {
             tlm_type + "_counter": 0,
             tlm_type + "_avg": 0,
             tlm_type + "_max": -math.inf,
-            tlm_type + "_min": math.inf
+            tlm_type + "_min": math.inf,
         }
         summation = 0
         for tlm in r_tlms:
             agg_tlm[tlm_type + "_counter"] += tlm[tlm_type + "_counter"]
-            agg_tlm[tlm_type + "_max"] = tlm[tlm_type + "_max"] if tlm[tlm_type + "_max"] > agg_tlm[tlm_type + "_max"] \
+            agg_tlm[tlm_type + "_max"] = (
+                tlm[tlm_type + "_max"]
+                if tlm[tlm_type + "_max"] > agg_tlm[tlm_type + "_max"]
                 else agg_tlm[tlm_type + "_max"]
-            agg_tlm[tlm_type + "_min"] = tlm[tlm_type + "_min"] if tlm[tlm_type + "_min"] < agg_tlm[tlm_type + "_min"] \
+            )
+            agg_tlm[tlm_type + "_min"] = (
+                tlm[tlm_type + "_min"]
+                if tlm[tlm_type + "_min"] < agg_tlm[tlm_type + "_min"]
                 else agg_tlm[tlm_type + "_min"]
+            )
             summation += tlm[tlm_type + "_counter"] * tlm[tlm_type + "_avg"]
         agg_tlm[tlm_type + "_avg"] = summation / agg_tlm[tlm_type + "_counter"]
 
@@ -157,16 +169,16 @@ class OpsviewReporter(ABC):
         """
         if len(tlms) == 0:
             return None
-        
+
         # read only the telemetry field of the tlm
         r_tlms = list(map(lambda t: t.get("telemetry"), tlms))
 
         # determine tlm_type
         first_key = list(r_tlms[0].keys())[0]
-        tlm_type = first_key[:first_key.rfind("_")]
+        tlm_type = first_key[: first_key.rfind("_")]
 
         # create a unique list of values
-        aggr_values= []
+        aggr_values = []
         for tlm in r_tlms:
             for v in tlm[tlm_type + "_values"]:
                 if not v in aggr_values:
@@ -180,7 +192,7 @@ class OpsviewReporter(ABC):
 
     def retrive_metrics(metric_servers, req_timeout):
         """
-        This methods retrieves the metrics provided by specific metric servers using a Prometheus interface. 
+        This methods retrieves the metrics provided by specific metric servers using a Prometheus interface.
         """
         raw_tlms = {}
         for u in metric_servers:
@@ -194,8 +206,10 @@ class OpsviewReporter(ABC):
                 raw_tlms[u] = None
                 continue
             if resp.status_code != 200:
-                logger.error(f"Not able to get metrics from {url}, "
-                             f"status {resp.status_code}, {resp.reason}, {resp.content.decode()}")
+                logger.error(
+                    f"Not able to get metrics from {url}, "
+                    f"status {resp.status_code}, {resp.reason}, {resp.content.decode()}"
+                )
                 raw_tlms[u] = None
             else:
                 raw_tlms[u] = resp.text

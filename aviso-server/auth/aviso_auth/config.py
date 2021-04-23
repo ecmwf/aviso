@@ -1,5 +1,5 @@
 # (C) Copyright 1996- ECMWF.
-# 
+#
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -31,16 +31,18 @@ class Config:
     environment variables, configuration files or defaults.
     """
 
-    def __init__(self,
-                 conf_path=None,
-                 logging_path=None,
-                 debug=None,
-                 authorisation_server=None,
-                 authentication_server=None,
-                 backend=None,
-                 frontend=None,
-                 cache=None,
-                 monitoring=None):
+    def __init__(
+        self,
+        conf_path=None,
+        logging_path=None,
+        debug=None,
+        authorisation_server=None,
+        authentication_server=None,
+        backend=None,
+        frontend=None,
+        cache=None,
+        monitoring=None,
+    ):
         """
         :param conf_path: path to the system configuration file. If not provided,
         the default location is HOME_FOLDER/user_config.yaml.
@@ -239,8 +241,8 @@ class Config:
     @monitoring.setter
     def monitoring(self, monitoring: Dict):
         m = self._config.get("monitoring")
-        if monitoring is not None: 
-            m = MonitoringConfig(**m)   
+        if monitoring is not None:
+            m = MonitoringConfig(**m)
         # verify is valid
         assert m is not None, "monitoring has not been configured"
         self._monitoring = m
@@ -354,12 +356,12 @@ class Config:
 
     def __str__(self):
         config_string = (
-                f"authorisation_server: {self.authorisation_server}" +
-                f", authentication_server: {self.authentication_server}" +
-                f", backend: {self.backend}" +
-                f", debug: {self.debug}" +
-                f", frontend: {self.frontend}" +
-                f", monitoring: {self.monitoring}"
+            f"authorisation_server: {self.authorisation_server}"
+            + f", authentication_server: {self.authentication_server}"
+            + f", backend: {self.backend}"
+            + f", debug: {self.debug}"
+            + f", frontend: {self.frontend}"
+            + f", monitoring: {self.monitoring}"
         )
         return config_string
 
@@ -368,7 +370,7 @@ class Config:
         console_handler = logging.StreamHandler()
         console_handler.name = "console"
         console_handler.setLevel(logging.INFO)
-        console_handler.setFormatter(logging.Formatter('%(message)s'))
+        console_handler.setFormatter(logging.Formatter("%(message)s"))
         logging.getLogger().addHandler(console_handler)
 
     def _configure_property(self, param, name):
@@ -395,15 +397,15 @@ class Config:
 
 # class to allow yaml loader to replace ~ with HOME directory
 class HomeFolderLoader(yaml.Loader):
-    path_matcher = re.compile('~')
+    path_matcher = re.compile("~")
 
     @staticmethod
     def path_constructor(loader, node):
         return os.path.expanduser(node.value)
 
 
-HomeFolderLoader.add_implicit_resolver('!path', HomeFolderLoader.path_matcher, None)
-HomeFolderLoader.add_constructor('!path', HomeFolderLoader.path_constructor)
+HomeFolderLoader.add_implicit_resolver("!path", HomeFolderLoader.path_matcher, None)
+HomeFolderLoader.add_constructor("!path", HomeFolderLoader.path_constructor)
 
 # class to add hostname to the possible attributes to use in the logging
 class HostnameFilter(logging.Filter):

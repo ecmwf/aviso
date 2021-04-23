@@ -13,7 +13,6 @@ from .opsview_reporter import OpsviewReporter
 
 
 class AvisoRestReporter(OpsviewReporter):
-
     def __init__(self, config, *args, **kwargs):
         aviso_rest_config = config.aviso_rest_reporter
         self.frequency = aviso_rest_config["frequency"]
@@ -23,7 +22,7 @@ class AvisoRestReporter(OpsviewReporter):
 
     def process_messages(self):
         """
-        This method searches in the receiver incoming tlm lists for tlms of tlm_type it aggregates them and 
+        This method searches in the receiver incoming tlm lists for tlms of tlm_type it aggregates them and
         return the resulting metric.
         Returns:
             list: list of the metrics aggregated
@@ -69,8 +68,8 @@ class AvisoRestChecker:
     def metric(self):
         pass
 
-class ResponseTime(AvisoRestChecker):
 
+class ResponseTime(AvisoRestChecker):
     def __init__(self, *args, **kwargs):
         self.warning_t = kwargs["warning_t"]
         self.critical_t = kwargs["critical_t"]
@@ -126,30 +125,13 @@ class ResponseTime(AvisoRestChecker):
                 "status": status,
                 "message": message,
                 "metrics": [
-                    {
-                        "m_name": self.metric_name + "_avg",
-                        "m_value": tlm.get(self.metric_name + "_avg"),
-                        "m_unit": "s"
-                    },
-                    {
-                        "m_name": self.metric_name + "_max",
-                        "m_value": tlm.get(self.metric_name + "_max"),
-                        "m_unit": "s"
-                    },
-                    {
-                        "m_name": self.metric_name + "_min",
-                        "m_value": tlm.get(self.metric_name + "_min"),
-                        "m_unit": "s"
-                    }
-
-                ]
+                    {"m_name": self.metric_name + "_avg", "m_value": tlm.get(self.metric_name + "_avg"), "m_unit": "s"},
+                    {"m_name": self.metric_name + "_max", "m_value": tlm.get(self.metric_name + "_max"), "m_unit": "s"},
+                    {"m_name": self.metric_name + "_min", "m_value": tlm.get(self.metric_name + "_min"), "m_unit": "s"},
+                ],
             }
         else:  # default metrics when no tlm have been received
-            m_status = {
-                "name": self.metric_name,
-                "status": status,
-                "message": ""
-            }
+            m_status = {"name": self.metric_name, "status": status, "message": ""}
         logger.debug(f"{self.metric_name} metric: {m_status}")
         return m_status
 
@@ -183,11 +165,7 @@ class ErrorLog(AvisoRestChecker):
                 message = f"Warnings received: {warns}"
 
         # build metric payload
-        m_status = {
-            "name": self.metric_name,
-            "status": status,
-            "message": message
-        }
+        m_status = {"name": self.metric_name, "status": status, "message": message}
         logger.debug(f"{self.metric_name} metric: {m_status}")
         return m_status
 
@@ -204,7 +182,6 @@ class PodAvailable(AvisoRestChecker):
         self.metric_server_url = kwargs["metric_server_url"]
         super().__init__(*args, **kwargs)
 
-
     def metric(self):
         pattern = 'kube_deployment_status_replicas{namespace="aviso",deployment="aviso-rest-\w+"}'
         # defaults
@@ -214,8 +191,10 @@ class PodAvailable(AvisoRestChecker):
 
         # fetch the cluster metrics
         if self.metric_server_url:
-            metrics = OpsviewReporter.retrive_metrics([self.metric_server_url], self.req_timeout)[self.metric_server_url]
-            if metrics: 
+            metrics = OpsviewReporter.retrive_metrics([self.metric_server_url], self.req_timeout)[
+                self.metric_server_url
+            ]
+            if metrics:
                 logger.debug(f"Processing tlm {self.metric_name}...")
 
                 av_pod = OpsviewReporter.read_from_metrics(metrics, pattern)
@@ -234,27 +213,15 @@ class PodAvailable(AvisoRestChecker):
                         "status": status,
                         "message": message,
                         "metrics": [
-                            {
-                                "m_name": self.metric_name,
-                                "m_value": av_pod,
-                                "m_unit": "pods"
-                            },
-                        ]
+                            {"m_name": self.metric_name, "m_value": av_pod, "m_unit": "pods"},
+                        ],
                     }
                 else:
                     logger.warning(f"Could not find {pattern} for {self.metric_name}")
         else:
-            m_status = {
-                "name": self.metric_name,
-                "status": 1,
-                "message": "Metric server not defined"
-            }
+            m_status = {"name": self.metric_name, "status": 1, "message": "Metric server not defined"}
         # check if a metric was generated
         if m_status is None:
-            m_status = {
-                "name": self.metric_name,
-                "status": 1,
-                "message": "Metric could not be retrieved"
-            }
+            m_status = {"name": self.metric_name, "status": 1, "message": "Metric could not be retrieved"}
         logger.debug(f"{self.metric_name} metric: {m_status}")
         return m_status

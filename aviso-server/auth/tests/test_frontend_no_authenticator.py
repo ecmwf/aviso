@@ -20,25 +20,33 @@ def conf() -> config.Config:  # this automatically configure the logging
 
 
 configuration = conf()
-frontend_url = f"http://{configuration.frontend['host']}:{configuration.frontend['port']}{configuration.backend['route']}"
+frontend_url = (
+    f"http://{configuration.frontend['host']}:{configuration.frontend['port']}{configuration.backend['route']}"
+)
 
-def valid_token() -> str: 
+
+def valid_token() -> str:
     with open(os.path.expanduser("~/.aviso-auth/testing/credentials.yaml"), "r") as f:
         c = yaml.load(f.read(), Loader=yaml.Loader)
         return c["token"]
 
-def valid_email() -> str: 
+
+def valid_email() -> str:
     with open(os.path.expanduser("~/.aviso-auth/testing/credentials.yaml"), "r") as f:
         c = yaml.load(f.read(), Loader=yaml.Loader)
         return c["email"]
 
+
 # mock authenticator
 mock_authenticator = Flask("Authenticator")
-@mock_authenticator.route('/',  methods=['GET'])
+
+
+@mock_authenticator.route("/", methods=["GET"])
 def error():
     return InternalServerError("Test Error")
 
-@pytest.fixture(scope="module", autouse=True) 
+
+@pytest.fixture(scope="module", autouse=True)
 def prepost_module():
     # Run the frontend at global level so it will be executed once and accessible to all tests
     frontend = Frontend(configuration)
@@ -46,13 +54,16 @@ def prepost_module():
     server.start()
     time.sleep(1)
     # Run the mock authenticator
-    authenticator = threading.Thread(target=mock_authenticator.run, daemon=True, kwargs={"host": "127.0.0.1", "port": 8020})
+    authenticator = threading.Thread(
+        target=mock_authenticator.run, daemon=True, kwargs={"host": "127.0.0.1", "port": 8020}
+    )
     authenticator.start()
     time.sleep(1)
     yield
-    
+
+
 def test_broken_authenticator():
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
 
     key = "/ec/diss/SCL"
     # encode key
@@ -68,9 +79,13 @@ def test_broken_authenticator():
         "keys_only": False,
         "revision": None,
         "min_mod_revision": None,
-        "max_mod_revision": None
+        "max_mod_revision": None,
     }
     # make the call
-    resp = requests.post(frontend_url, json=body, headers={"Authorization": f"EmailKey {valid_email()}:{valid_token()}"},
-                         timeout=configuration.backend['req_timeout'])
+    resp = requests.post(
+        frontend_url,
+        json=body,
+        headers={"Authorization": f"EmailKey {valid_email()}:{valid_token()}"},
+        timeout=configuration.backend["req_timeout"],
+    )
     assert resp.status_code == 503

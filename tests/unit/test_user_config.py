@@ -1,5 +1,5 @@
 # (C) Copyright 1996- ECMWF.
-# 
+#
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -11,11 +11,11 @@ import os
 
 import pytest
 
-from pyaviso import logger, SYSTEM_FOLDER
+from pyaviso import SYSTEM_FOLDER, logger
 from pyaviso.authentication import AuthType
 from pyaviso.engine import EngineType
 from pyaviso.event_listeners.listener_schema_parser import ListenerSchemaParserType
-from pyaviso.user_config import UserConfig, KEY_FILE
+from pyaviso.user_config import KEY_FILE, UserConfig
 
 test_config_folder = "tests/unit/fixtures/"
 
@@ -124,8 +124,9 @@ def clear_environment():
     except KeyError:
         pass
 
+
 def test_default():
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     c = UserConfig._create_default_config()
     assert not c["debug"]
     assert c["notification_engine"]["timeout"] == 60
@@ -156,7 +157,7 @@ def test_default():
 
 
 def test_config_file():
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     c = UserConfig(conf_path=test_config_folder + "config.yaml")
     assert c.debug
     assert c.notification_engine.polling_interval == 1
@@ -186,7 +187,7 @@ def test_config_file():
 
 
 def test_config_file_with_ev():
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     os.environ["AVISO_CONFIG"] = test_config_folder + "config.yaml"
     c = UserConfig()
     assert c.debug
@@ -217,7 +218,7 @@ def test_config_file_with_ev():
 
 
 def test_env_variables():
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     os.environ["AVISO_NOTIFICATION_HOST"] = "test_env"
     os.environ["AVISO_NOTIFICATION_PORT"] = "3"
     os.environ["AVISO_NOTIFICATION_HTTPS"] = "True"
@@ -274,7 +275,7 @@ def test_env_variables():
 
 
 def test_env_variables_with_config_file():
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     os.environ["AVISO_NOTIFICATION_HOST"] = "test_env"
     os.environ["AVISO_NOTIFICATION_PORT"] = "3"
     os.environ["AVISO_NOTIFICATION_HTTPS"] = "False"
@@ -330,12 +331,28 @@ def test_env_variables_with_config_file():
 
 
 def test_constructor():
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     # create a config with passing the configuration file as well as the parameters. The parameters will take priority
-    notification_engine = {"host": "localhost", "port": 2379, "type": "ETCD_REST", "polling_interval": 60,
-                           "timeout": 10, "automatic_retry_delay": 10, "https": False, "service": "aviso/v4", "catchup": False}
-    configuration_engine = {"host": "localhost", "port": 2379, "type": "ETCD_REST", "max_file_size": 200, "timeout": 10, 
-                            "automatic_retry_delay": 10, "https": False}
+    notification_engine = {
+        "host": "localhost",
+        "port": 2379,
+        "type": "ETCD_REST",
+        "polling_interval": 60,
+        "timeout": 10,
+        "automatic_retry_delay": 10,
+        "https": False,
+        "service": "aviso/v4",
+        "catchup": False,
+    }
+    configuration_engine = {
+        "host": "localhost",
+        "port": 2379,
+        "type": "ETCD_REST",
+        "max_file_size": 200,
+        "timeout": 10,
+        "automatic_retry_delay": 10,
+        "https": False,
+    }
 
     c = UserConfig(
         conf_path=test_config_folder + "config.yaml",
@@ -349,8 +366,7 @@ def test_constructor():
         auth_type="ecmwf",
         key_ttl=30,
         remote_schema=True,
-        schema_parser="ecmwf"
-
+        schema_parser="ecmwf",
     )
     assert not c.debug
     assert c.notification_engine.polling_interval == 60
@@ -380,7 +396,7 @@ def test_constructor():
 
 
 def test_constructor_with_env_var():
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     os.environ["AVISO_NOTIFICATION_HOST"] = "test_env"
     os.environ["AVISO_NOTIFICATION_PORT"] = "3"
     os.environ["AVISO_NOTIFICATION_HTTPS"] = "True"
@@ -407,10 +423,26 @@ def test_constructor_with_env_var():
     os.environ["AVISO_SCHEMA_PARSER"] = "generic"
 
     # create a config with passing the configuration file as well as the parameters. The parameters will take priority
-    notification_engine = {"host": "localhost", "port": 2379, "type": "ETCD_REST", "polling_interval": 60,
-                           "timeout": 10, "automatic_retry_delay": 10, "https": False, "service": "aviso/v4", "catchup": False}
-    configuration_engine = {"host": "localhost", "port": 2379, "type": "ETCD_REST", "max_file_size": 200, "timeout": 10,
-                            "https": False, "automatic_retry_delay": 10,}
+    notification_engine = {
+        "host": "localhost",
+        "port": 2379,
+        "type": "ETCD_REST",
+        "polling_interval": 60,
+        "timeout": 10,
+        "automatic_retry_delay": 10,
+        "https": False,
+        "service": "aviso/v4",
+        "catchup": False,
+    }
+    configuration_engine = {
+        "host": "localhost",
+        "port": 2379,
+        "type": "ETCD_REST",
+        "max_file_size": 200,
+        "timeout": 10,
+        "https": False,
+        "automatic_retry_delay": 10,
+    }
 
     c = UserConfig(
         conf_path=test_config_folder + "config.yaml",
@@ -424,7 +456,7 @@ def test_constructor_with_env_var():
         auth_type="ecmwf",
         key_ttl=30,
         remote_schema=True,
-        schema_parser="ecmwf"
+        schema_parser="ecmwf",
     )
     assert not c.debug
     assert c.notification_engine.polling_interval == 60

@@ -1,5 +1,5 @@
 # (C) Copyright 1996- ECMWF.
-# 
+#
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -28,11 +28,13 @@ class EventListenerFactory:
         self._engine_factory = engine_factory
         self._listener_schema = listener_schema
 
-    def create_listeners(self,
-                         listeners_dict: Dict[str, any],
-                         from_date: datetime = None,
-                         to_date: datetime = None,
-                         payload_key: str = None) -> List[el.EventListener]:
+    def create_listeners(
+        self,
+        listeners_dict: Dict[str, any],
+        from_date: datetime = None,
+        to_date: datetime = None,
+        payload_key: str = None,
+    ) -> List[el.EventListener]:
         """
         This method is used to parse a key-value dictionary and create a list of event listeners.
 
@@ -60,8 +62,7 @@ class EventListenerFactory:
             # extract the relevant listener schema
             assert "event" in l, "Wrong file structure, 'event' could not be located"
             event_type = l.get("event")
-            assert event_type in self._listener_schema, \
-                f"Wrong schema structure, {event_type} could not be located"
+            assert event_type in self._listener_schema, f"Wrong schema structure, {event_type} could not be located"
             schema = self._listener_schema.get(event_type)
 
             # Parse the request and build the key to the forecast dataset
@@ -72,8 +73,7 @@ class EventListenerFactory:
             triggers: Optional[List[Dict[str, any]]] = self._parse_triggers(l)
 
             # create the listener
-            listener = el.EventListener(
-                event_type, engine, request, triggers, schema, from_date, to_date, payload_key)
+            listener = el.EventListener(event_type, engine, request, triggers, schema, from_date, to_date, payload_key)
             listeners.append(listener)
 
         return listeners

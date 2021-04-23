@@ -18,7 +18,6 @@ DATE_FORMAT = "%Y%m%d"
 
 
 class Cleaner:
-
     def __init__(self, config):
         self.url = config["url"]
         self.req_timeout = config["req_timeout"]
@@ -42,24 +41,22 @@ class Cleaner:
         key = os.path.join(self.dest_path, date_s)
         encoded_key = encode_to_str_base64(key)
         encoded_end_key = encode_to_str_base64(str(incr_last_byte(key), "utf-8"))
-        body = {
-            "key": encoded_key,
-            "range_end": encoded_end_key,
-            "keys_only": True
-        }
+        body = {"key": encoded_key, "range_end": encoded_end_key, "keys_only": True}
         # make the call
         resp = requests.post(url, json=body, timeout=self.req_timeout)
-        assert resp.status_code == 200, f'Not able to request destinations for {date_s}, status {resp.status_code}, ' \
-            f'{resp.reason}, {resp.content.decode()}'
+        assert resp.status_code == 200, (
+            f"Not able to request destinations for {date_s}, status {resp.status_code}, "
+            f"{resp.reason}, {resp.content.decode()}"
+        )
         logger.debug(f"Query for destinations completed")
         resp_body = resp.json()
 
         # read the body and extract the destinations
         destinations = []
-        if 'kvs' in resp_body:
+        if "kvs" in resp_body:
             for kv in resp_body["kvs"]:
                 k = decode_to_bytes(kv["key"]).decode()
-                destinations.append(k.replace(key+"/", ""))
+                destinations.append(k.replace(key + "/", ""))
 
         logger.debug(f"Number of destinations retrieved: {len(destinations)}")
         return destinations
@@ -79,14 +76,13 @@ class Cleaner:
         key = os.path.join(self.dest_path, date_s)
         encoded_key = encode_to_str_base64(key)
         encoded_end_key = encode_to_str_base64(str(incr_last_byte(key), "utf-8"))
-        body = {
-            "key": encoded_key,
-            "range_end": encoded_end_key
-        }
+        body = {"key": encoded_key, "range_end": encoded_end_key}
         # make the call
         resp = requests.post(url, json=body, timeout=self.req_timeout)
-        assert resp.status_code == 200, f'Not able to delete destinations for {date_s}, status {resp.status_code}, ' \
-            f'{resp.reason}, {resp.content.decode()}'
+        assert resp.status_code == 200, (
+            f"Not able to delete destinations for {date_s}, status {resp.status_code}, "
+            f"{resp.reason}, {resp.content.decode()}"
+        )
 
         logger.debug(f"Deleting destinations completed")
 
@@ -112,21 +108,20 @@ class Cleaner:
         url = self.url + "/v3/kv/deleterange"
 
         # build the key with the date
-        date_s = "date="+date.strftime(DATE_FORMAT)
+        date_s = "date=" + date.strftime(DATE_FORMAT)
         if destination:  # Dissemination keys
             key = os.path.join(self.diss_path, destination, date_s)
         else:  # MARS keys
             key = os.path.join(self.mars_path, date_s)
         encoded_key = encode_to_str_base64(key)
         encoded_end_key = encode_to_str_base64(str(incr_last_byte(key), "utf-8"))
-        body = {
-            "key": encoded_key,
-            "range_end": encoded_end_key
-        }
+        body = {"key": encoded_key, "range_end": encoded_end_key}
         # make the call
         resp = requests.post(url, json=body, timeout=self.req_timeout)
-        assert resp.status_code == 200, f'Not able to delete keys for {date_s}, status {resp.status_code}, ' \
-            f'{resp.reason}, {resp.content.decode()}'
+        assert resp.status_code == 200, (
+            f"Not able to delete keys for {date_s}, status {resp.status_code}, "
+            f"{resp.reason}, {resp.content.decode()}"
+        )
         logger.debug(f"Deleting keys completed")
 
         # check how many keys have been deleted
@@ -173,5 +168,3 @@ class Cleaner:
 
         logger.info(f"Cleaner execution completed. Total keys deleted: {t_del_key}")
         return True
-
-

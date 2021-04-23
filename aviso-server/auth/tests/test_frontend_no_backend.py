@@ -20,23 +20,31 @@ def conf() -> config.Config:  # this automatically configure the logging
 
 
 configuration = conf()
-frontend_url = f"http://{configuration.frontend['host']}:{configuration.frontend['port']}{configuration.backend['route']}"
+frontend_url = (
+    f"http://{configuration.frontend['host']}:{configuration.frontend['port']}{configuration.backend['route']}"
+)
 
-def valid_token() -> str: 
+
+def valid_token() -> str:
     with open(os.path.expanduser("~/.aviso-auth/testing/credentials.yaml"), "r") as f:
         c = yaml.load(f.read(), Loader=yaml.Loader)
         return c["token"]
 
-def valid_email() -> str: 
+
+def valid_email() -> str:
     with open(os.path.expanduser("~/.aviso-auth/testing/credentials.yaml"), "r") as f:
         c = yaml.load(f.read(), Loader=yaml.Loader)
         return c["email"]
 
+
 # mock backend
 mock_backend = Flask("Backend")
-@mock_backend.route(configuration.backend["route"],  methods=['POST'])
+
+
+@mock_backend.route(configuration.backend["route"], methods=["POST"])
 def error():
     return InternalServerError("Test Error")
+
 
 @pytest.fixture(scope="module", autouse=True)
 def prepost_module():
@@ -51,8 +59,9 @@ def prepost_module():
     time.sleep(1)
     yield
 
+
 def test_broken_aviso_server():
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     key = "/ec/diss/SCL"
     # encode key
     encoded_key = Authoriser._encode_to_str_base64(key)
@@ -67,9 +76,13 @@ def test_broken_aviso_server():
         "keys_only": False,
         "revision": None,
         "min_mod_revision": None,
-        "max_mod_revision": None
+        "max_mod_revision": None,
     }
     # make the call
-    resp = requests.post(frontend_url, json=body, headers={"Authorization": f"EmailKey {valid_email()}:{valid_token()}"},
-                         timeout=configuration.backend['req_timeout'])
+    resp = requests.post(
+        frontend_url,
+        json=body,
+        headers={"Authorization": f"EmailKey {valid_email()}:{valid_token()}"},
+        timeout=configuration.backend["req_timeout"],
+    )
     assert resp.status_code == 503

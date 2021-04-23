@@ -1,5 +1,5 @@
 # (C) Copyright 1996- ECMWF.
-# 
+#
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -12,16 +12,14 @@ import os
 import random
 import subprocess
 from datetime import datetime
-from shutil import rmtree
 from multiprocessing import Process
-from flask import Flask
-from flask import request
+from shutil import rmtree
 
 import pytest
 from click.testing import CliRunner
+from flask import Flask, request
 
-from pyaviso import HOME_FOLDER
-from pyaviso import user_config
+from pyaviso import HOME_FOLDER, user_config
 from pyaviso.authentication import auth
 from pyaviso.cli_aviso import *
 from pyaviso.cli_aviso import _parse_inline_params
@@ -38,7 +36,7 @@ aviso = NotificationManager()
 def schema():
     # Load the schema
     listener_schema = ListenerSchemaParser().load(conf)
-    return listener_schema['flight']
+    return listener_schema["flight"]
 
 
 def create_conf() -> user_config.UserConfig:  # this automatically configure the logging
@@ -119,8 +117,8 @@ def send_notification_as_dict(config):
         "date": "20210101",
         "airport": "FCO",
         "number": "AZ203",
-        "payload": "Landed"
-        }
+        "payload": "Landed",
+    }
     aviso.notify(notification=notification, config=config)
 
 
@@ -143,12 +141,12 @@ def reset_previuous_run():
         except Exception as e:
             pass
     return full_path
-        
+
 
 @pytest.mark.parametrize("config", [c1, c2])
 def test_command_listener(config):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
-    
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
+
     # delete previous file of notification
     file_path = reset_previuous_run()
 
@@ -171,15 +169,14 @@ def test_command_listener(config):
     assert received
 
     # delete result of notification
-    file_path = reset_previuous_run()   
+    file_path = reset_previuous_run()
 
 
 @pytest.mark.parametrize("config", configs)
 def test_key(config):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
-    result = runner.invoke(key, [
-        "event=flight,country=Italy,airport=fco,date=20210101,number=AZ203"])
+    result = runner.invoke(key, ["event=flight,country=Italy,airport=fco,date=20210101,number=AZ203"])
 
     assert result.exit_code == 0
     assert "/tmp/aviso/flight/20210101/italy/FCO/AZ203" in result.output
@@ -187,18 +184,18 @@ def test_key(config):
 
 @pytest.mark.parametrize("config", configs)
 def test_notify_and_value(config):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
     # noinspection PyPep8
-    result = runner.invoke(notify, [
-        "event=flight,country=Italy,airport=fco,date=20210101,number=AZ203,payload=Departed"])
+    result = runner.invoke(
+        notify, ["event=flight,country=Italy,airport=fco,date=20210101,number=AZ203,payload=Departed"]
+    )
 
     assert result.exit_code == 0
     assert "Done" in result.output
 
     # now test the value command
-    result = runner.invoke(value, [
-        "event=flight,country=Italy,airport=fco,date=20210101,number=AZ203"])
+    result = runner.invoke(value, ["event=flight,country=Italy,airport=fco,date=20210101,number=AZ203"])
     assert result.exit_code == 0
     assert "Departed" in result.output
 
@@ -212,30 +209,28 @@ def test_notify_and_value(config):
 
 @pytest.mark.parametrize("config", configs)
 def test_notify_no_payload(config):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
     # noinspection PyPep8
-    result = runner.invoke(notify, [
-        "event=flight,country=Italy,airport=fco,date=20210101,number=AZ203"])
+    result = runner.invoke(notify, ["event=flight,country=Italy,airport=fco,date=20210101,number=AZ203"])
 
     assert result.exit_code == 0
     assert "Done" in result.output
 
     # now test the value command
-    result = runner.invoke(value, [
-        "event=flight,country=Italy,airport=fco,date=20210101,number=AZ203"])
+    result = runner.invoke(value, ["event=flight,country=Italy,airport=fco,date=20210101,number=AZ203"])
     assert result.exit_code == 0
     assert "None" in result.output
 
 
 @pytest.mark.parametrize("config", configs)
 def test_notify_test(config):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
     # noinspection PyPep8
-    result = runner.invoke(notify, [
-        "event=flight,country=Italy,airport=fco,date=20210101,number=AZ203,payload=Departed",
-        "--test"])
+    result = runner.invoke(
+        notify, ["event=flight,country=Italy,airport=fco,date=20210101,number=AZ203,payload=Departed", "--test"]
+    )
 
     assert result.exit_code == 0
     assert "TEST MODE" in result.output
@@ -244,19 +239,19 @@ def test_notify_test(config):
 
 @pytest.mark.parametrize("config", [c1, c2])
 def test_notify_ttl(config):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
 
     runner = CliRunner()
     # noinspection PyPep8
-    result = runner.invoke(notify, [
-        "event=flight,country=Italy,airport=fco,date=20210101,number=AZ203,payload=Departed,ttl=1"])
+    result = runner.invoke(
+        notify, ["event=flight,country=Italy,airport=fco,date=20210101,number=AZ203,payload=Departed,ttl=1"]
+    )
 
     assert result.exit_code == 0
     assert "Done" in result.output
 
     # now retrieve it
-    result = runner.invoke(value, [
-        "event=flight,country=Italy,airport=fco,date=20210101,number=AZ203"])
+    result = runner.invoke(value, ["event=flight,country=Italy,airport=fco,date=20210101,number=AZ203"])
     assert result.exit_code == 0
     assert "Departed" in result.output
 
@@ -264,8 +259,7 @@ def test_notify_ttl(config):
     time.sleep(3)
 
     # now test the value command
-    result = runner.invoke(value, [
-        "event=flight,country=Italy,airport=fco,date=20210101,number=AZ203"])
+    result = runner.invoke(value, ["event=flight,country=Italy,airport=fco,date=20210101,number=AZ203"])
     assert result.exit_code == 0
     assert "None" in result.output
 
@@ -273,7 +267,7 @@ def test_notify_ttl(config):
 @pytest.mark.skip
 @pytest.mark.parametrize("config", [c1])
 def test_history_on_server(config: user_config.UserConfig, caplog):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     with caplog_for_logger(caplog):  # this allows to assert over the logging output
         config.notification_engine.host = "aviso.ecmwf.int"
         config.notification_engine.port = 80

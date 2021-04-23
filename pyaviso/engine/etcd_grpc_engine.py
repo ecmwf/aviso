@@ -1,5 +1,5 @@
 # (C) Copyright 1996- ECMWF.
-# 
+#
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -36,16 +36,20 @@ class EtcdGrpcEngine(EtcdEngine):
     def _initialise_server(self):
         if type(self.auth) == EtcdAuth:
             self._server = Etcd3Client(
-                self.host, self.port, user=self.auth.username, password=self.auth.password, timeout=self.timeout)
+                self.host, self.port, user=self.auth.username, password=self.auth.password, timeout=self.timeout
+            )
         else:
             self._server = Etcd3Client(self.host, self.port, timeout=self.timeout)
 
-    def pull(self, key: str,
-             key_only: bool = False,
-             rev: int = None,
-             prefix: bool = True,
-             min_rev: int = None,
-             max_rev: int = None) -> List[Dict[str, any]]:
+    def pull(
+        self,
+        key: str,
+        key_only: bool = False,
+        rev: int = None,
+        prefix: bool = True,
+        min_rev: int = None,
+        max_rev: int = None,
+    ) -> List[Dict[str, any]]:
         """
         This method implements a query to the notification server for all the key-values associated to the key as input.
         This key by default is a prefix, it can therefore return a set of key-values
@@ -67,11 +71,7 @@ class EtcdGrpcEngine(EtcdEngine):
 
         # call the get range on the ETCD_GRPC sever, order them newest first
         range_request = self._server._build_get_range_request(
-            key=key,
-            range_end=range_end,
-            sort_order="descend",
-            sort_target="key",
-            keys_only=key_only
+            key=key, range_end=range_end, sort_order="descend", sort_target="key", keys_only=key_only
         )
 
         range_request.limit = MAX_KV_RETURNED
@@ -99,8 +99,9 @@ class EtcdGrpcEngine(EtcdEngine):
                     try_again = True
                     logger.debug(f"Error {e}, trying again", exc_info=True)
                     self._initialise_server()
-                elif e._state.code.name == "OUT_OF_RANGE" and \
-                        "required revision has been compacted" in e._state.details:
+                elif (
+                    e._state.code.name == "OUT_OF_RANGE" and "required revision has been compacted" in e._state.details
+                ):
                     raise EngineHistoryNotAvailableError()
                 else:
                     raise EngineException(e)
@@ -133,11 +134,7 @@ class EtcdGrpcEngine(EtcdEngine):
 
         # call the delete range on the ETCD_GRPC sever
         try_again = False
-        del_request = self._server._build_delete_request(
-            key=key,
-            range_end=range_end,
-            prev_kv=True
-        )
+        del_request = self._server._build_delete_request(key=key, range_end=range_end, prev_kv=True)
 
         # make the call
         logger.debug(f"Deleting key range associated to key {key}")
@@ -163,7 +160,7 @@ class EtcdGrpcEngine(EtcdEngine):
 
         # parse the result to return just key-value pairs of what has been deleted
         del_kvs: List[Dict[str, bytes]] = []
-        if hasattr(del_result, 'prev_kvs'):
+        if hasattr(del_result, "prev_kvs"):
             logger.debug(f"Building key-value list")
             for kv in del_result.prev_kvs:
                 new_kv = self._parse_raw_kv(kv)
@@ -172,10 +169,7 @@ class EtcdGrpcEngine(EtcdEngine):
 
         return del_kvs
 
-    def push(self,
-             kvs: List[Dict[str, any]],
-             ks_delete: List[str] = None,
-             ttl: int = None) -> bool:
+    def push(self, kvs: List[Dict[str, any]], ks_delete: List[str] = None, ttl: int = None) -> bool:
         """
         Method to submit a list of key-value pairs and delete a list of keys from the server as a single transaction
         :param kvs: List of KV pair
@@ -216,7 +210,7 @@ class EtcdGrpcEngine(EtcdEngine):
         transaction_request = etcdrpc.TxnRequest(success=ops)
 
         # commit transaction
-        #logger.debug(f"Committing the transaction statement: {ops}")
+        # logger.debug(f"Committing the transaction statement: {ops}")
         try_again = True
         while try_again:
             try:
@@ -225,7 +219,7 @@ class EtcdGrpcEngine(EtcdEngine):
                     transaction_request,
                     self._server.timeout,
                     credentials=self._server.call_credentials,
-                    metadata=self._server.metadata
+                    metadata=self._server.metadata,
                 )
             except grpc._channel._InactiveRpcError as e:
                 if e._state.code.name == "UNAUTHENTICATED":
@@ -235,10 +229,10 @@ class EtcdGrpcEngine(EtcdEngine):
                     self._initialise_server()
                 else:
                     raise e
-        assert txn_response.succeeded, f'Not able to execute the transaction'
+        assert txn_response.succeeded, f"Not able to execute the transaction"
         logger.debug(f"Transaction completed")
         # read the header
-        if hasattr(txn_response, 'header'):
+        if hasattr(txn_response, "header"):
             h = txn_response.header
             rev = int(h.revision)
             logger.debug(f"New server revision {rev}")
@@ -327,7 +321,7 @@ class EtcdGrpcEngine(EtcdEngine):
         logger.debug(f"Query for latest revision completed")
 
         # read the header
-        if hasattr(range_result, 'header'):
+        if hasattr(range_result, "header"):
             h = range_result.header
             rev = int(h.revision)
         else:
@@ -356,7 +350,7 @@ class EtcdGrpcEngine(EtcdEngine):
                     lease_grant_request,
                     self._server.timeout,
                     credentials=self._server.call_credentials,
-                    metadata=self._server.metadata
+                    metadata=self._server.metadata,
                 )
             except grpc._channel._InactiveRpcError as e:
                 if e._state.code.name == "UNAUTHENTICATED":
@@ -382,9 +376,9 @@ class EtcdGrpcEngine(EtcdEngine):
         """
         new_kv = {}
         if not key_only:
-            new_kv['value'] = kv.value  # leave it as binary
-        new_kv['key'] = kv.key.decode()
-        new_kv['version'] = int(kv.version)
-        new_kv['create_rev'] = int(kv.create_revision)
-        new_kv['mod_rev'] = int(kv.mod_revision)
+            new_kv["value"] = kv.value  # leave it as binary
+        new_kv["key"] = kv.key.decode()
+        new_kv["version"] = int(kv.version)
+        new_kv["create_rev"] = int(kv.create_revision)
+        new_kv["mod_rev"] = int(kv.mod_revision)
         return new_kv

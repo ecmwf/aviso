@@ -1,5 +1,5 @@
 # (C) Copyright 1996- ECMWF.
-# 
+#
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -12,7 +12,6 @@ from .type_handler import TypeHandler
 
 
 class EnumHandler(TypeHandler):
-
     def __init__(self, key, values: List[str], required=False, default=None):
         super(EnumHandler, self).__init__(key, required)
         self._valid_values = values
@@ -34,11 +33,10 @@ class EnumHandler(TypeHandler):
         if value in self.valid_values:
             return True
         else:
-            valid_values_str = ','.join(map(lambda x: str(x), self.valid_values))
+            valid_values_str = ",".join(map(lambda x: str(x), self.valid_values))
             raise ValueError(f"Key {self.key} accepts only the following values: {valid_values_str}")
 
     def canonise(self, value: any) -> str:
         if value == "" and self._default is not None:
             value = self._default
         return value
-

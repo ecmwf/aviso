@@ -24,8 +24,9 @@ MAX_N_TRIES = 25
 
 
 class Authenticator:
-    UNAUTHORISED_RESPONSE_HEADER = \
-        {"WWW-Authenticate": "EmailKey realm='ecmwf',info='Authenticate with ECMWF API credentials <email>:<key>'"}
+    UNAUTHORISED_RESPONSE_HEADER = {
+        "WWW-Authenticate": "EmailKey realm='ecmwf',info='Authenticate with ECMWF API credentials <email>:<key>'"
+    }
 
     def __init__(self, config, cache=None):
         self.url = config.authentication_server["url"]
@@ -34,13 +35,16 @@ class Authenticator:
         # assign explicitly a decorator to provide cache for _token_to_username
         if cache:
             self._token_to_username = cache.memoize(timeout=config.authentication_server["cache_timeout"])(
-                self._token_to_username_impl)
+                self._token_to_username_impl
+            )
         else:
             self._token_to_username = self._token_to_username_impl
 
         # assign explicitly a decorator to monitor the authentication
         if config.authentication_server["monitor"]:
-            self.timer = TimeCollector(config.monitoring, tlm_type=AvisoAuthMetricType.auth_resp_time.name, tlm_name="att")
+            self.timer = TimeCollector(
+                config.monitoring, tlm_type=AvisoAuthMetricType.auth_resp_time.name, tlm_name="att"
+            )
             self.authenticate = self.timed_authenticate
         else:
             self.authenticate = self.authenticate_impl
@@ -67,12 +71,11 @@ class Authenticator:
         # validate the authorization header
         auth_header = request.environ.get("HTTP_AUTHORIZATION")
         try:
-            auth_type, credentials = auth_header.split(' ', 1)
-            auth_email, auth_token = credentials.split(':', 1)
+            auth_type, credentials = auth_header.split(" ", 1)
+            auth_email, auth_token = credentials.split(":", 1)
         except ValueError:
             logger.debug(f"Authorization header not recognised {auth_header}")
-            raise TokenNotValidException(
-                "Could not read authorization header, expected 'Authorization: <email>:<key>'")
+            raise TokenNotValidException("Could not read authorization header, expected 'Authorization: <email>:<key>'")
 
         # validate the token
         username, email = self._token_to_username(auth_token)
@@ -99,22 +102,24 @@ class Authenticator:
 
         # just in case requests does not always raise an error
         if resp.status_code != 200:
-            message = f'Not able to authenticate token {token} to {self.url}, status {resp.status_code}, ' \
-                f'{resp.reason}, {resp.content.decode()}'
+            message = (
+                f"Not able to authenticate token {token} to {self.url}, status {resp.status_code}, "
+                f"{resp.reason}, {resp.content.decode()}"
+            )
             logger.error(message)
-            raise InternalSystemError(f'Error in authenticating token {token}, please contact the support team')
+            raise InternalSystemError(f"Error in authenticating token {token}, please contact the support team")
 
         # we got a 200, extract the username and email
         resp_body = resp.json()
         if resp_body.get("uid") is None:
             logger.error(f"Not able to find username in: {resp_body}")
-            raise InternalSystemError(f'Error in authenticating token {token}, please contact the support team')
+            raise InternalSystemError(f"Error in authenticating token {token}, please contact the support team")
         # get the username
         username = resp_body.get("uid")
 
         if resp_body.get("email") is None:
             logger.error(f"Not able to find email in: {resp_body}")
-            raise InternalSystemError(f'Error in authenticating token {token}, please contact the support team')
+            raise InternalSystemError(f"Error in authenticating token {token}, please contact the support team")
         email = resp_body.get("email")
 
         logger.debug(f"Token correctly validated with user {username}, email {email}")
@@ -141,22 +146,21 @@ class Authenticator:
                     # or just exit as we have a good result
                     break
             except requests.exceptions.HTTPError as errh:
-                message = f'Not able to authenticate token {token} from {self.url}, {str(errh)}'
+                message = f"Not able to authenticate token {token} from {self.url}, {str(errh)}"
                 if resp.status_code == 403:
                     logger.debug(message)
-                    raise TokenNotValidException(f'Token {token} not valid')
-                if resp.status_code == 408 or ( resp.status_code >= 500 and resp.status_code < 600):
+                    raise TokenNotValidException(f"Token {token} not valid")
+                if resp.status_code == 408 or (resp.status_code >= 500 and resp.status_code < 600):
                     logger.warning(message)
-                    raise AuthenticationUnavailableException(f'Error in authenticating token {token}')
+                    raise AuthenticationUnavailableException(f"Error in authenticating token {token}")
                 else:
                     logger.error(message)
-                    raise InternalSystemError(f'Error in authenticating token {token}, please contact the support team') 
+                    raise InternalSystemError(f"Error in authenticating token {token}, please contact the support team")
             except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as err:
-                logger.warning(f'Not able to authenticate token {token}, {str(err)}')
-                raise AuthenticationUnavailableException(f'Error in authenticating token {token}')
+                logger.warning(f"Not able to authenticate token {token}, {str(err)}")
+                raise AuthenticationUnavailableException(f"Error in authenticating token {token}")
             except Exception as e:
                 logger.exception(e)
-                raise InternalSystemError(f'Error in authenticating token {token}, please contact the support team')
+                raise InternalSystemError(f"Error in authenticating token {token}, please contact the support team")
         # noinspection PyUnboundLocalVariable
         return resp
-

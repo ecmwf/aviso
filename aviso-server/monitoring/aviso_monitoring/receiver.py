@@ -10,9 +10,10 @@ import json
 
 from . import logger
 
-ETCD_APP_NAME="etcd"
-AVISO_AUTH_APP_NAME="aviso-auth"
-AVISO_REST_APP_NAME="aviso-rest"
+ETCD_APP_NAME = "etcd"
+AVISO_AUTH_APP_NAME = "aviso-auth"
+AVISO_REST_APP_NAME = "aviso-rest"
+
 
 class Receiver:
     """
@@ -22,7 +23,7 @@ class Receiver:
     def __init__(self) -> None:
         # setup the income telemetry lists
         self._incoming_tlms = {}
-        self._incoming_errors = {ETCD_APP_NAME:[], AVISO_AUTH_APP_NAME: [], AVISO_REST_APP_NAME:[]}
+        self._incoming_errors = {ETCD_APP_NAME: [], AVISO_AUTH_APP_NAME: [], AVISO_REST_APP_NAME: []}
 
     def process_message(self, message):
         """
@@ -46,7 +47,7 @@ class Receiver:
             elif AVISO_REST_APP_NAME in message:
                 self._incoming_errors[AVISO_REST_APP_NAME].append(message)
                 logger.debug(f"{AVISO_REST_APP_NAME} log received")
-                return True  
+                return True
         else:
             # validate telemetry message
             try:
@@ -78,7 +79,7 @@ class Receiver:
             list: list of tlms received of the specific type
         """
         return self._incoming_tlms.get(tlm_type)
-    
+
     def incoming_errors(self, app_id):
         """
         Args:
@@ -107,7 +108,7 @@ class Receiver:
             return tlms
         else:
             return []
-    
+
     def set_incoming_tlms(self, tlm_type, tlms):
         self._incoming_tlms[tlm_type] = tlms
 

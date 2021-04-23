@@ -16,7 +16,6 @@ from .opsview_reporter import OpsviewReporter
 
 
 class EtcdReporter(OpsviewReporter):
-
     def __init__(self, config, *args, **kwargs):
         self.etcd_config = config.etcd_reporter
         self.frequency = self.etcd_config["frequency"]
@@ -43,7 +42,10 @@ class EtcdReporter(OpsviewReporter):
         for tlm_type in self.tlms.keys():
             # create the relative metric checker
             m_type = EtcdMetricType[tlm_type.lower()]
-            checker = eval(m_type.value + "(tlm_type, msg_receiver=self.msg_receiver, raw_tlms=raw_tlms, **self.tlms[tlm_type], **self.etcd_config)")
+            checker = eval(
+                m_type.value
+                + "(tlm_type, msg_receiver=self.msg_receiver, raw_tlms=raw_tlms, **self.tlms[tlm_type], **self.etcd_config)"
+            )
 
             # retrieve metric
             metrics.append(checker.metric())
@@ -113,22 +115,10 @@ class StoreSize(EtcdChecker):
             "status": status,
             "message": message,
             "metrics": [
-                {
-                    "m_name": "store_logic",
-                    "m_value": store_logic,
-                    "m_unit": "GiB"
-                },
-                {
-                    "m_name": "store_physical",
-                    "m_value": store_physical,
-                    "m_unit": "GiB"
-                },
-                {
-                    "m_name": "store_quota",
-                    "m_value": store_quota,
-                    "m_unit": "GiB"
-                }
-            ]
+                {"m_name": "store_logic", "m_value": store_logic, "m_unit": "GiB"},
+                {"m_name": "store_physical", "m_value": store_physical, "m_unit": "GiB"},
+                {"m_name": "store_quota", "m_value": store_quota, "m_unit": "GiB"},
+            ],
         }
         logger.debug(f"{self.metric_name} metric: {m_status}")
         return m_status
@@ -165,7 +155,7 @@ class ClusterStatus(EtcdChecker):
         if cluster_size != len(self.member_urls):
             status = 2
             message = f"Cluster size is {cluster_size}"
-        
+
         if status == 0:
             # now check the health of each member
             for url in self.member_urls:
@@ -175,7 +165,7 @@ class ClusterStatus(EtcdChecker):
                     break
 
         if status == 0:
-            # check if there is a leader 
+            # check if there is a leader
             if self.raw_tlms[self.member_urls[0]] is None:
                 status = 1
                 message = f"Could not retrieve metrics from {self.member_urls[0]}"
@@ -208,8 +198,10 @@ class ClusterStatus(EtcdChecker):
             logger.exception(e)
             return False
         if resp.status_code != 200:
-            logger.error(f"Not able to get health on {url}, "
-                         f"status {resp.status_code}, {resp.reason}, {resp.content.decode()}")
+            logger.error(
+                f"Not able to get health on {url}, "
+                f"status {resp.status_code}, {resp.reason}, {resp.content.decode()}"
+            )
         data = resp.json()
         healthy = bool(data.get("health"))
 
@@ -229,8 +221,10 @@ class ClusterStatus(EtcdChecker):
             logger.exception(e)
             return False
         if resp.status_code != 200:
-            logger.error(f"Not able to get cluster info on {url}, "
-                         f"status {resp.status_code}, {resp.reason}, {resp.content.decode()}")
+            logger.error(
+                f"Not able to get cluster info on {url}, "
+                f"status {resp.status_code}, {resp.reason}, {resp.content.decode()}"
+            )
         data = resp.json()
         cluster_size = len(data.get("members"))
 
@@ -257,16 +251,11 @@ class TotalKeys(EtcdChecker):
             "name": self.metric_name,
             "status": status,
             "message": message,
-            "metrics": [
-                {
-                    "m_name": "total_keys",
-                    "m_value": t_keys,
-                    "m_unit": ""
-                }
-            ]
+            "metrics": [{"m_name": "total_keys", "m_value": t_keys, "m_unit": ""}],
         }
         logger.debug(f"{self.metric_name} metric: {m_status}")
         return m_status
+
 
 class ErrorLog(EtcdChecker):
     """
@@ -300,10 +289,6 @@ class ErrorLog(EtcdChecker):
                 message = f"Warnings received: {warns}"
 
         # build metric payload
-        m_status = {
-            "name": self.metric_name,
-            "status": status,
-            "message": message
-        }
+        m_status = {"name": self.metric_name, "status": status, "message": message}
         logger.debug(f"{self.metric_name} metric: {m_status}")
         return m_status

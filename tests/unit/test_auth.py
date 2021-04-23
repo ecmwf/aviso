@@ -1,5 +1,5 @@
 # (C) Copyright 1996- ECMWF.
-# 
+#
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -10,8 +10,8 @@ import os
 
 import pytest
 
-from pyaviso import user_config, logger
-from pyaviso.authentication import auth, etcd_auth, ecmwf_auth, none_auth
+from pyaviso import logger, user_config
+from pyaviso.authentication import auth, ecmwf_auth, etcd_auth, none_auth
 from pyaviso.engine import engine_factory
 
 
@@ -32,7 +32,7 @@ def pre_post_test():
 
 @pytest.mark.parametrize("conf", [conf()])
 def test_auth_type(conf):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     auth1 = auth.Auth.get_auth(conf)
     conf.auth_type = "etcd"
     conf.password = "tests"
@@ -47,7 +47,7 @@ def test_auth_type(conf):
 @pytest.mark.skip  # we cannot authenticate in this test setup
 @pytest.mark.parametrize("conf", confs)
 def test_etcd_auth_fail(conf):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     # test with wrong password
     conf.auth_type = "etcd"
     auth1 = auth.Auth.get_auth(conf)

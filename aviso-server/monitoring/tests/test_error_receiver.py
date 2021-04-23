@@ -22,15 +22,11 @@ err_rest_log = '<191>1 2021-04-12T09:19:12.252093+00:00 aviso-rest-green-9c975dc
 err_auth_log = '<191>1 2021-04-12T09:19:12.252093+00:00 aviso-auth-green-9c975dc86-mvplw aviso-auth 58 - [origin software="aviso"]  {"asctime": "2021-03-09 07:18:34,385", "hostname": "aviso-auth-blue-56698cb9bc-4s2z7", "process": 42, "thread": 140026491313032, "name": "root", "filename": "frontend.py", "lineno": 73, "levelname": "ERROR", "message": "Value tc3_lace is not valid"}'
 
 
-upd_server_config = {
-    "host": "127.0.0.1",
-    "port": 1114,
-    "buffer_size": 64 * 1024
-}
+upd_server_config = {"host": "127.0.0.1", "port": 1114, "buffer_size": 64 * 1024}
 
 
 def test_send_etcd_log():
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
 
     # create the UDP server
     receiver = Receiver()
@@ -47,12 +43,11 @@ def test_send_etcd_log():
 
     time.sleep(1)
     # verify they are received
-    assert len(receiver.incoming_errors(ETCD_APP_NAME)) == 2 
+    assert len(receiver.incoming_errors(ETCD_APP_NAME)) == 2
     assert len(receiver.incoming_errors(AVISO_REST_APP_NAME)) == 1
     assert len(receiver.incoming_errors(AVISO_AUTH_APP_NAME)) == 1
     # verify the copy & clear
     assert len(receiver.extract_incoming_errors(ETCD_APP_NAME)) == 2
-    assert len(receiver.incoming_errors(ETCD_APP_NAME)) == 0  
+    assert len(receiver.incoming_errors(ETCD_APP_NAME)) == 0
 
     udp_server.stop()
-

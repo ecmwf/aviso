@@ -1,5 +1,5 @@
 # (C) Copyright 1996- ECMWF.
-# 
+#
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -67,12 +67,15 @@ class Engine(ABC):
         return self._https
 
     @abstractmethod
-    def pull(self, key: str,
-             key_only: bool = False,
-             rev: int = None,
-             prefix: bool = True,
-             min_rev: int = None,
-             max_rev: int = None) -> List[Dict[str, any]]:
+    def pull(
+        self,
+        key: str,
+        key_only: bool = False,
+        rev: int = None,
+        prefix: bool = True,
+        min_rev: int = None,
+        max_rev: int = None,
+    ) -> List[Dict[str, any]]:
         """
         Abstract method to query the notification server for all the key-values associated to the key as input.
         This key can be a prefix, it can therefore return a set of key-values
@@ -87,10 +90,7 @@ class Engine(ABC):
         pass
 
     @abstractmethod
-    def push(self,
-             kvs: List[Dict[str, any]],
-             ks_delete: List[str] = None,
-             ttl: int = None) -> bool:
+    def push(self, kvs: List[Dict[str, any]], ks_delete: List[str] = None, ttl: int = None) -> bool:
         """
         Abstract method to submit a list of key-value pairs and delete a list of keys from the server as a
         single transaction
@@ -111,12 +111,14 @@ class Engine(ABC):
         pass
 
     @abstractmethod
-    def _polling(self,
-                 key: str,
-                 callback: callable([str, str]),
-                 channel: Queue,
-                 from_date: datetime = None,
-                 to_date: datetime = None):
+    def _polling(
+        self,
+        key: str,
+        callback: callable([str, str]),
+        channel: Queue,
+        from_date: datetime = None,
+        to_date: datetime = None,
+    ):
         """
         This method implements the active polling
         :param key: key to watch as a prefix
@@ -128,11 +130,9 @@ class Engine(ABC):
         """
         pass
 
-    def listen(self,
-               keys: List[str],
-               callback: callable([str, str]),
-               from_date: datetime = None,
-               to_date: datetime = None) -> bool:
+    def listen(
+        self, keys: List[str], callback: callable([str, str]), from_date: datetime = None, to_date: datetime = None
+    ) -> bool:
         """
         This method allows to listen for changes to specific keys. Note that the key is always considered as a prefix.
         The listening is implemented with a background thread doing a active polling. Multiple listening threads can
@@ -187,13 +187,15 @@ class Engine(ABC):
                 return False
         return True
 
-    def push_with_status(self,
-                         kvs: List[Dict[str, any]],
-                         base_key: str,
-                         message: str = "",
-                         admin_key: str = None,
-                         ks_delete: List[str] = None,
-                         ttl: int = None) -> bool:
+    def push_with_status(
+        self,
+        kvs: List[Dict[str, any]],
+        base_key: str,
+        message: str = "",
+        admin_key: str = None,
+        ks_delete: List[str] = None,
+        ttl: int = None,
+    ) -> bool:
         """
         Method to submit a list of key-value pairs and delete a list of keys from the server as a
         single transaction. This method also updates the status of the base key.
@@ -214,7 +216,7 @@ class Engine(ABC):
             "aviso_version": __version__,
             "engine": self._engine_type.name,
             "hostname": os.uname().nodename,
-            "date_time": datetime.utcnow().strftime(DATE_FORMAT)
+            "date_time": datetime.utcnow().strftime(DATE_FORMAT),
         }
 
         # update the status with the revision of the current status. This helps creating a linked list
@@ -222,18 +224,12 @@ class Engine(ABC):
         if len(old_status_kvs) == 1:
             self._status_as_linked_list(status, old_status_kvs)
 
-        status_kv = {
-            "key": base_key,
-            "value": json.dumps(status)  # push it as a json
-        }
+        status_kv = {"key": base_key, "value": json.dumps(status)}  # push it as a json
         kvs.append(status_kv)
 
         if admin_key:
             # prepare the admin key value pair
-            admin_kv = {
-                "key": admin_key,
-                "value": "None"
-            }
+            admin_kv = {"key": admin_key, "value": "None"}
             kvs.append(admin_kv)
 
         return self.push(kvs, ks_delete, ttl)

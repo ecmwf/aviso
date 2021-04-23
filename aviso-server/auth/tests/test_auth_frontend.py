@@ -13,15 +13,20 @@ from aviso_auth.frontend import Frontend
 def conf() -> config.Config:  # this automatically configure the logging
     return config.Config(conf_path=os.path.expanduser("~/.aviso-auth/testing/config.yaml"))
 
-configuration = conf()
-frontend_url = f"http://{configuration.frontend['host']}:{configuration.frontend['port']}{configuration.backend['route']}"
 
-def valid_token() -> str: 
+configuration = conf()
+frontend_url = (
+    f"http://{configuration.frontend['host']}:{configuration.frontend['port']}{configuration.backend['route']}"
+)
+
+
+def valid_token() -> str:
     with open(os.path.expanduser("~/.aviso-auth/testing/credentials.yaml"), "r") as f:
         c = yaml.load(f.read(), Loader=yaml.Loader)
         return c["token"]
 
-def valid_email() -> str: 
+
+def valid_email() -> str:
     with open(os.path.expanduser("~/.aviso-auth/testing/credentials.yaml"), "r") as f:
         c = yaml.load(f.read(), Loader=yaml.Loader)
         return c["email"]
@@ -38,7 +43,7 @@ def prepost_module():
 
 
 def test_successful_request():
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     key = "/ec/diss/SCL"
     # encode key
     encoded_key = Authoriser._encode_to_str_base64(key)
@@ -53,16 +58,20 @@ def test_successful_request():
         "keys_only": False,
         "revision": None,
         "min_mod_revision": None,
-        "max_mod_revision": None
+        "max_mod_revision": None,
     }
     # make the call
-    resp = requests.post(frontend_url, json=body, headers={"Authorization": f"EmailKey {valid_email()}:{valid_token()}"},
-                         timeout=configuration.backend['req_timeout'])
+    resp = requests.post(
+        frontend_url,
+        json=body,
+        headers={"Authorization": f"EmailKey {valid_email()}:{valid_token()}"},
+        timeout=configuration.backend["req_timeout"],
+    )
     assert resp.status_code == 200
 
 
 def test_bad_authorisation_header():
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     key = "/ec/diss/SCL"
     # encode key
     encoded_key = Authoriser._encode_to_str_base64(key)
@@ -77,16 +86,17 @@ def test_bad_authorisation_header():
         "keys_only": False,
         "revision": None,
         "min_mod_revision": None,
-        "max_mod_revision": None
+        "max_mod_revision": None,
     }
     # make the call
-    resp = requests.post(frontend_url, json=body, headers={"Authorization": valid_token()},
-                         timeout=configuration.backend['req_timeout'])
+    resp = requests.post(
+        frontend_url, json=body, headers={"Authorization": valid_token()}, timeout=configuration.backend["req_timeout"]
+    )
     assert resp.status_code == 401
 
 
 def test_bad_authorisation_format():
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     key = "/ec/diss/SCL"
     # encode key
     encoded_key = Authoriser._encode_to_str_base64(key)
@@ -101,16 +111,20 @@ def test_bad_authorisation_format():
         "keys_only": False,
         "revision": None,
         "min_mod_revision": None,
-        "max_mod_revision": None
+        "max_mod_revision": None,
     }
     # make the call
-    resp = requests.post(frontend_url, json=body, headers={"Authorization": f"EmailKey {valid_email()}-{valid_token()}"},
-                         timeout=configuration.backend['req_timeout'])
+    resp = requests.post(
+        frontend_url,
+        json=body,
+        headers={"Authorization": f"EmailKey {valid_email()}-{valid_token()}"},
+        timeout=configuration.backend["req_timeout"],
+    )
     assert resp.status_code == 401
 
 
 def test_bad_token():
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     key = "/ec/diss/SCL"
     # encode key
     encoded_key = Authoriser._encode_to_str_base64(key)
@@ -125,16 +139,20 @@ def test_bad_token():
         "keys_only": False,
         "revision": None,
         "min_mod_revision": None,
-        "max_mod_revision": None
+        "max_mod_revision": None,
     }
     # make the call
-    resp = requests.post(frontend_url, json=body, headers={"Authorization": f"EmailKey {valid_email()}:1111112222233333"},
-                         timeout=configuration.backend['req_timeout'])
+    resp = requests.post(
+        frontend_url,
+        json=body,
+        headers={"Authorization": f"EmailKey {valid_email()}:1111112222233333"},
+        timeout=configuration.backend["req_timeout"],
+    )
     assert resp.status_code == 401
 
 
 def test_bad_destination():
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     key = "/ec/diss/SCL2"
     # encode key
     encoded_key = Authoriser._encode_to_str_base64(key)
@@ -149,16 +167,20 @@ def test_bad_destination():
         "keys_only": False,
         "revision": None,
         "min_mod_revision": None,
-        "max_mod_revision": None
+        "max_mod_revision": None,
     }
     # make the call
-    resp = requests.post(frontend_url, json=body, headers={"Authorization": f"EmailKey {valid_email()}:{valid_token()}"},
-                         timeout=configuration.backend['req_timeout'])
+    resp = requests.post(
+        frontend_url,
+        json=body,
+        headers={"Authorization": f"EmailKey {valid_email()}:{valid_token()}"},
+        timeout=configuration.backend["req_timeout"],
+    )
     assert resp.status_code == 403
 
 
 def test_bad_backend_key():
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     key = "/ec2/diss/SCL"
     # encode key
     encoded_key = Authoriser._encode_to_str_base64(key)
@@ -173,16 +195,20 @@ def test_bad_backend_key():
         "keys_only": False,
         "revision": None,
         "min_mod_revision": None,
-        "max_mod_revision": None
+        "max_mod_revision": None,
     }
     # make the call
-    resp = requests.post(frontend_url, json=body, headers={"Authorization": f"EmailKey {valid_email()}:{valid_token()}"},
-                         timeout=configuration.backend['req_timeout'])
+    resp = requests.post(
+        frontend_url,
+        json=body,
+        headers={"Authorization": f"EmailKey {valid_email()}:{valid_token()}"},
+        timeout=configuration.backend["req_timeout"],
+    )
     assert resp.status_code == 403
 
 
 def test_no_token():
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     key = "/ec/diss/SCL"
     # encode key
     encoded_key = Authoriser._encode_to_str_base64(key)
@@ -197,23 +223,26 @@ def test_no_token():
         "keys_only": False,
         "revision": None,
         "min_mod_revision": None,
-        "max_mod_revision": None
+        "max_mod_revision": None,
     }
     # make the call
-    resp = requests.post(frontend_url, json=body, timeout=configuration.backend['req_timeout'])
+    resp = requests.post(frontend_url, json=body, timeout=configuration.backend["req_timeout"])
     assert resp.status_code == 401
 
 
 def test_no_body():
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     # make the call
-    resp = requests.post(frontend_url, headers={"Authorization": f"EmailKey {valid_email()}:{valid_token()}"},
-                         timeout=configuration.backend['req_timeout'])
+    resp = requests.post(
+        frontend_url,
+        headers={"Authorization": f"EmailKey {valid_email()}:{valid_token()}"},
+        timeout=configuration.backend["req_timeout"],
+    )
     assert resp.status_code == 400
 
 
 def test_no_backend_key():
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     key = "/ec/diss/SCL"
     # encode key
     encoded_key = Authoriser._encode_to_str_base64(key)
@@ -228,15 +257,20 @@ def test_no_backend_key():
         "keys_only": False,
         "revision": None,
         "min_mod_revision": None,
-        "max_mod_revision": None
+        "max_mod_revision": None,
     }
     # make the call
-    resp = requests.post(frontend_url, json=body, headers={"Authorization": f"EmailKey {valid_email()}:{valid_token()}"},
-                         timeout=configuration.backend['req_timeout'])
+    resp = requests.post(
+        frontend_url,
+        json=body,
+        headers={"Authorization": f"EmailKey {valid_email()}:{valid_token()}"},
+        timeout=configuration.backend["req_timeout"],
+    )
     assert resp.status_code == 400
 
+
 def test_bad_route():
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     key = "/ec/diss/SCL"
     # encode key
     encoded_key = Authoriser._encode_to_str_base64(key)
@@ -251,9 +285,13 @@ def test_bad_route():
         "keys_only": False,
         "revision": None,
         "min_mod_revision": None,
-        "max_mod_revision": None
+        "max_mod_revision": None,
     }
     # make the call
-    resp = requests.post(frontend_url[:-3], json=body, headers={"Authorization": f"EmailKey {valid_email()}:{valid_token()}"},
-                         timeout=configuration.backend['req_timeout'])
+    resp = requests.post(
+        frontend_url[:-3],
+        json=body,
+        headers={"Authorization": f"EmailKey {valid_email()}:{valid_token()}"},
+        timeout=configuration.backend["req_timeout"],
+    )
     assert resp.status_code == 404

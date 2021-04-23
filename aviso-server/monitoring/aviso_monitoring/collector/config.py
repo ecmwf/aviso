@@ -1,5 +1,5 @@
 # (C) Copyright 1996- ECMWF.
-# 
+#
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -20,10 +20,7 @@ class Config:
     environment variables or defaults.
     """
 
-    def __init__(self,
-                 transmitter=None,
-                 enabled=None,
-                 conf_from_file=None):
+    def __init__(self, transmitter=None, enabled=None, conf_from_file=None):
         """[summary]
 
         Args:
@@ -38,7 +35,7 @@ class Config:
             # start from the defaults
             self._config = self._create_default_config()
 
-             # add the configuration from file
+            # add the configuration from file
             if conf_from_file:
                 Config.deep_update(self._config, conf_from_file)
 
@@ -63,7 +60,7 @@ class Config:
             "monitoring_server_host": "127.0.0.1",
             "monitoring_server_port": 1111,
             "component_name": "TBD",
-            "frequency": 2, # in minutes
+            "frequency": 2,  # in minutes
         }
 
         # main config
@@ -110,10 +107,7 @@ class Config:
         self._enabled = self._configure_property(enabled, "enabled")
 
     def __str__(self):
-        config_string = (
-                f"transmitter: {self.transmitter}" +
-                f", enabled: {self.enabled}" 
-        )
+        config_string = f"transmitter: {self.transmitter}" + f", enabled: {self.enabled}"
         return config_string
 
     def _configure_property(self, param, name):

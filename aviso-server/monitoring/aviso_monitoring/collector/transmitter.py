@@ -90,7 +90,7 @@ class Transmitter(Thread):
             "component_name": self.component_name,
             "hostname": socket.gethostname(),
             "time": datetime.datetime.timestamp(datetime.datetime.utcnow()),
-            "telemetry": tlm
+            "telemetry": tlm,
         }
         # send the message
         byte_message = json.dumps(message).encode()

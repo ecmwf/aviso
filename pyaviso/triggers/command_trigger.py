@@ -1,5 +1,5 @@
 # (C) Copyright 1996- ECMWF.
-# 
+#
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -49,9 +49,7 @@ class CommandTrigger(trigger.Trigger):
 
         # create an independent process for the command
         logger.debug(f"Calling command {final_command}...")
-        out = subprocess.Popen(
-            final_command, env=my_env, shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE
-        )
+        out = subprocess.Popen(final_command, env=my_env, shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         # log the results
         stdout, stderr = out.communicate()
         if stdout is not None and stdout.decode() is not "":

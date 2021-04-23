@@ -1,5 +1,5 @@
 # (C) Copyright 1996- ECMWF.
-# 
+#
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -23,6 +23,7 @@ def do_something(fix=False):
     else:
         return random()
 
+
 telemetry_type = "test_counter"
 
 collector_config = {
@@ -35,17 +36,12 @@ collector_config = {
     "enabled": True,
 }
 
-upd_server_config = {
-    "host": "127.0.0.1",
-    "port": 1113,
-    "buffer_size": 64 * 1024
-}
+upd_server_config = {"host": "127.0.0.1", "port": 1113, "buffer_size": 64 * 1024}
 
 received = False
 
 
 class ReceiverMock:
-
     def process_message(self, message):
         logger.debug(f"Message received: {message}")
         message = json.loads(message)
@@ -61,7 +57,7 @@ class ReceiverMock:
 
 
 def test_count():
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
 
     # create the UDP server with mock ServiceRegister
     udp_server = UdpServer(upd_server_config, ReceiverMock())
@@ -75,11 +71,9 @@ def test_count():
         counter(do_something)
 
     for i in range(5):
-        counter(do_something, args=True) # this will return always only the same
+        counter(do_something, args=True)  # this will return always only the same
 
     # wait to receive it
     sleep(5)
     assert received
     udp_server.stop()
-
-

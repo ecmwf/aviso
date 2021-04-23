@@ -1,5 +1,5 @@
 # (C) Copyright 1996- ECMWF.
-# 
+#
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -29,15 +29,15 @@ class EventListener:
     """
 
     def __init__(
-            self,
-            event_type: str,
-            engine: Engine,
-            request: Dict[str, any],
-            triggers: List[Dict[str, any]],
-            listener_schema: Dict[str, any],
-            from_date: datetime = None,
-            to_date: datetime = None,
-            payload_key: str = None,
+        self,
+        event_type: str,
+        engine: Engine,
+        request: Dict[str, any],
+        triggers: List[Dict[str, any]],
+        listener_schema: Dict[str, any],
+        from_date: datetime = None,
+        to_date: datetime = None,
+        payload_key: str = None,
     ):
         self._event_type = event_type
         self._engine = engine
@@ -169,8 +169,9 @@ class EventListener:
         """
         # read the key format from the schema
         # noinspection PyPep8
-        key_put_format = EventListener._key_base_format(self.listener_schema, self.engine.engine_type) + \
-                         EventListener._key_stem_format(self.listener_schema, self.engine.engine_type)
+        key_put_format = EventListener._key_base_format(
+            self.listener_schema, self.engine.engine_type
+        ) + EventListener._key_stem_format(self.listener_schema, self.engine.engine_type)
 
         try:
             notification: Dict[str, any] = parse.parse(key_put_format, key, extra_types=[str]).named
@@ -248,10 +249,7 @@ class EventListener:
                     break  # the whole triggers execution stop
 
     @staticmethod
-    def derive_notification_keys(
-            params: Dict[str, any],
-            schema: Dict[str, any],
-            engine_type: EngineType):
+    def derive_notification_keys(params: Dict[str, any], schema: Dict[str, any], engine_type: EngineType):
         """
         This function compose all the keys needed for a notification to the server using the parameters passed and
         the schema
@@ -361,7 +359,7 @@ class EventListener:
                 assert "stem" in endpoint, "Wrong schema structure, 'stem' in 'endpoint' could not be located"
                 stem_key_f = endpoint["stem"]
                 if stem_key_f.startswith("/"):
-                    stem_key_f = stem_key_f[1: len(stem_key_f)]
+                    stem_key_f = stem_key_f[1 : len(stem_key_f)]
                 break
         if stem_key_f is None:
             raise EventListenerException("Key base could bot be located in the schema")

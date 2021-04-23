@@ -1,5 +1,5 @@
 # (C) Copyright 1996- ECMWF.
-# 
+#
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -14,7 +14,7 @@ from .transmitter import Transmitter
 
 class Collector(ABC):
     """
-    This class is responsible for collecting a telemetry and to transmit it. It's an abstract class as it is assumed 
+    This class is responsible for collecting a telemetry and to transmit it. It's an abstract class as it is assumed
     that the details on how and what to collect are in its specialisation.
     """
 
@@ -22,18 +22,14 @@ class Collector(ABC):
         self.enabled = config.enabled
         if type(self.enabled) is str:
             self.enabled = self.enabled.casefold() == "true".casefold()
-            
+
         self.tlm_type = tlm_type
         # this is used to create sub tlms under the same tlm type
         self.telemetry_name = f"{self.tlm_type}_{tlm_name}" if tlm_name else self.tlm_type
 
         # create a buffer for the measurements collected
         self.tlm_buffer = []
-        self.transmitter = Transmitter(
-            config.transmitter,
-            self.tlm_buffer,
-            self.aggregate_tlms,
-            self.tlm_type)
+        self.transmitter = Transmitter(config.transmitter, self.tlm_buffer, self.aggregate_tlms, self.tlm_type)
         # start the transmitter
         if self.enabled:
             self.transmitter.start()

@@ -1,5 +1,5 @@
 # (C) Copyright 1996- ECMWF.
-# 
+#
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -27,12 +27,11 @@ from six import iteritems
 
 
 class Frontend:
-
     def __init__(self, config: Config):
         self.config = config
         self.handler = self.create_handler()
         self.handler.cache = Cache(self.handler, config=config.cache)
-        # we need to initialise our components and timer here if this app runs in Flask, 
+        # we need to initialise our components and timer here if this app runs in Flask,
         # if instead it runs in Gunicorn the hook post_worker_init will take over, and these components will not be used
         self.init_components()
 
@@ -47,7 +46,9 @@ class Frontend:
         self.backend = BackendAdapter(self.config)
         # this is a time collector for the whole request
         self.timer = TimeCollector(self.config.monitoring, tlm_type=AvisoAuthMetricType.auth_resp_time.name)
-        self.user_counter = UniqueCountCollector(self.config.monitoring, tlm_type=AvisoAuthMetricType.auth_users_counter.name)
+        self.user_counter = UniqueCountCollector(
+            self.config.monitoring, tlm_type=AvisoAuthMetricType.auth_users_counter.name
+        )
 
     def create_handler(self) -> Flask:
         handler = Flask(__name__)
@@ -56,7 +57,7 @@ class Frontend:
         logger.handlers = handler.logger.handlers
 
         def json_response(m, code, header=None):
-            h = {'Content-Type': 'application/json'}
+            h = {"Content-Type": "application/json"}
             if header:
                 h.update(header)
             return json.dumps({"message": str(m)}), code, h
@@ -90,29 +91,30 @@ class Frontend:
 
         @handler.errorhandler(custom.AuthorisationUnavailableException)
         def authorisation_unavailable(e):
-            return authentication_unavailable(e) # same behaviour
-        
+            return authentication_unavailable(e)  # same behaviour
+
         @handler.errorhandler(custom.BackendUnavailableException)
         def backend_unavailable(e):
-            return authentication_unavailable(e) # same behaviour
+            return authentication_unavailable(e)  # same behaviour
 
         @handler.errorhandler(Exception)
         def default_error_handler(e):
             logging.exception(str(e))
             logging.error(f"Request: {request.json}")
-            return json.dumps(
-                {"message": "Server error occurred", "details": str(e)}
-            ), getattr(e, 'code', 500), {'Content-Type': 'application/json'}
+            return (
+                json.dumps({"message": "Server error occurred", "details": str(e)}),
+                getattr(e, "code", 500),
+                {"Content-Type": "application/json"},
+            )
 
-        @handler.route(self.config.backend['route'], methods=["POST"])
+        @handler.route(self.config.backend["route"], methods=["POST"])
         def root():
             logger.info(f"New request received: {request.data}")
-            
+
             resp_content = timed_process_request()
 
             # forward back the response
             return Response(resp_content)
-
 
         def process_request():
             # authenticate request and count the users
@@ -140,17 +142,26 @@ class Frontend:
         return handler
 
     def run_server(self):
-        logger.info(f"Running aviso-auth - version {__version__} on server {self.config.frontend['server_type']}, aviso_monitoring module v.{monitoring_version}")
+        logger.info(
+            f"Running aviso-auth - version {__version__} on server {self.config.frontend['server_type']}, aviso_monitoring module v.{monitoring_version}"
+        )
         logger.info(f"Configuration loaded: {self.config}")
 
         if self.config.frontend["server_type"] == "flask":
             # flask internal server for non-production environments
             # should only be used for testing and debugging
-            self.handler.run(debug=self.config.debug, host=self.config.frontend["host"],
-                             port=self.config.frontend["port"], use_reloader=False)
+            self.handler.run(
+                debug=self.config.debug,
+                host=self.config.frontend["host"],
+                port=self.config.frontend["port"],
+                use_reloader=False,
+            )
         elif self.config.frontend["server_type"] == "gunicorn":
-            options = {"bind": f"{self.config.frontend['host']}:{self.config.frontend['port']}",
-                       "workers": self.config.frontend['workers'], "post_worker_init": self.post_worker_init}
+            options = {
+                "bind": f"{self.config.frontend['host']}:{self.config.frontend['port']}",
+                "workers": self.config.frontend["workers"],
+                "post_worker_init": self.post_worker_init,
+            }
             GunicornServer(self.handler, options).run()
         else:
             logging.error(f"server_type {self.config.frontend['server_type']} not supported")
@@ -179,20 +190,20 @@ def main():
 
 
 class GunicornServer(gunicorn.app.base.BaseApplication):
-
     def __init__(self, app, options=None):
         self.options = options or {}
         self.application = app
         super(GunicornServer, self).__init__()
 
     def load_config(self):
-        config = dict([(key, value) for key, value in iteritems(self.options)
-                       if key in self.cfg.settings and value is not None])
+        config = dict(
+            [(key, value) for key, value in iteritems(self.options) if key in self.cfg.settings and value is not None]
+        )
         for key, value in iteritems(config):
             self.cfg.set(key.lower(), value)
 
-        #this approach does not support custom filters, therefore it's better to disable it
-        #self.cfg.set('logger_class', GunicornServer.CustomLogger)
+        # this approach does not support custom filters, therefore it's better to disable it
+        # self.cfg.set('logger_class', GunicornServer.CustomLogger)
 
     def load(self):
         return self.application
@@ -207,9 +218,7 @@ class GunicornServer(gunicorn.app.base.BaseApplication):
             formatter = logging.getLogger().handlers[0].formatter
 
             # Override Gunicorn's `error_log` configuration.
-            self._set_handler(
-                self.error_log, cfg.errorlog, formatter
-            )
+            self._set_handler(self.error_log, cfg.errorlog, formatter)
 
 
 # when running directly from this file

@@ -1,5 +1,5 @@
 # (C) Copyright 1996- ECMWF.
-# 
+#
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -10,7 +10,7 @@ import os
 
 import pytest
 
-from pyaviso import user_config, logger
+from pyaviso import logger, user_config
 from pyaviso.authentication import auth
 from pyaviso.engine import engine_factory as ef
 from pyaviso.event_listeners import listener_manager
@@ -28,11 +28,11 @@ def conf() -> user_config.UserConfig:  # this automatically configure the loggin
 def schema(conf):
     # Load the schema
     listener_schema = ListenerSchemaParser().load(conf)
-    return listener_schema['flight']
+    return listener_schema["flight"]
 
 
 def test_adding_listener(conf, schema):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     aviso = listener_manager.ListenerManager()
     authenticator = auth.Auth.get_auth(conf)
     engine_factory: ef.EngineFactory = ef.EngineFactory(conf.notification_engine, authenticator)
@@ -48,7 +48,7 @@ def test_adding_listener(conf, schema):
 
 
 def test_deleting_new_listener(conf, schema):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     aviso = listener_manager.ListenerManager()
     authenticator = auth.Auth.get_auth(conf)
     engine_factory: ef.EngineFactory = ef.EngineFactory(conf.notification_engine, authenticator)
@@ -67,7 +67,7 @@ def test_deleting_new_listener(conf, schema):
 
 
 def test_adding_listeners(conf, schema):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     aviso = listener_manager.ListenerManager()
     authenticator = auth.Auth.get_auth(conf)
     engine_factory: ef.EngineFactory = ef.EngineFactory(conf.notification_engine, authenticator)

@@ -1,5 +1,5 @@
 # (C) Copyright 1996- ECMWF.
-# 
+#
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -42,8 +42,9 @@ class EngineFactory:
             logger.debug(f"Setting up gRPC stub to connect to the etcd server {self._conf.host}:{self._conf.port}")
         elif self._conf.type == EngineType.ETCD_REST:
             # connect to the server by using the REST API
-            logger.debug(f"Setting up REST interface to connect to the etcd server "
-                         f"{self._conf.host}:{self._conf.port}")
+            logger.debug(
+                f"Setting up REST interface to connect to the etcd server " f"{self._conf.host}:{self._conf.port}"
+            )
         elif self._conf.type == EngineType.FILE_BASED:
             # connect to the test file based server
             logger.debug(f"Setting up file-based test engine")
@@ -56,6 +57,4 @@ class EngineFactory:
             # instantiate the engine and return
             return engine_class(config=self._conf, auth=self._auth)
         except Exception as e:
-            raise EngineException(
-                f"Error in creating the engine {engine_class.__name__}: {e}"
-            )
+            raise EngineException(f"Error in creating the engine {engine_class.__name__}: {e}")

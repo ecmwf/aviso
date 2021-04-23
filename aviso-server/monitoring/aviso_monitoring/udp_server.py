@@ -1,5 +1,5 @@
 # (C) Copyright 1996- ECMWF.
-# 
+#
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -21,7 +21,6 @@ class UdpServerException(Exception):
 
 
 class UdpServer(Thread):
-
     def __init__(self, config: Dict, receiver):
         super(UdpServer, self).__init__()
         self.config = config
@@ -59,6 +58,3 @@ class UdpServer(Thread):
                 logger.debug(f"Message received from {address[0]}:{address[1]}, content: {message_str}")
                 # send message to the receiver
                 self.receiver.process_message(message_str)
-
-
-
