@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
   push:
-    branches: [feature/code_quality]
+    branches: [develop]
 
 jobs:
 
