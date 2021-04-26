@@ -90,7 +90,7 @@ class Config:
 
         # main config
         config = {}
-        config["monitoring"] = {}
+        config["monitoring"] = None
         config["aviso"] = None
         config["debug"] = False
         config["host"] = "127.0.0.1"
@@ -206,7 +206,9 @@ class Config:
     def monitoring(self, monitoring: Dict):
         m = self._config.get("monitoring")
         if monitoring is not None:
-            m = MonitoringConfig(**m)
+            m = MonitoringConfig(**monitoring)
+        if m is None:
+            m = MonitoringConfig()
         # verify is valid
         assert m is not None, "monitoring has not been configured"
         self._monitoring = m
@@ -220,6 +222,8 @@ class Config:
         av = self._config.get("aviso")
         if aviso is not None:
             av = AvisoConfig(**aviso)
+        if av is None:
+            av = AvisoConfig()
         # verify is valid
         assert av is not None, "aviso has not been configured"
         self._aviso = av

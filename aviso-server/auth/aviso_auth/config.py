@@ -118,7 +118,7 @@ class Config:
 
         # main config
         config = {}
-        config["monitoring"] = {}
+        config["monitoring"] = None
         config["authorisation_server"] = authorisation_server
         config["authentication_server"] = authentication_server
         config["backend"] = backend
@@ -241,7 +241,9 @@ class Config:
     def monitoring(self, monitoring: Dict):
         m = self._config.get("monitoring")
         if monitoring is not None:
-            m = MonitoringConfig(**m)
+            m = MonitoringConfig(**monitoring)
+        if m is None:
+            m = MonitoringConfig()
         # verify is valid
         assert m is not None, "monitoring has not been configured"
         self._monitoring = m
