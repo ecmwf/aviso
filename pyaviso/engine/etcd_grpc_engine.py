@@ -259,6 +259,8 @@ class EtcdGrpcEngine(EtcdEngine):
                     self._initialise_server()
                 else:
                     raise e
+            except Exception as e:
+                raise EngineException(f"Not able to acquire lock {id}, {e}")
         if res:
             logger.debug(f"Lock {id} acquired")
             return lock

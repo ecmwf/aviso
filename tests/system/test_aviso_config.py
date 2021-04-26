@@ -7,6 +7,7 @@
 # nor does it submit to any jurisdiction.
 
 import os
+import time
 from filecmp import dircmp
 from shutil import rmtree
 
@@ -128,7 +129,11 @@ def test_push_and_pull(conf):
 
     # delete pull directory
     if os.path.exists(config_folder_to_pull):
-        rmtree(config_folder_to_pull)
+        try:
+            rmtree(config_folder_to_pull)
+        except OSError:
+            time.sleep(1)
+            rmtree(config_folder_to_pull)
         assert not os.path.exists(config_folder_to_pull)
 
     # pull to retrieve the files on a new directory
@@ -165,7 +170,11 @@ def test_push_and_pull_workflow1(conf):
 
     # delete pull directory
     if os.path.exists(config_folder_to_pull):
-        rmtree(config_folder_to_pull)
+        try:
+            rmtree(config_folder_to_pull)
+        except OSError:
+            time.sleep(1)
+            rmtree(config_folder_to_pull)
         assert not os.path.exists(config_folder_to_pull)
 
     # pull to retrieve the files on a new directory
@@ -206,7 +215,11 @@ def test_push_and_pull_workflow2(conf):
 
     # delete pull directory
     if os.path.exists(config_folder_to_pull):
-        rmtree(config_folder_to_pull)
+        try:
+            rmtree(config_folder_to_pull)
+        except OSError:
+            time.sleep(1)
+            rmtree(config_folder_to_pull)
         assert not os.path.exists(config_folder_to_pull)
 
     # pull to retrieve the files on a new directory
@@ -236,7 +249,11 @@ def test_push_and_pull_workflow3(conf):
 
     # delete pull directory
     if os.path.exists(config_folder_to_pull):
-        rmtree(config_folder_to_pull)
+        try:
+            rmtree(config_folder_to_pull)
+        except OSError:
+            time.sleep(1)
+            rmtree(config_folder_to_pull)
         assert not os.path.exists(config_folder_to_pull)
 
     # pull to retrieve the files on a new directory
@@ -287,7 +304,11 @@ def test_push_and_pull_workflow4(conf):
 
     # delete pull directory
     if os.path.exists(config_folder_to_pull):
-        rmtree(config_folder_to_pull)
+        try:
+            rmtree(config_folder_to_pull)
+        except OSError:
+            time.sleep(1)
+            rmtree(config_folder_to_pull)
         assert not os.path.exists(config_folder_to_pull)
 
     # pull to retrieve the files on a new directory
@@ -332,7 +353,11 @@ def test_remove(conf):
 
     # delete pull directory
     if os.path.exists(config_folder_to_pull):
-        rmtree(config_folder_to_pull)
+        try:
+            rmtree(config_folder_to_pull)
+        except OSError:
+            time.sleep(1)
+            rmtree(config_folder_to_pull)
         assert not os.path.exists(config_folder_to_pull)
 
     # pull to retrieve the files on a new directory
@@ -361,7 +386,11 @@ def test_remove_doit(conf):
 
     # delete pull directory
     if os.path.exists(config_folder_to_pull):
-        rmtree(config_folder_to_pull)
+        try:
+            rmtree(config_folder_to_pull)
+        except OSError:
+            time.sleep(1)
+            rmtree(config_folder_to_pull)
         assert not os.path.exists(config_folder_to_pull)
 
     # pull to retrieve the files on a new directory -> no file found
