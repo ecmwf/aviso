@@ -23,13 +23,17 @@ Below a few steps to guide the development:
 
     pip install -U -r tests/requirements-dev.txt
 
-* Unit tests can be run with `pytest <https://pytest.org>`_ with::
+* Unit and system tests for pyaviso can be run with `pytest <https://pytest.org>`_ with::
 
-    pytest -v --cov=pyaviso --cov-report=html --cache-clear
+    pytest tests -v --cov=pyaviso --cache-clear
 
-* Coverage can be checked opening in a browser the file ``htmlcov/index.html`` . Without the option ``--cov-report=html`` it will be printed to the console output. Please ensure the coverage at least stays the same before you submit a pull request.
+* Ensure to comply with PEP8 code quality::
+    
+    tox -e quality
 
-* Please ensure to comply with PEP8 code quality 
+* Before submitting a pull request run all tests and code quality check::
+
+    tox
 
 
 

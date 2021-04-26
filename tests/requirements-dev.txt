@@ -1,7 +1,8 @@
 -r ../requirements.txt
-pytest>=5.4.2
-pytest-cov>=2.7.1
-flask>=1.1.2
+pytest
+pytest-cov
+flask
+debugpy
 black
 isort
 flake8
