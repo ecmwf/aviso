@@ -31,6 +31,20 @@ Below a few steps to guide the development:
     
     tox -e quality
 
+.. note::
+
+    In order to run the tests, an instance of etcd has to run on ``127.0.0.1/2379`` with default configurations. 
+    Please check :ref:`getting_started` for more info on how to install it.
+
+To develop on the Aviso server components:
+
+* Install the following module::
+  
+    pip install -e aviso-server/monitoring
+    pip install -e aviso-server/rest
+    pip install -e aviso-server/auth
+    pip install -e aviso-server/admin
+
 * Before submitting a pull request run all tests and code quality check::
 
     tox
