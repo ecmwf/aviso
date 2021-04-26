@@ -32,14 +32,6 @@ logging:
       level: INFO
       formatter: console-format
       stream: ext://sys.stderr
-    debug-line_file:
-      class: logging.handlers.TimedRotatingFileHandler
-      level: DEBUG
-      formatter: line-format
-      when: D
-      utc: True
-      backupCount: 30
-      filename: ~/.aviso/log/aviso.debug-line.log
   root:
     level: DEBUG
-    handlers: [console, debug-line_file]
+    handlers: [console]
