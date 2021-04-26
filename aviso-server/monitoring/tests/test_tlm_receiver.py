@@ -1,11 +1,20 @@
-import os
+# (C) Copyright 1996- ECMWF.
+#
+# This software is licensed under the terms of the Apache Licence Version 2.0
+# which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+# In applying this licence, ECMWF does not waive the privileges and immunities
+# granted to it by virtue of its status as an intergovernmental organisation
+# nor does it submit to any jurisdiction.
+
+import datetime
 import json
+import os
 import socket
 import time
+
 from aviso_monitoring import logger
-import datetime
-from aviso_monitoring.udp_server import UdpServer
 from aviso_monitoring.receiver import Receiver
+from aviso_monitoring.udp_server import UdpServer
 
 test_message = {
     "telemetry_type": "type1",
@@ -13,19 +22,15 @@ test_message = {
     "hostname": "me",
     "time": datetime.datetime.timestamp(datetime.datetime.utcnow()),
     "telemetry": {
-                "test_avg": 1.2,
-            }
+        "test_avg": 1.2,
+    },
 }
 
-upd_server_config = {
-    "host": "127.0.0.1",
-    "port": 1111,
-    "buffer_size": 64 * 1024
-}
+upd_server_config = {"host": "127.0.0.1", "port": 1117, "buffer_size": 64 * 1024}
 
 
 def test_send_message():
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
 
     # create the UDP server
     receiver = Receiver()
@@ -41,7 +46,7 @@ def test_send_message():
 
     time.sleep(1)
     # verify they are received
-    assert len(receiver.incoming_tlms(test_message["telemetry_type"])) == 2 
+    assert len(receiver.incoming_tlms(test_message["telemetry_type"])) == 2
 
     # send message of different type
     test_message2 = test_message.copy()
@@ -53,8 +58,8 @@ def test_send_message():
 
     time.sleep(1)
     # verify it's received properly
-    assert len(receiver.incoming_tlms(test_message["telemetry_type"])) == 2 
-    assert len(receiver.incoming_tlms(test_message2["telemetry_type"])) == 1 
+    assert len(receiver.incoming_tlms(test_message["telemetry_type"])) == 2
+    assert len(receiver.incoming_tlms(test_message2["telemetry_type"])) == 1
 
     # send a wrong message of same type
     test_message2.pop("component_name")
@@ -65,8 +70,7 @@ def test_send_message():
 
     time.sleep(1)
     # verify it's NOT received properly
-    assert len(receiver.incoming_tlms(test_message["telemetry_type"])) == 2 
-    assert len(receiver.incoming_tlms(test_message2["telemetry_type"])) == 1 
+    assert len(receiver.incoming_tlms(test_message["telemetry_type"])) == 2
+    assert len(receiver.incoming_tlms(test_message2["telemetry_type"])) == 1
 
     udp_server.stop()
-

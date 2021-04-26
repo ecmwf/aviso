@@ -1,16 +1,16 @@
 # (C) Copyright 1996- ECMWF.
-# 
+#
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
 # granted to it by virtue of its status as an intergovernmental organisation
 # nor does it submit to any jurisdiction.
 
-from typing import Dict, Callable
+from typing import Callable, Dict
 
+from .. import logger
 from . import trigger
 from .trigger import TriggerType
-from .. import logger
 
 
 class FunctionTrigger(trigger.Trigger):
@@ -26,11 +26,11 @@ class FunctionTrigger(trigger.Trigger):
         self.trigger_type = TriggerType.function
 
     def execute(self):
-        logger.info(f"Starting Function Trigger...")
+        logger.info("Starting Function Trigger...")
         logger.debug(f"calling function {self.function.__name__}")
 
         # run the function
         logger.debug("Running function trigger")
         self.function(self.notification)
 
-        logger.info(f"Function Trigger completed")
+        logger.info("Function Trigger completed")

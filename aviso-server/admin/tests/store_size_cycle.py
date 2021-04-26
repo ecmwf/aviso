@@ -1,15 +1,28 @@
+# (C) Copyright 1996- ECMWF.
+#
+# This software is licensed under the terms of the Apache Licence Version 2.0
+# which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+# In applying this licence, ECMWF does not waive the privileges and immunities
+# granted to it by virtue of its status as an intergovernmental organisation
+# nor does it submit to any jurisdiction.
+
 import datetime
 import queue
+
 import requests
 from aviso_admin import config
 from aviso_admin.cleaner import Cleaner
 from aviso_admin.compactor import Compactor
-from aviso_monitoring.reporter.etcd_reporter import StoreSize, EtcdReporter, EtcdMetricType
+from aviso_monitoring.reporter.etcd_reporter import (
+    EtcdMetricType,
+    EtcdReporter,
+    StoreSize,
+)
 
 """
 This test simulates the store size cycle day by day including:
 - notification submission of dissemination keys
-- daily compaction 
+- daily compaction
 - daily key deletion
 It is not performing submission of mars keys. These anyway account for a small percentage of the total.
 """
@@ -54,8 +67,9 @@ def delete_destination_keys(date):
 
 def store_size():
     reporter = EtcdReporter(conf().monitoring)
-    checker = StoreSize(EtcdMetricType.etcd_store_size, member_urls=reporter.member_urls,
-                        raw_tlms=reporter.retrive_raw_tlms())
+    checker = StoreSize(
+        EtcdMetricType.etcd_store_size, member_urls=reporter.member_urls, raw_tlms=reporter.retrive_raw_tlms()
+    )
     size = checker.max_store_size("etcd_mvcc_db_total_size_in_use_in_bytes")
     return size
 
@@ -126,7 +140,6 @@ for day in range(run_days):
         # delete keys
         date = date - datetime.timedelta(days=ret_period)
         # print(f"Deleting keys for {date}")
-        # noinspection PyRedeclaration
         r = delete_destination_keys(date)
         # print(r)
         tot = 0

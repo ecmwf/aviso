@@ -1,5 +1,5 @@
 # (C) Copyright 1996- ECMWF.
-# 
+#
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -14,15 +14,16 @@ from typing import Dict
 import requests
 from cloudevents.http import CloudEvent, to_structured
 
-from . import trigger
 from .. import logger
 from ..custom_exceptions import TriggerException
+from . import trigger
 
 
 class ProtocolType(Enum):
     """
     Enum for the various protocols accepted by the post triggers
     """
+
     cloudevents = ("post_trigger", "PostCloudEvent")
 
     def get_class(self):
@@ -44,20 +45,21 @@ class PostTrigger(trigger.Trigger):
         self.protocol = ProtocolType[protocol_params.get("type").lower()].get_class()(notification, protocol_params)
 
     def execute(self):
-        logger.info(f"Starting Post Trigger for (params.get('protocol'))...'")
+        logger.info("Starting Post Trigger for (params.get('protocol'))...'")
 
         # execute the specific protocol
         self.protocol.execute()
 
-        logger.debug(f"Post Trigger completed")
+        logger.debug("Post Trigger completed")
 
 
 class PostCloudEvent:
     """
-    This class implements a trigger in charge of translating the notification in a CloudEvents message and 
+    This class implements a trigger in charge of translating the notification in a CloudEvents message and
     POST it to the URL specified by the user.
     This class expects the params to contain the URL where to send the message to. The remaining fields are optional.
     """
+
     TIMEOUT_DEFAULT = 60
     TYPE_DEFAULT = "aviso"
     SOURCE_DEFAULT = "https://aviso.ecmwf.int"
@@ -84,7 +86,7 @@ class PostCloudEvent:
         attributes = {
             "type": self.type,
             "source": self.source,
-            "time": datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+            "time": datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
         }
         data = self.notification
         event = CloudEvent(attributes, data)
@@ -102,7 +104,9 @@ class PostCloudEvent:
             logger.error("Not able to POST CloudEvents notification")
             raise TriggerException(e)
         if resp.status_code != 200:
-            raise TriggerException(f"Not able to POST CloudEvents notification to {self.url}, "
-                                   f"status {resp.status_code}, {resp.reason}, {resp.content.decode()}")
+            raise TriggerException(
+                f"Not able to POST CloudEvents notification to {self.url}, "
+                f"status {resp.status_code}, {resp.reason}, {resp.content.decode()}"
+            )
 
-        logger.debug(f"CloudEvents notification sent successfully")
+        logger.debug("CloudEvents notification sent successfully")

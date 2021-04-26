@@ -1,5 +1,5 @@
 # (C) Copyright 1996- ECMWF.
-# 
+#
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -31,7 +31,7 @@ class TriggerType(Enum):
     post = ("post_trigger", "PostTrigger")
 
     def get_class(self):
-        module = importlib.import_module("pyaviso.triggers."+self.value[0])
+        module = importlib.import_module("pyaviso.triggers." + self.value[0])
         return getattr(module, self.value[1])
 
 
@@ -75,7 +75,7 @@ class Trigger(ABC):
         matches = re.findall(TEMPLATE, text)
         for match in matches:
             assert len(match) > 3, "Wrong format for the variable templating, variable name must be specified"
-            variable = match[2: (len(match) - 1)]
+            variable = match[2 : (len(match) - 1)]
             sub_pattern = f"\\{match}"
             if variable == "json":  # special case where we dump the whole notification dictionary
                 json_dump = f"'{json.dumps(self.notification)}'"

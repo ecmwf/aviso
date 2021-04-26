@@ -5,6 +5,11 @@ How Aviso Works at ECMWF
 
 This section presents how Aviso has been configured and deployed at ECMWF. This is a real-life example of usage of Aviso as well as a service users can request to access.
 
+.. warning::
+
+   ECMWF Aviso Data Notification service is currently limited to registered users only. Please contact `ECMWF Service Desk`__ for more details and for configuration instructions.
+
+__ https://www.ecmwf.int/en/about/contact-us
 
 ECMWF Aviso service
 -------------------
@@ -22,12 +27,6 @@ disseminated via ECMWF dissemination system. The delivery of these products is a
    :align: center
 
 This service is based on the Aviso server solution presented in :ref:`aviso_server`. This server is currently receiving over 300k notifications a day.
-
-.. warning::
-
-   ECMWF Aviso service is currently limited to registered users only. Please contact `ECMWF Service Desk`__ for more details and for configuration instructions.
-
-__ https://www.ecmwf.int/en/about/contact-us
 
 
 ECMWF event listeners 

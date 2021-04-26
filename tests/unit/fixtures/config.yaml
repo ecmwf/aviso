@@ -4,6 +4,7 @@ notification_engine:
   port: 8080
   polling_interval: 1
   timeout: 30
+  automatic_retry_delay: 30
   https: true
   catchup: true
   service: aviso/v2
@@ -13,6 +14,7 @@ configuration_engine:
   port: 8080
   max_file_size: 500
   timeout: null
+  automatic_retry_delay: 30
   https: true
 auth_type: etcd
 key_file: tests/unit/fixtures/key

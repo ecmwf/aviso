@@ -31,6 +31,7 @@ Installing
    DOWNLOAD_URL=https://github.com/etcd-io/etcd/releases/download
 
    curl -L ${DOWNLOAD_URL}/${ETCD_VER}/etcd-${ETCD_VER}-linux-amd64.tar.gz -o /tmp/etcd-${ETCD_VER}-linux-amd64.tar.gz
+   mkdir /tmp/etcd-download-test
    tar xzvf /tmp/etcd-${ETCD_VER}-linux-amd64.tar.gz -C /tmp/etcd-download-test --strip-components=1
 
    # start a local etcd server
@@ -51,10 +52,10 @@ Create a configuration file in the default location `~/.aviso/config.yaml` with 
 
    listeners:
    - event: flight
-      request:
-         country: Italy
-      triggers:
-         - type: echo
+     request:
+       country: Italy
+     triggers:
+       - type: echo
 
 This file defines how to run Aviso, the event to listen to and the triggers to execute in case of notifications. 
 This is a basic example of a generic listener to events of type ``flight``. 

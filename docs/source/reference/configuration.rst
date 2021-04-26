@@ -297,7 +297,20 @@ Configuration file     .. code-block:: yaml
                             service: "aviso/v1"
 ====================   ============================
 
+AUTOMATIC RETRY DELAY
+^^^^^^^^^^^^^^^^^^^^^
+Number of seconds to wait before retrying to connect to the notification sever. This prevents the application to terminate in case of temporarily network issues for example.
 
+====================   ============================
+Type                   integer, seconds
+Defaults               15
+Command Line options   N/A
+Environment variable   AVISO_AUTOMATIC_RETRY_DELAY
+Configuration file     .. code-block:: yaml
+                        
+                          notification_engine:
+                            automatic_retry_delay: 15
+====================   ============================
 
 Configuration Engine
 --------------------
@@ -387,4 +400,17 @@ Configuration file     .. code-block:: yaml
                             max_file_size: 500
 ====================   ============================
 
+AUTOMATIC RETRY DELAY
+^^^^^^^^^^^^^^^^^^^^^
+Number of seconds to wait before retrying to connect to the configuration sever. This prevents the application to terminate in case of temporarily network issues for example.
 
+====================   ============================
+Type                   integer, seconds
+Defaults               15
+Command Line options   N/A
+Environment variable   AVISO_AUTOMATIC_RETRY_DELAY
+Configuration file     .. code-block:: yaml
+                        
+                          configuration_engine:
+                            automatic_retry_delay: 15
+====================   ============================

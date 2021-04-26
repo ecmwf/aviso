@@ -4,5 +4,5 @@ listeners:
       number: AZ203
     triggers:
       - type: command
-        working_dir: tests/integration/fixtures
+        working_dir: tests/unit/fixtures
         command: ./my_script.sh --jsonpath ${jsonpath}

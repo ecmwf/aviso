@@ -1,5 +1,5 @@
 # (C) Copyright 1996- ECMWF.
-# 
+#
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -12,7 +12,7 @@ from shutil import rmtree
 
 import pytest
 
-from pyaviso import user_config, HOME_FOLDER, logger
+from pyaviso import HOME_FOLDER, logger, user_config
 from pyaviso.authentication import auth
 from pyaviso.engine.etcd_engine import LOCAL_STATE_FOLDER
 from pyaviso.engine.file_based_engine import FileBasedEngine
@@ -43,7 +43,7 @@ def pre_post_test(test_engine):
 
 
 def test_push_pull_delete(test_engine):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     # create 2 kvs and pushed them
     kv1 = {"key": "/tmp/aviso/test/test1", "value": "1"}
     kv2 = {"key": "/tmp/aviso/test/test2", "value": "2"}
@@ -68,7 +68,7 @@ def test_push_pull_delete(test_engine):
 
 
 def test_listen(test_engine):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     callback_list = []
 
     def callback(key, value):

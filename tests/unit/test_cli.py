@@ -1,5 +1,5 @@
 # (C) Copyright 1996- ECMWF.
-# 
+#
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -11,8 +11,8 @@ import os
 import pytest
 from click.testing import CliRunner
 
-from pyaviso import user_config
-from pyaviso.cli_aviso import *
+from pyaviso import logger, user_config
+from pyaviso.cli_aviso import cli, key, listen, notify, value
 from pyaviso.engine.engine_factory import EngineType
 
 
@@ -40,7 +40,7 @@ def clear_environment():
 
 @pytest.mark.skip
 def test_listen(conf):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
     result = runner.invoke(cli, ["listen", "examples/echoListener.yaml"])
     # run successfully
@@ -48,7 +48,7 @@ def test_listen(conf):
 
 
 def test_help():
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
     result = runner.invoke(listen, ["-h"])
     # run successfully
@@ -58,15 +58,17 @@ def test_help():
 
 
 def test_bad_dates_listen(conf):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
-    result = runner.invoke(listen, ["tests/unit/fixtures/basic_flight_listener.yaml",
-                                    "--from", "2019-20-01T00:00:00.0Z"])
+    result = runner.invoke(
+        listen, ["tests/unit/fixtures/basic_flight_listener.yaml", "--from", "2019-20-01T00:00:00.0Z"]
+    )
     assert result.exit_code == 2
     assert result.output.find(" invalid datetime format: 2019-20-01T00:00:00.0Z") != -1
 
-    result = runner.invoke(listen, ["tests/unit/fixtures/basic_flight_listener.yaml",
-                                    "--from", "2030-02-01T00:00:00.0Z"])
+    result = runner.invoke(
+        listen, ["tests/unit/fixtures/basic_flight_listener.yaml", "--from", "2030-02-01T00:00:00.0Z"]
+    )
     assert result.exit_code == -1
     assert result.output.find("from_date must be in the past") != -1
 
@@ -78,14 +80,22 @@ def test_bad_dates_listen(conf):
     assert result.exit_code == -1
     assert result.output.find("to_date must be in the past") != -1
 
-    result = runner.invoke(listen, ["tests/unit/fixtures/basic_flight_listener.yaml", "--from",
-                                    "2020-02-01T00:00:00.0Z", "--to", "2010-02-01T00:00:00.0Z"])
+    result = runner.invoke(
+        listen,
+        [
+            "tests/unit/fixtures/basic_flight_listener.yaml",
+            "--from",
+            "2020-02-01T00:00:00.0Z",
+            "--to",
+            "2010-02-01T00:00:00.0Z",
+        ],
+    )
     assert result.exit_code == -1
     assert result.output.find("to_date must be later than from_date") != -1
 
 
 def test_bad_listener_file(conf):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
     result = runner.invoke(listen, ["tests/unit/fixtures/no_file.py"])
     # The process stops and return an error
@@ -94,7 +104,7 @@ def test_bad_listener_file(conf):
 
 
 def test_bad_multiple_argument(conf):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
     result = runner.invoke(listen, ["tests/unit/fixtures/basic_flight_listener.yaml", "bad"])
     # The process stops and return an error
@@ -103,7 +113,7 @@ def test_bad_multiple_argument(conf):
 
 
 def test_bad_options(conf):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
     result = runner.invoke(listen, ["tests/unit/fixtures/basic_flight_listener.yaml", "--bad"])
     # The process stops and return an error
@@ -112,7 +122,7 @@ def test_bad_options(conf):
 
 
 def test_bad_logging(conf):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
     result = runner.invoke(listen, ["tests/unit/fixtures/basic_flight_listener.yaml", "-l badLogging.yaml"])
     # The process run successfully using default logs
@@ -120,7 +130,7 @@ def test_bad_logging(conf):
 
 
 def test_bad_config_file(conf):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
     result = runner.invoke(listen, ["tests/unit/fixtures/basic_flight_listener.yaml", "-cbadConfig.yaml"])
     assert result.exit_code == -1
@@ -128,7 +138,7 @@ def test_bad_config_file(conf):
 
 @pytest.mark.skip  # we cannot authenticate in this test setup
 def test_bad_user(conf):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
     result = runner.invoke(listen, ["tests/unit/fixtures/basic_flight_listener.yaml", "-uuser"])
     # The process stop as it cannot connect to the server
@@ -141,7 +151,7 @@ def test_bad_user(conf):
 
 @pytest.mark.skip  # we cannot authenticate in this test setup, therefore we cannot read key
 def test_bad_key(conf):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
     result = runner.invoke(listen, ["tests/unit/fixtures/basic_flight_listener.yaml", "-kp"])
     # The process stop as it cannot connect to the server
@@ -151,7 +161,7 @@ def test_bad_key(conf):
 
 @pytest.mark.skip  # we cannot authenticate in this test setup
 def test_bad_password(conf):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
     result = runner.invoke(listen, ["tests/unit/fixtures/basic_flight_listener.yaml", "-ktests/unit/fixtures/bad/key"])
     # The process stop as it cannot connect to the server
@@ -163,67 +173,61 @@ def test_bad_password(conf):
 
 
 def test_key_missing_params(conf):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
-    result = runner.invoke(key, [
-        "event=flight,country=Italy,airport=fco,date=20210101"])
+    result = runner.invoke(key, ["event=flight,country=Italy,airport=fco,date=20210101"])
 
     assert result.exit_code == -1
     assert "Wrong parameters: number required" in result.output
 
 
 def test_key_extra_params(conf):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
-    result = runner.invoke(key, [
-        "event=flight,country=Italy,airport=fco,date=20210101,number=AZ203,payload=Landed"])
+    result = runner.invoke(key, ["event=flight,country=Italy,airport=fco,date=20210101,number=AZ203,payload=Landed"])
 
     assert result.exit_code == -1
     assert "Key payload is not allowed" in result.output
 
 
 def test_key_missing_event(conf):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
-    result = runner.invoke(key, [
-        "country=Italy,airport=fco,date=20210101,number=AZ203"])
+    result = runner.invoke(key, ["country=Italy,airport=fco,date=20210101,number=AZ203"])
 
     assert result.exit_code == -1
     assert "Invalid notification, 'event' could not be located" in result.output
 
 
 def test_key_bad_event(conf):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
-    result = runner.invoke(key, [
-        "event=flight2,country=Italy,airport=fco,date=20210101,number=AZ203,payload=Landed"])
+    result = runner.invoke(key, ["event=flight2,country=Italy,airport=fco,date=20210101,number=AZ203,payload=Landed"])
 
     assert result.exit_code == -1
     assert "Invalid notification, flight2 could not be located in the schema" in result.output
 
 
 def test_key_bad_format(conf):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
-    result = runner.invoke(key, [
-        "event=flight,country:Italy,airport:fco,date:20210101,number=AZ203"])
+    result = runner.invoke(key, ["event=flight,country:Italy,airport:fco,date:20210101,number=AZ203"])
 
     assert result.exit_code == -1
     assert "Wrong structure for the notification string, it should be <key_name>=<key_value>,..." in result.output
 
 
 def test_key_bad_format2(conf):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
-    result = runner.invoke(key, [
-        "event=flight,country=Italy-airport=fco-date=20210101-number=AZ203"])
+    result = runner.invoke(key, ["event=flight,country=Italy-airport=fco-date=20210101-number=AZ203"])
 
     assert result.exit_code == -1
     assert "Wrong structure for the notification string, it should be <key_name>=<key_value>,..." in result.output
 
 
-def test_key_missing_params(conf):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+def test_key_missing_all_params(conf):
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
     result = runner.invoke(key, [])
 
@@ -232,7 +236,7 @@ def test_key_missing_params(conf):
 
 
 def test_key_help():
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
     result = runner.invoke(key, ["-h"])
     # run successfully
@@ -242,17 +246,16 @@ def test_key_help():
 
 
 def test_value_bad_format(conf):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
-    result = runner.invoke(value, [
-        "event=flight,country=Italy,airport:fco,date:20210101,number:AZ203,payload=Landed"])
+    result = runner.invoke(value, ["event=flight,country=Italy,airport:fco,date:20210101,number:AZ203,payload=Landed"])
 
     assert result.exit_code == -1
     assert "Wrong structure for the notification string, it should be <key_name>=<key_value>,..." in result.output
 
 
 def test_value_missing_params(conf):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
     result = runner.invoke(value, [])
 
@@ -261,7 +264,7 @@ def test_value_missing_params(conf):
 
 
 def test_value_help():
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
     result = runner.invoke(value, ["-h"])
     # run successfully
@@ -271,7 +274,7 @@ def test_value_help():
 
 
 def test_notify_help():
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
     result = runner.invoke(notify, ["-h"])
     # run successfully
@@ -281,23 +284,9 @@ def test_notify_help():
 
 
 def test_notify_missing_params(conf):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
     result = runner.invoke(notify, [])
 
     assert result.exit_code == 2
     assert "Missing argument" in result.output
-
-
-def test_notify_bad_server(conf):
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
-    runner = CliRunner()
-    result = runner.invoke(notify, [
-        "event=flight,country=Italy,airport=fco,date=20210101,number=AZ203,payload=Landed",
-        "-Hhost"])
-
-    assert result.exit_code == -1
-    if conf.notification_engine.type == EngineType.ETCD_REST:
-        assert result.output.find("Not able to pull key") != -1
-    if conf.notification_engine.type == EngineType.ETCD_GRPC:
-        assert result.output.find("Socket closed") != -1

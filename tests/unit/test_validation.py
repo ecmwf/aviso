@@ -1,5 +1,5 @@
 # (C) Copyright 1996- ECMWF.
-# 
+#
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -10,11 +10,19 @@ import os
 
 from pyaviso import logger
 from pyaviso.event_listeners.event_listener import EventListener
-from pyaviso.event_listeners.validation import *
+from pyaviso.event_listeners.validation import (
+    DateHandler,
+    EnumHandler,
+    FloatHandler,
+    IntHandler,
+    RegexHandler,
+    StringHandler,
+    TimeHandler,
+)
 
 
 def test_int_handler():
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
 
     schema = {"range": [0, 20], "canonic": "{0:0>4}", "error": "error"}
     try:
@@ -35,10 +43,10 @@ def test_int_handler():
         assert e.args[0] == "Key test has to be an integer"
 
     result = validator.process(12.33)
-    assert result == '0012'
+    assert result == "0012"
 
     result = validator.process(12)
-    assert result == '0012'
+    assert result == "0012"
 
     try:
         result = validator.process(25)
@@ -52,7 +60,7 @@ def test_int_handler():
 
 
 def test_float_handler():
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
 
     schema = {"canonic": "{:2.2f}"}
 
@@ -67,14 +75,14 @@ def test_float_handler():
         assert e.args[0] == "Key test has to be a float"
 
     result = validator.process(12.33243254323)
-    assert result == '12.33'
+    assert result == "12.33"
 
     result = validator.process(12)
-    assert result == '12.00'
+    assert result == "12.00"
 
 
 def test_regex_handler():
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
 
     schema = {"regex": "a"}
 
@@ -85,17 +93,17 @@ def test_regex_handler():
         assert e.args[0] == "Value bbb is not valid for key test"
 
     result = validator.process("aaa")
-    assert result == 'aaa'
+    assert result == "aaa"
 
 
 def test_string_handler():
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
 
     schema = {"canonic": "upper"}
 
     validator = StringHandler(key="test", **schema)
     result = validator.process("aaa")
-    assert result == 'AAA'
+    assert result == "AAA"
 
     schema = {"canonic": "uppercase"}
     validator = StringHandler(key="test", **schema)
@@ -106,7 +114,7 @@ def test_string_handler():
 
 
 def test_date_handler():
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
 
     schema = {"canonic": "%Y%m%d"}
 
@@ -136,7 +144,7 @@ def test_date_handler():
 
 
 def test_enum_handler():
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
 
     schema = {"values": ["1", "2", "3"]}
 
@@ -155,7 +163,7 @@ def test_enum_handler():
 
 
 def test_time_handler():
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
 
     schema = {"values": ["0", "6", "12", "18"], "canonic": "{0:0>2}"}
 
@@ -185,7 +193,7 @@ def test_multiple_types():
 
     params = {"postproc": 12}
     EventListener._validate(params, schema)
-    assert params["postproc"] == '12'
+    assert params["postproc"] == "12"
 
     params = {"postproc": "aaaa"}
     try:
@@ -201,4 +209,4 @@ def test_multiple_types():
 
     params = {"postproc": 12.5}
     EventListener._validate(params, schema)
-    assert params["postproc"] == '12'
+    assert params["postproc"] == "12"

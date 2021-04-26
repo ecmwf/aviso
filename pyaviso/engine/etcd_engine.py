@@ -1,5 +1,5 @@
 # (C) Copyright 1996- ECMWF.
-# 
+#
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -13,13 +13,13 @@ import time
 from abc import ABC, abstractmethod
 from datetime import datetime
 from queue import Queue
-from typing import Tuple, Any
+from typing import Any, Tuple
 
-from .engine import Engine, DATE_FORMAT
-from .. import logger, HOME_FOLDER
+from .. import HOME_FOLDER, logger
 from ..authentication.auth import Auth
-from ..custom_exceptions import EngineHistoryNotAvailableError, EngineException
+from ..custom_exceptions import EngineException, EngineHistoryNotAvailableError
 from ..user_config import EngineConfig
+from .engine import DATE_FORMAT, Engine
 
 MAX_KV_RETURNED = 10000
 LOCAL_STATE_FOLDER = "etcd/last"
@@ -52,12 +52,14 @@ class EtcdEngine(Engine, ABC):
         """
         pass
 
-    def _polling(self,
-                 key: str,
-                 callback: callable([str, str]),
-                 channel: Queue,
-                 from_date: datetime = None,
-                 to_date: datetime = None):
+    def _polling(
+        self,
+        key: str,
+        callback: callable([str, str]),
+        channel: Queue,
+        from_date: datetime = None,
+        to_date: datetime = None,
+    ):
         """
         This method implements the active polling
         :param key: key to watch as a prefix
@@ -82,7 +84,9 @@ class EtcdEngine(Engine, ABC):
         try:
             # initialise the revisions
             final_rev = None
-            if from_date is None:
+
+            # check start date
+            if from_date is None:  # no start date defined
                 if self.catchup is None:
                     raise EngineException("catchup not defined for notification engine")
                 if self.catchup:  # we start from the saved one
@@ -96,16 +100,23 @@ class EtcdEngine(Engine, ABC):
                     self._delete_saved_revision()
                     # we start from now
                     next_rev = self._latest_revision(key) + 1
-            else:
+
+            else:  # start date defined
                 logger.info("Searching for past notifications...")
                 next_rev, final_rev = self._from_to_revisions(key, from_date=from_date, to_date=to_date)
-                if next_rev:
+                if next_rev == -1 and final_rev == -1:
+                    logger.warning("No history available in the time period selected")
+                    channel.put(True)
+                    return
+                elif next_rev:
                     logger.info("Search completed, retrieving...")
                 else:
-                    logger.error(f"Error in retrieving the history")
+                    logger.error("Error in one of the listening process")
                     channel.put(False)
+                    return
 
-            if to_date:  # retrieve only past notifications
+            # check end date
+            if to_date:  # end date defined, retrieve only past notifications
                 if final_rev:
                     kvs = self.pull(key, min_rev=next_rev, max_rev=final_rev)
                     # remove the status from the result
@@ -121,7 +132,9 @@ class EtcdEngine(Engine, ABC):
                 if len(self._listeners) == 0:  # this is the last pooling thread
                     # terminate the main execution
                     channel.put(True)
-            else:  # start the polling for new notifications
+                    return
+
+            else:  # no end date defined, start the polling for new notifications
                 while key in self._listeners:  # this is the stop condition
                     # retrieve any change since the last revision
                     kvs = self.pull(key, min_rev=next_rev)
@@ -141,6 +154,7 @@ class EtcdEngine(Engine, ABC):
                         trigger_callback(kvs)
                     # wait the polling interval before trying again
                     time.sleep(self._polling_interval)
+
         except Exception as e:
             logger.error(f"Error while listening to key {key}: {e}")
             logger.debug("", exc_info=True)
@@ -186,7 +200,7 @@ class EtcdEngine(Engine, ABC):
                 try:
                     # delete the file
                     os.remove(full_rev_path)
-                    logger.debug(f"Last revision file has been successfully deleted")
+                    logger.debug("Last revision file has been successfully deleted")
                 except Exception:
                     logger.warning(f"Deleting the last revision file has failed: {full_rev_path}")
                     logger.debug("", exc_info=True)
@@ -203,7 +217,7 @@ class EtcdEngine(Engine, ABC):
                 "last_revision": rev,
                 "date_time": datetime.utcnow().strftime(DATE_FORMAT),
                 "server_host": self.host,
-                "server_port": self.port
+                "server_port": self.port,
             }
             # build the path where the last revision will be saved
             full_home_path = os.path.expanduser(HOME_FOLDER)
@@ -243,7 +257,7 @@ class EtcdEngine(Engine, ABC):
         try:
             kvs = self.pull(key=key, prefix=False, rev=rev)
         # in case of retrieving a compacted revision we will get a 400 error with a proper reason
-        except EngineHistoryNotAvailableError as e:
+        except EngineHistoryNotAvailableError:
             logger.debug(f"Revision {rev} too old for current history")
             return rev, None, rev, None  # return in a way that is clear that we arrived at the end of the history
 
@@ -278,6 +292,7 @@ class EtcdEngine(Engine, ABC):
         # check all limit cases first
         # limit case - check if there is no status
         if status_rev == -1:
+            logger.debug("No status available")
             return None, None
         # limit case - check if this revision is before from_date and to_date
         if status_date <= from_date:
@@ -309,12 +324,14 @@ class EtcdEngine(Engine, ABC):
         while status_date > from_date and status_prev_rev != -1:
             if status_date.date() == from_date.date():  # same day
                 # go back one revision
-                status_rev, status_date, status_prev_rev, status_last_prev_day_rev = \
-                    self._retrieve_status_history(key, status_prev_rev)
+                status_rev, status_date, status_prev_rev, status_last_prev_day_rev = self._retrieve_status_history(
+                    key, status_prev_rev
+                )
             elif status_last_prev_day_rev:
                 # go back to the revision of the last of the previous day -> we skip a day
-                status_rev, status_date, status_prev_rev, status_last_prev_day_rev = \
-                    self._retrieve_status_history(key, status_last_prev_day_rev)
+                status_rev, status_date, status_prev_rev, status_last_prev_day_rev = self._retrieve_status_history(
+                    key, status_last_prev_day_rev
+                )
             elif status_last_prev_day_rev is None:  # it is the last point of history
                 logger.warning("Reached the end of history available")
                 break
@@ -332,8 +349,8 @@ class EtcdEngine(Engine, ABC):
         else:  # we exit because is the last point but we are inside the interval
             from_rev = status_rev
         if to_date and to_rev is None:  # this means there are no point inside the interval - limit case
-            logger.info("No keys found")
-            return None, None
+            logger.debug("No keys found")
+            return -1, -1
 
         return from_rev, to_rev
 

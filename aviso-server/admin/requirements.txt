@@ -2,3 +2,4 @@ PyYAML>=5.1.2
 python-json-logger>=0.1.11
 requests>=2.23.0
 schedule>=0.6.0
+rfc5424-logging-handler>=1.4.3

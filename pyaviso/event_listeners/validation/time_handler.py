@@ -1,5 +1,5 @@
 # (C) Copyright 1996- ECMWF.
-# 
+#
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -12,7 +12,6 @@ from .enum_handler import EnumHandler
 
 
 class TimeHandler(EnumHandler):
-
     def __init__(self, key, values: List[str], canonic, required=False):
         super(TimeHandler, self).__init__(key, values, required)
         self._canonic = canonic

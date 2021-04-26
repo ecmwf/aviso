@@ -6,26 +6,26 @@
 # granted to it by virtue of its status as an intergovernmental organisation
 # nor does it submit to any jurisdiction.
 
-import requests
 from enum import Enum
-import re
 
-from .reporter import Reporter
+import requests
+
 from .. import logger
+from ..receiver import ETCD_APP_NAME
+from .opsview_reporter import OpsviewReporter
 
 
-class EtcdReporter(Reporter):
-
+class EtcdReporter(OpsviewReporter):
     def __init__(self, config, *args, **kwargs):
-        etcd_config = config.etcd_reporter
-        self.frequency = etcd_config["frequency"]
-        self.enabled = etcd_config["enabled"]
-        self.tlm_type = etcd_config["tlm_type"]
-        self.member_urls = etcd_config["member_urls"]
-        self.req_timeout = etcd_config["req_timeout"]
+        self.etcd_config = config.etcd_reporter
+        self.frequency = self.etcd_config["frequency"]
+        self.enabled = self.etcd_config["enabled"]
+        self.req_timeout = self.etcd_config["req_timeout"]
+        self.member_urls = self.etcd_config["member_urls"]
+        self.tlms = self.etcd_config["tlms"]
         super().__init__(config, *args, **kwargs)
 
-    def process_tlms(self):
+    def process_messages(self):
         """
         This method for each metric to process instantiates the relative TLM checker and run it
         :return: the metrics collected
@@ -33,14 +33,20 @@ class EtcdReporter(Reporter):
         logger.debug("Etcd processing metrics...")
 
         # fetch the raw tlms provided by etcd
-        raw_tlms = self.retrive_raw_tlms()
+        raw_tlms = OpsviewReporter.retrive_metrics(self.member_urls, self.req_timeout)  # noqa: F841
 
         # array of metric to return
         metrics = []
-        for mn in self.tlm_type:
+
+        # check for each tlm
+        for tlm_type in self.tlms.keys():
             # create the relative metric checker
-            m_type = EtcdMetricType[mn.lower()]
-            checker = eval(m_type.value + "(m_type, self.req_timeout, member_urls=self.member_urls, raw_tlms=raw_tlms)")
+            m_type = EtcdMetricType[tlm_type.lower()]
+            checker = eval(
+                m_type.value
+                + "(tlm_type, msg_receiver=self.msg_receiver, raw_tlms=raw_tlms, **self.tlms[tlm_type], \
+                    **self.etcd_config)"
+            )
 
             # retrieve metric
             metrics.append(checker.metric())
@@ -48,32 +54,6 @@ class EtcdReporter(Reporter):
         logger.debug("Etcd metrics completed")
 
         return metrics
-
-    def retrive_raw_tlms(self):
-        """
-        this methods retrieves the etcd metrics provided by each member. We collect from all of them because some of
-        them are not the same
-        """
-        raw_tlms = {}
-        for u in self.member_urls:
-            url = u + "/metrics"
-            logger.debug(f"Retrieving TLMs from {url}...")
-            try:
-                resp = requests.get(url, verify=False, timeout=self.req_timeout)
-            except Exception as e:
-                logger.error(f"Not able to get TLMs from {url}")
-                logger.exception(e)
-                raw_tlms[u] = None
-                continue
-            if resp.status_code != 200:
-                logger.error(f"Not able to get TLMs from {url}, "
-                             f"status {resp.status_code}, {resp.reason}, {resp.content.decode()}")
-                raw_tlms[u] = None
-            else:
-                raw_tlms[u] = resp.text
-
-        logger.debug("Etcd raw TLMs successfully retrieved")
-        return raw_tlms
 
 
 class EtcdMetricType(Enum):
@@ -84,6 +64,7 @@ class EtcdMetricType(Enum):
     etcd_store_size = "StoreSize"
     etcd_cluster_status = "ClusterStatus"
     etcd_total_keys = "TotalKeys"
+    etcd_error_log = "ErrorLog"
 
 
 class EtcdChecker:
@@ -91,32 +72,15 @@ class EtcdChecker:
     Base class for etcd checkers
     """
 
-    def __init__(self, type, req_timeout=60, *args, **kwargs):
-        self.metric_type = type
+    def __init__(self, tlm_type, req_timeout=60, *args, **kwargs):
+        self.metric_name = tlm_type
         self.req_timeout = req_timeout
         self.member_urls = kwargs["member_urls"]
         self.raw_tlms = kwargs["raw_tlms"]
+        self.msg_receiver = kwargs["msg_receiver"]
 
     def metric(self):
         pass
-
-    def read_from_raw_tlms(self, url, tlm_name):
-        """
-        This methods extract the value associated to tlm_name in the raw_tlms text
-        :param url: member url
-        :param tlm_name:
-        :return: the value as string, None if nothing was found
-        """
-        pattern = f"{tlm_name} [0-9.e+]+"
-        res = re.findall(pattern, self.raw_tlms[url])
-        if len(res) == 1:
-            res = res[0].split()
-            if len(res) == 2:
-                return res[1]
-            else:
-                return None
-        else:
-            return None
 
 
 class StoreSize(EtcdChecker):
@@ -128,7 +92,7 @@ class StoreSize(EtcdChecker):
 
         # defaults
         status = 0
-        message = f"Store size is nominal"
+        message = "Store size is nominal"
 
         store_logic = self.max_store_size("etcd_mvcc_db_total_size_in_use_in_bytes")
         store_physical = self.max_store_size("etcd_mvcc_db_total_size_in_bytes")
@@ -136,7 +100,7 @@ class StoreSize(EtcdChecker):
 
         if store_logic == -1:
             status = 2
-            message = f"Could not retrieve the store size"
+            message = "Could not retrieve the store size"
         else:
             utilisation = store_logic * 100 / store_quota
             if utilisation > 85:
@@ -148,28 +112,16 @@ class StoreSize(EtcdChecker):
 
         # build metric payload
         m_status = {
-            "name": self.metric_type.name,
+            "name": self.metric_name,
             "status": status,
             "message": message,
             "metrics": [
-                {
-                    "m_name": "store_logic",
-                    "m_value": store_logic,
-                    "m_unit": "GiB"
-                },
-                {
-                    "m_name": "store_physical",
-                    "m_value": store_physical,
-                    "m_unit": "GiB"
-                },
-                {
-                    "m_name": "store_quota",
-                    "m_value": store_quota,
-                    "m_unit": "GiB"
-                }
-            ]
+                {"m_name": "store_logic", "m_value": store_logic, "m_unit": "GiB"},
+                {"m_name": "store_physical", "m_value": store_physical, "m_unit": "GiB"},
+                {"m_name": "store_quota", "m_value": store_quota, "m_unit": "GiB"},
+            ],
         }
-        logger.debug(f"Store size metric: {m_status}")
+        logger.debug(f"{self.metric_name} metric: {m_status}")
         return m_status
 
     def max_store_size(self, tlm_name):
@@ -180,11 +132,12 @@ class StoreSize(EtcdChecker):
         """
         max = -1
         for u in self.member_urls:
-            size = self.read_from_raw_tlms(u, tlm_name)
-            if size:
-                # convert byte in GiB
-                size = round(float(size) / (1024 * 1024 * 1024), 2)
-                max = size if size > max else max
+            if self.raw_tlms[u]:
+                size = OpsviewReporter.read_from_metrics(self.raw_tlms[u], tlm_name)
+                if size:
+                    # convert byte in GiB
+                    size = round(float(size) / (1024 * 1024 * 1024), 2)
+                    max = size if size > max else max
         return max
 
 
@@ -196,7 +149,7 @@ class ClusterStatus(EtcdChecker):
 
     def metric(self):
         status = 0
-        message = f"Cluster status is nominal"
+        message = "Cluster status is nominal"
 
         # first retrieve the member size
         cluster_size = self.cluster_size(self.member_urls[0])  # any of the member should give the same info
@@ -204,39 +157,32 @@ class ClusterStatus(EtcdChecker):
             status = 2
             message = f"Cluster size is {cluster_size}"
 
-        # now check the health of each member
-        for url in self.member_urls:
-            if not self.health(url):
-                status = 2
-                message = f"Cluster member {url} not healthy"
+        if status == 0:
+            # now check the health of each member
+            for url in self.member_urls:
+                if not self.health(url):
+                    status = 2
+                    message = f"Cluster member {url} not healthy"
+                    break
 
-        # check if there is a leader
-        leader = self.read_from_raw_tlms(self.member_urls[0], "etcd_server_has_leader")
-        if leader != "1":
-            status = 1
-            message = f"Cluster has no leader"
-
-        # retrieve total failed hearthbeat
-        tot_failed_heartbeat = 0
-        for url in self.member_urls:
-            failed_heartbeat = self.read_from_raw_tlms(url, "etcd_server_heartbeat_send_failures_total")
-            if failed_heartbeat:
-                tot_failed_heartbeat += int(failed_heartbeat)
+        if status == 0:
+            # check if there is a leader
+            if self.raw_tlms[self.member_urls[0]] is None:
+                status = 1
+                message = f"Could not retrieve metrics from {self.member_urls[0]}"
+            else:
+                leader = OpsviewReporter.read_from_metrics(self.raw_tlms[self.member_urls[0]], "etcd_server_has_leader")
+                if leader != "1":
+                    status = 1
+                    message = "Cluster has no leader"
 
         # build metric payload
         m_status = {
-            "name": self.metric_type.name,
+            "name": self.metric_name,
             "status": status,
             "message": message,
-            "metrics": [
-                {
-                    "m_name": "failed_heartbeat",
-                    "m_value": tot_failed_heartbeat,
-                    "m_unit": ""
-                }
-            ]
         }
-        logger.debug(f"Cluster status metric: {m_status}")
+        logger.debug(f"{self.metric_name} metric: {m_status}")
         return m_status
 
     def health(self, url):
@@ -253,8 +199,10 @@ class ClusterStatus(EtcdChecker):
             logger.exception(e)
             return False
         if resp.status_code != 200:
-            logger.error(f"Not able to get health on {url}, "
-                         f"status {resp.status_code}, {resp.reason}, {resp.content.decode()}")
+            logger.error(
+                f"Not able to get health on {url}, "
+                f"status {resp.status_code}, {resp.reason}, {resp.content.decode()}"
+            )
         data = resp.json()
         healthy = bool(data.get("health"))
 
@@ -274,8 +222,10 @@ class ClusterStatus(EtcdChecker):
             logger.exception(e)
             return False
         if resp.status_code != 200:
-            logger.error(f"Not able to get cluster info on {url}, "
-                         f"status {resp.status_code}, {resp.reason}, {resp.content.decode()}")
+            logger.error(
+                f"Not able to get cluster info on {url}, "
+                f"status {resp.status_code}, {resp.reason}, {resp.content.decode()}"
+            )
         data = resp.json()
         cluster_size = len(data.get("members"))
 
@@ -290,25 +240,56 @@ class TotalKeys(EtcdChecker):
     def metric(self):
         # defaults
         status = 0
-        message = f"Total number of keys is nominal"
+        message = "Total number of keys is nominal"
         # any member should reply the same
-        t_keys = self.read_from_raw_tlms(self.member_urls[0], "etcd_debugging_mvcc_keys_total")
+        t_keys = OpsviewReporter.read_from_metrics(self.raw_tlms[self.member_urls[0]], "etcd_debugging_mvcc_keys_total")
         if t_keys is None:
             status = 2
-            message = f"Cannot retrieve total number of keys"
+            message = "Cannot retrieve total number of keys"
 
         # build metric payload
         m_status = {
-            "name": self.metric_type.name,
+            "name": self.metric_name,
             "status": status,
             "message": message,
-            "metrics": [
-                {
-                    "m_name": "total_keys",
-                    "m_value": t_keys,
-                    "m_unit": ""
-                }
-            ]
+            "metrics": [{"m_name": "total_keys", "m_value": t_keys, "m_unit": ""}],
         }
-        logger.debug(f"Total keys metric: {m_status}")
+        logger.debug(f"{self.metric_name} metric: {m_status}")
+        return m_status
+
+
+class ErrorLog(EtcdChecker):
+    """
+    Collect the errors received
+    """
+
+    def metric(self):
+        # defaults
+        status = 0
+        message = "No error to report"
+
+        # fetch the error log
+        assert self.msg_receiver, "Msg receiver is None"
+        new_errs = self.msg_receiver.extract_incoming_errors(ETCD_APP_NAME)
+
+        if len(new_errs):
+            logger.debug(f"Processing {len(new_errs)} tlms {self.metric_name}...")
+
+            # replace the | with - Opsview does not like it otherwise
+            new_errs = list(map(lambda log: log.replace("|", "-"), new_errs))
+
+            # select warnings and errors
+            warns = list(filter(lambda log: (" W " in log), new_errs))
+            errs = list(filter(lambda log: (" E " in log), new_errs))
+
+            if len(errs):
+                status = 2
+                message = f"Errors received: {errs}"
+            elif len(warns):
+                status = 1
+                message = f"Warnings received: {warns}"
+
+        # build metric payload
+        m_status = {"name": self.metric_name, "status": status, "message": message}
+        logger.debug(f"{self.metric_name} metric: {m_status}")
         return m_status

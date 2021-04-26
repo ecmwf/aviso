@@ -1,22 +1,21 @@
 # (C) Copyright 1996- ECMWF.
-# 
+#
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
 # granted to it by virtue of its status as an intergovernmental organisation
 # nor does it submit to any jurisdiction.
 
-import time
 from datetime import datetime
-from typing import List, Dict, Tuple
+from typing import Dict, List, Tuple
 
 import yaml
 
-from . import logger, user_config, exit_channel
+from . import exit_channel, logger, user_config
 from .authentication.auth import Auth
 from .custom_exceptions import EventListenerException, InvalidInputError
 from .engine import engine_factory as ef
-from .event_listeners.event_listener import EventListener, DEFAULT_PAYLOAD_KEY
+from .event_listeners.event_listener import DEFAULT_PAYLOAD_KEY, EventListener
 from .event_listeners.listener_manager import ListenerManager
 
 
@@ -28,11 +27,14 @@ class NotificationManager:
     def __init__(self):
         self.listener_manager = ListenerManager()
 
-    def _listen(self, config: user_config.UserConfig = None,
-                listeners_file_paths: List[str] = None,
-                listeners: Dict[str, any] = None,
-                from_date: datetime = None,
-                to_date: datetime = None) -> int:
+    def _listen(
+        self,
+        config: user_config.UserConfig = None,
+        listeners_file_paths: List[str] = None,
+        listeners: Dict[str, any] = None,
+        from_date: datetime = None,
+        to_date: datetime = None,
+    ) -> int:
         """
         This method parses the inputs and calls the listener manager to create the listeners
         :param config: UserConfig object
@@ -50,7 +52,7 @@ class NotificationManager:
             if hasattr(config, "listeners"):
                 listeners_list.append(config.listeners)
             else:
-                raise EventListenerException(f"Listeners not defined")
+                raise EventListenerException("Listeners not defined")
         else:
             listeners_list.append(listeners)
 
@@ -60,13 +62,16 @@ class NotificationManager:
         # Call the listener manager
         return self.listener_manager.listen(listeners_list, listener_schema, config, from_date, to_date)
 
-    def listen(self, config: user_config.UserConfig = None,
-               listeners_file_paths: List[str] = None,
-               listeners: Dict[str, any] = None,
-               from_date: datetime = None,
-               to_date: datetime = None,
-               now: bool = False,
-               catchup: bool = False):
+    def listen(
+        self,
+        config: user_config.UserConfig = None,
+        listeners_file_paths: List[str] = None,
+        listeners: Dict[str, any] = None,
+        from_date: datetime = None,
+        to_date: datetime = None,
+        now: bool = False,
+        catchup: bool = False,
+    ):
         """
         This method implements the main workflow to instantiate and execute new listeners and holding the main thread in
         active waiting.
@@ -104,16 +109,17 @@ class NotificationManager:
 
         # Call the listener manager
         self._listen(config, listeners_file_paths, listeners, from_date, to_date)
-        
+
         # keep the main process running and wait for the listening thread to terminate
-        l_exit =  exit_channel.get()  # this is blocking until all listener ends or there is an error
-        if l_exit: # it exits successful
+        l_exit = exit_channel.get()  # this is blocking until all listener ends or there is an error
+        if l_exit:  # it exits successful
             return
-        else: # it exits with errors
+        else:  # it exits with errors
             raise EventListenerException("Error in one of the listening process")
 
-    def key(self, params: Dict, config: user_config.UserConfig = None, listener_schema: Dict = None) \
-            -> Tuple[str, str, str]:
+    def key(
+        self, params: Dict, config: user_config.UserConfig = None, listener_schema: Dict = None
+    ) -> Tuple[str, str, str]:
         """
         Generate a key to send to the notification server with the params passed and complying to the current schema
         :param params: parameters to use in the key
@@ -145,7 +151,8 @@ class NotificationManager:
         filtered_params = params.copy()
         filtered_params.pop("event")
         key, root, admin_key = EventListener.derive_notification_keys(
-            filtered_params, event_schema, config.notification_engine.type)
+            filtered_params, event_schema, config.notification_engine.type
+        )
         logger.debug(f"Keys generated {root}, {key}, {admin_key}")
 
         return key, root, admin_key
@@ -172,15 +179,13 @@ class NotificationManager:
 
         # retrieve the value
         kvs = engine.pull(key=key, prefix=False)
-        assert len(kvs) < 2, 'Error in retrieving value from key, more than one value returned'
+        assert len(kvs) < 2, "Error in retrieving value from key, more than one value returned"
         if len(kvs) == 0:
             logger.debug("No value returned")
         else:
             return kvs[0]["value"].decode()
 
-    def notify(self,
-               notification: Dict,
-               config: user_config.UserConfig = None) -> bool:
+    def notify(self, notification: Dict, config: user_config.UserConfig = None) -> bool:
         """
         Send a notification to the server. The notification is made of a key-value pair created using the params passed
         and a status that is sent to the base key. This is needed for the catchup feature.
@@ -193,7 +198,7 @@ class NotificationManager:
         # first check the config
         if config is None:
             config = user_config.UserConfig()
-            
+
         # retrieve listener schema
         logger.debug("Getting schema...")
         listener_schema = config.schema_parser.parser().load(config)
@@ -233,11 +238,8 @@ class NotificationManager:
         logger.debug(f"Submit key {key}, value {value} with status update")
         kvs = [{"key": key, "value": value}]
         engine.push_with_status(
-            kvs,
-            base_key=base_key,
-            admin_key=admin_key,
-            message=f"notification to key {key}",
-            ttl=ttl)
+            kvs, base_key=base_key, admin_key=admin_key, message=f"notification to key {key}", ttl=ttl
+        )
 
         return True
 

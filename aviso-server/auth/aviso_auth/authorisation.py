@@ -10,14 +10,19 @@ import base64
 
 import requests
 from aviso_monitoring.collector.time_collector import TimeCollector
+from aviso_monitoring.reporter.aviso_auth_reporter import AvisoAuthMetricType
 from requests.auth import HTTPBasicAuth
 
 from . import logger
-from .custom_exceptions import InternalSystemError, InvalidInputError
+from .custom_exceptions import (
+    AuthorisationUnavailableException,
+    InternalSystemError,
+    InvalidInputError,
+    UserNotFoundException,
+)
 
 
 class Authoriser:
-
     def __init__(self, config, cache=None):
         auth_conf = config.authorisation_server
         self.url = auth_conf["url"]
@@ -30,13 +35,16 @@ class Authoriser:
         # assign explicitly a decorator to provide cache for _allowed_destinations
         if cache:
             self._allowed_destinations = cache.memoize(timeout=auth_conf["cache_timeout"])(
-                self._allowed_destinations_impl)
+                self._allowed_destinations_impl
+            )
         else:
             self._allowed_destinations = self._allowed_destinations_impl
 
         # assign explicitly a decorator to monitor the authorisation
         if auth_conf["monitor"]:
-            self.timer = TimeCollector(config.monitoring, name="ats")
+            self.timer = TimeCollector(
+                config.monitoring, tlm_type=AvisoAuthMetricType.auth_resp_time.name, tlm_name="ats"
+            )
             self.is_authorised = self.timed_is_authorised
         else:
             self.is_authorised = self.is_authorised_impl
@@ -54,26 +62,60 @@ class Authoriser:
         :param username:
         :return:
         - the list of allowed destinations associated to this username if valid
+        - UserNotFoundException if the user is not registred in ECPDS
+        - AuthorisationUnavailableException if the ECPDS server is unreachable
         - InternalSystemError otherwise
         """
         logger.debug(f"Request allowed destinations for username {username}")
         try:
-            resp = requests.get(self.url, params={"id": username}, timeout=self.req_timeout,
-                                auth=HTTPBasicAuth(self.username, self.password))
+            resp = requests.get(
+                self.url,
+                params={"id": username},
+                timeout=self.req_timeout,
+                auth=HTTPBasicAuth(self.username, self.password),
+            )
+            # raise an error for http cases
+            resp.raise_for_status()
+        except requests.exceptions.HTTPError as errh:
+            message = f"Not able to retrieve destinations for {username} from {self.url}, {str(errh)}"
+            if resp.status_code == 408 or (resp.status_code >= 500 and resp.status_code < 600):
+                logger.warning(message)
+                raise AuthorisationUnavailableException(f"Error in retrieving destinations for {username}")
+            else:
+                logger.error(message)
+                raise InternalSystemError(
+                    f"Error in retrieving destinations for {username}, please contact the support team"
+                )
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as err:
+            logger.warning(f"Not able to retrieve destinations for {username} from {self.url}, {str(err)}")
+            raise AuthorisationUnavailableException(f"Error in retrieving destinations for {username}")
         except Exception as e:
             logger.exception(e)
-            raise InternalSystemError(f'Error in retrieving destinations for {username}')
+            raise InternalSystemError(
+                f"Error in retrieving destinations for {username}, please contact the support team"
+            )
 
+        # just in case requests does not always raise an error
         if resp.status_code != 200:
-            logger.error(f'Not able to retrieve destinations for {username} from {self.url}, '
-                         f'status {resp.status_code}, {resp.reason}, {resp.content.decode()}')
-            raise InternalSystemError(f'Error in retrieving destinations for {username}')
+            message = f"Not able to retrieve destinations for {username} from {self.url}, \
+                status {resp.status_code}, {resp.reason}, {resp.content.decode()}"
+            logger.error(message)
+            raise InternalSystemError(
+                f"Error in retrieving destinations for {username}, please contact the support team"
+            )
 
         resp_body = resp.json()
         if resp_body.get("success") != "yes":
-            logger.error(f'Error in retrieving destinations for {username} from {self.url}, '
-                         f'error {resp_body.get("error")}')
-            raise InternalSystemError(f'Error in retrieving destinations for {username}')
+            logger.error(
+                f"Error in retrieving destinations for {username} from {self.url}, " f'error {resp_body.get("error")}'
+            )
+            message = f"Error in retrieving destinations for {username}"
+            if f"User {username} not found" in resp_body.get("error"):
+                message += f', {resp_body.get("error")}'
+                raise UserNotFoundException(message)
+            else:
+                message += ", please contact the support team"
+                raise InternalSystemError(message)
 
         destinations = []
         if resp_body.get("destinationList"):
@@ -90,6 +132,8 @@ class Authoriser:
         :return:
         - True if authorised
         - False if not authorised
+        - UserNotFoundException if the user is not registred in ECPDS
+        - AuthorisationUnavailableException if the ECPDS server is unreachable
         - InternalSystemError otherwise
         """
         # we expect only JSON body
@@ -116,6 +160,8 @@ class Authoriser:
         :return:
         - True if authorised
         - False if not authorised
+        - UserNotFoundException if the user is not registred in ECPDS
+        - AuthorisationUnavailableException if the ECPDS server is unreachable
         - InternalSystemError otherwise
         """
         # first check if we are accessing to a open key space, open to everyone

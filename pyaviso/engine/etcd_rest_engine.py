@@ -1,5 +1,5 @@
 # (C) Copyright 1996- ECMWF.
-# 
+#
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -9,16 +9,17 @@
 import base64
 import http.client
 import logging
-from typing import List, Dict
+import time
+from typing import Dict, List
 
 import requests
 
-from .etcd_engine import EtcdEngine, MAX_KV_RETURNED
 from .. import logger
 from ..authentication.auth import Auth
 from ..authentication.etcd_auth import EtcdAuth
 from ..custom_exceptions import EngineException, EngineHistoryNotAvailableError
 from ..user_config import EngineConfig
+from .etcd_engine import MAX_KV_RETURNED, EtcdEngine
 
 
 class EtcdRestEngine(EtcdEngine):
@@ -35,12 +36,15 @@ class EtcdRestEngine(EtcdEngine):
         else:
             self._base_url = f"http://{self._host}:{self._port}/v3/"
 
-    def pull(self, key: str,
-             key_only: bool = False,
-             rev: int = None,
-             prefix: bool = True,
-             min_rev: int = None,
-             max_rev: int = None) -> List[Dict[str, any]]:
+    def pull(
+        self,
+        key: str,
+        key_only: bool = False,
+        rev: int = None,
+        prefix: bool = True,
+        min_rev: int = None,
+        max_rev: int = None,
+    ) -> List[Dict[str, any]]:
         """
         This method implements a query to the notification server for all the key-values associated to the key as input.
         This key by default is a prefix, it can therefore return a set of key-values
@@ -78,26 +82,50 @@ class EtcdRestEngine(EtcdEngine):
             "keys_only": key_only,
             "revision": rev,
             "min_mod_revision": min_rev,
-            "max_mod_revision": max_rev
+            "max_mod_revision": max_rev,
         }
         # make the call
         logger.debug(f"Pull request: {body}")
-        resp = requests.post(url, json=body, headers=self.auth.header(), timeout=self.timeout)
 
-        # check response
-        if resp.status_code == 400 and ("History not available" in resp.content.decode() or
-                                        "required revision has been compacted" in resp.content.decode()):
-            raise EngineHistoryNotAvailableError()
-        elif resp.status_code != 200:
-            raise EngineException(f'Not able to pull key {key}, status {resp.status_code}, {resp.reason}, '
-                                  f'{resp.content.decode()}')
+        # start an infinite loop of request if the server side is unreachable
+        while True:
+            try:
+                resp = requests.post(url, json=body, headers=self.auth.header(), timeout=self.timeout)
+                resp.raise_for_status()
+            except requests.exceptions.HTTPError as err:
+                if resp.status_code == 408 or (resp.status_code >= 500 and resp.status_code < 600):
+                    logger.warning(f"Unable to connect to {url}, trying again in {self.automatic_retry_delay}s...")
+                    logger.debug(f"Not able to pull key {key}, {str(err)}, trying again...")
+                    time.sleep(self.automatic_retry_delay)
+                    continue
+                elif resp.status_code == 400 and (
+                    "History not available" in resp.content.decode()
+                    or "required revision has been compacted" in resp.content.decode()
+                ):
+                    raise EngineHistoryNotAvailableError()
+                else:
+                    raise EngineException(f"Not able to pull key {key}, {str(err)}")
+            except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as err:
+                logger.warning(f"Unable to connect to {url}, trying again in {self.automatic_retry_delay}s...")
+                logger.debug(f"Not able to pull key {key}, {str(err)}, trying again...")
+                time.sleep(self.automatic_retry_delay)
+                continue
+            except Exception as e:
+                logger.exception(e)
+                raise EngineException(
+                    f"Not able to pull key {key}, status {resp.status_code}, {resp.reason}, " f"{resp.content.decode()}"
+                )
+
+            # we got a good responce, exit from the loop
+            break
+
         logger.debug(f"Query for {key} completed")
 
         # parse the result to return just key-value pairs
         new_kvs: List[Dict[str, bytes]] = []
         resp_body = resp.json()
-        if 'kvs' in resp_body:
-            logger.debug(f"Building key-value list")
+        if "kvs" in resp_body:
+            logger.debug("Building key-value list")
             for kv in resp_body["kvs"]:
                 new_kv = self._parse_raw_kv(kv, key_only)
                 new_kvs.append(new_kv)
@@ -130,23 +158,22 @@ class EtcdRestEngine(EtcdEngine):
         encoded_key = self._encode_to_str_base64(key)
 
         # create the body for the delete range
-        body = {
-            "key": encoded_key,
-            "range_end": range_end,
-            "prev_kv": True
-        }
+        body = {"key": encoded_key, "range_end": range_end, "prev_kv": True}
         # make the call
         logger.debug(f"Deleting key range associated to key {key}")
-        resp = requests.post(url, json=body, headers=self.auth.header(), timeout=self.timeout)
-        assert resp.status_code == 200, f'Not able to delete key {key}, status {resp.status_code}, {resp.reason}, ' \
-            f'{resp.content.decode()}'
+        try:
+            resp = requests.post(url, json=body, headers=self.auth.header(), timeout=self.timeout)
+            resp.raise_for_status()
+        except Exception as err:
+            raise EngineException(f"Not able to delete key {key}, {str(err)}")
+
         logger.debug(f"Delete request for key {key} completed")
 
         # parse the result to return just key-value pairs of what has been deleted
         del_kvs: List[Dict[str, bytes]] = []
         resp_body = resp.json()
-        if 'prev_kvs' in resp_body:
-            logger.debug(f"Building key-value list")
+        if "prev_kvs" in resp_body:
+            logger.debug("Building key-value list")
             for kv in resp_body["prev_kvs"]:
                 new_kv = self._parse_raw_kv(kv)
                 del_kvs.append(new_kv)
@@ -154,10 +181,7 @@ class EtcdRestEngine(EtcdEngine):
 
         return del_kvs
 
-    def push(self,
-             kvs: List[Dict[str, any]],
-             ks_delete: List[str] = None,
-             ttl: int = None) -> bool:
+    def push(self, kvs: List[Dict[str, any]], ks_delete: List[str] = None, ttl: int = None) -> bool:
         """
         Method to submit a list of key-value pairs and delete a list of keys from the server as a single transaction
         :param kvs: List of KV pair
@@ -165,7 +189,7 @@ class EtcdRestEngine(EtcdEngine):
         :param ttl: time to leave of the keys pushed, once expired the keys will be deleted
         :return: True if successful
         """
-        logger.debug(f"Calling push...")
+        logger.debug("Calling push...")
         url = self._base_url + "kv/txn"
 
         # first authenticate and use the token for the header
@@ -173,12 +197,9 @@ class EtcdRestEngine(EtcdEngine):
 
         # check if we need to request a lease for the ttl
         if ttl:
-            try:
-                lease = self._lease(ttl)
-            except EngineException:
-                raise EngineException("Not able to push keys")
+            lease = self._lease(ttl)
 
-        logger.debug(f"Preparing the transaction statement")
+        logger.debug("Preparing the transaction statement")
         ops = []
         # first delete the keys requested
         if ks_delete is not None and len(ks_delete) != 0:
@@ -195,20 +216,22 @@ class EtcdRestEngine(EtcdEngine):
             v = self._encode_to_str_base64(kv["value"])
             put = {"requestPut": {"key": k, "value": v}}
             if ttl:
-                # noinspection PyUnboundLocalVariable
                 put["requestPut"]["lease"] = lease
             ops.append(put)
 
         body = {"success": ops}
         # commit transaction
-        logger.debug(f"Committing the transaction statement: {body}")
-        resp = requests.post(url, json=body, headers=self.auth.header(), timeout=self.timeout)
-        assert resp.status_code == 200, f'Not able to execute the transaction, status {resp.status_code}, ' \
-            f'{resp.reason}, {resp.content.decode()}'
-        logger.debug(f"Transaction completed")
+        # logger.debug(f"Committing the transaction statement: {body}")
+        try:
+            resp = requests.post(url, json=body, headers=self.auth.header(), timeout=self.timeout)
+            resp.raise_for_status()
+        except Exception as err:
+            raise EngineException(f"Not able to execute the transaction, {str(err)}")
+
+        logger.debug("Transaction completed")
         resp_body = resp.json()
         # read the header
-        if 'header' in resp_body:
+        if "header" in resp_body:
             h = resp_body["header"]
             rev = int(h["revision"])
             logger.debug(f"New server revision {rev}")
@@ -221,18 +244,19 @@ class EtcdRestEngine(EtcdEngine):
         :return: True if successfully authenticated
         """
         if type(self.auth) == EtcdAuth:
-            logger.debug(f'Authenticating user {self.auth.username}...')
+            logger.debug(f"Authenticating user {self.auth.username}...")
 
             url = self._base_url + "auth/authenticate"
             body = {"name": self.auth.username, "password": self.auth.password}
-
-            resp = requests.post(url, json=body, headers=self.auth.header(), timeout=self.timeout)
-            if resp.status_code != 200:
-                raise EngineException(f'Not able to authenticate {self.auth.username}, status {resp.status_code}')
-            assert resp.json().get("token") is not None, f'No token found in authentication response'
+            try:
+                resp = requests.post(url, json=body, headers=self.auth.header(), timeout=self.timeout)
+                resp.raise_for_status()
+            except Exception as err:
+                raise EngineException(f"Not able to authenticate {self.auth.username}, {str(err)}")
+            assert resp.json().get("token") is not None, "No token found in authentication response"
             self.auth.token = resp.json()["token"]
 
-            logger.debug(f'User {self.auth.username} successfully authenticated')
+            logger.debug(f"User {self.auth.username} successfully authenticated")
 
         return True
 
@@ -241,7 +265,7 @@ class EtcdRestEngine(EtcdEngine):
         :param: key used for the server request
         :return: latest revision of the notification server.
         """
-        logger.debug(f"Querying notification server for latest revision")
+        logger.debug("Querying notification server for latest revision")
 
         url = self._base_url + "kv/range"
 
@@ -250,18 +274,39 @@ class EtcdRestEngine(EtcdEngine):
 
         # we need just the header back from the server
         encoded_key = self._encode_to_str_base64(key)
-        body = {
-            "key": encoded_key,
-            "keys_only": True
-        }
+        body = {"key": encoded_key, "keys_only": True}
         # make the call
-        resp = requests.post(url, json=body, headers=self.auth.header(), timeout=self.timeout)
-        assert resp.status_code == 200, f'Not able to request latest revision, status {resp.status_code}, ' \
-            f'{resp.reason}, {resp.content.decode()}'
-        logger.debug(f"Query for latest revision completed")
+        while True:
+            try:
+                resp = requests.post(url, json=body, headers=self.auth.header(), timeout=self.timeout)
+                resp.raise_for_status()
+            except requests.exceptions.HTTPError as err:
+                if resp.status_code == 408 or (resp.status_code >= 500 and resp.status_code < 600):
+                    logger.warning(f"Unable to connect to {url}, trying again in {self.automatic_retry_delay}s...")
+                    logger.debug(f"Not able to request latest revision, {str(err)}, trying again...")
+                    time.sleep(self.automatic_retry_delay)
+                    continue
+                else:
+                    raise EngineException(f"Not able to request latest revision, {str(err)}")
+            except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as err:
+                logger.warning(f"Unable to connect to {url}, trying again in {self.automatic_retry_delay}s...")
+                logger.debug(f"Not able to request latest revision, {str(err)}, trying again...")
+                time.sleep(self.automatic_retry_delay)
+                continue
+            except Exception as e:
+                logger.exception(e)
+                raise EngineException(
+                    f"Not able to request latest revision, status {resp.status_code}, {resp.reason}, "
+                    f"{resp.content.decode()}"
+                )
+
+            # we got a good responce, exit from the loop
+            break
+
+        logger.debug("Query for latest revision completed")
         resp_body = resp.json()
         # read the header
-        if 'header' in resp_body:
+        if "header" in resp_body:
             h = resp_body["header"]
             rev = int(h["revision"])
         else:
@@ -283,22 +328,20 @@ class EtcdRestEngine(EtcdEngine):
         self._authenticate()
 
         # create the request body
-        body = {
-            "TTL": ttl,
-            "ID": 0
-        }
+        body = {"TTL": ttl, "ID": 0}
 
         # make the call
-        resp = requests.post(url, json=body, headers=self.auth.header(), timeout=self.timeout)
+        try:
+            resp = requests.post(url, json=body, headers=self.auth.header(), timeout=self.timeout)
+            resp.raise_for_status()
+        except Exception as err:
+            raise EngineException(f"Not able to request a lease, {str(err)}")
 
-        # check response
-        assert resp.status_code == 200, f'Not able to request a lease, status {resp.status_code}, ' \
-            f'{resp.reason}, {resp.content.decode()}'
-        logger.debug(f"Lease request completed")
+        logger.debug("Lease request completed")
         resp_body = resp.json()
         if "ID" in resp_body:
             logger.debug(f"Lease {resp_body.get('ID')} acquired")
-            return resp_body.get('ID')
+            return resp_body.get("ID")
         else:
             logger.error(f"Not able to read lease id from {resp_body}")
             raise EngineException("Not able to acquire lease")
@@ -313,11 +356,11 @@ class EtcdRestEngine(EtcdEngine):
         """
         new_kv = {}
         if not key_only:
-            new_kv['value'] = self._decode_to_bytes(kv["value"])  # leave it as binary
-        new_kv['key'] = self._decode_to_bytes(kv["key"]).decode()
-        new_kv['version'] = int(kv["version"])
-        new_kv['create_rev'] = int(kv["create_revision"])
-        new_kv['mod_rev'] = int(kv["mod_revision"])
+            new_kv["value"] = self._decode_to_bytes(kv["value"])  # leave it as binary
+        new_kv["key"] = self._decode_to_bytes(kv["key"]).decode()
+        new_kv["version"] = int(kv["version"])
+        new_kv["create_rev"] = int(kv["create_revision"])
+        new_kv["mod_rev"] = int(kv["mod_revision"])
         return new_kv
 
     def _encode_to_str_base64(self, obj: any) -> str:
@@ -352,7 +395,10 @@ httpclient_logger = logging.getLogger("http.client")
 
 
 def httpclient_log(*args):
-    httpclient_logger.log(logging.DEBUG, " ".join(args))
+    to_be_logged = " ".join(args)
+    if len(to_be_logged) > 1000:
+        to_be_logged = to_be_logged[:1000]
+    httpclient_logger.log(logging.DEBUG, to_be_logged)
 
 
 # mask the print() built-in in the http.client module to use logging instead

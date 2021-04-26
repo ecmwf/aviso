@@ -1,7 +1,6 @@
 .*
 !.gitignore
-!.dockerignore
-venvDev*/*
+!.github
 __pycache*
 htmlcov
 pyaviso.egg-info/*

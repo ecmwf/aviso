@@ -1,5 +1,5 @@
 # (C) Copyright 1996- ECMWF.
-# 
+#
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -19,12 +19,15 @@ class Config:
     which can be defined by arguments, environment variables or defaults.
     """
 
-    def __init__(self,
-                 udp_server=None,
-                 monitor_server=None,
-                 aviso_rest_reporter=None,
-                 aviso_auth_reporter=None,
-                 etcd_reporter=None):
+    def __init__(
+        self,
+        udp_server=None,
+        monitor_servers=None,
+        aviso_rest_reporter=None,
+        aviso_auth_reporter=None,
+        etcd_reporter=None,
+        prometheus_reporter=None,
+    ):
 
         try:
             # we build the configuration in priority order from the lower to the higher
@@ -34,12 +37,13 @@ class Config:
             Config.deep_update(self._config, self._read_env_variables())
             # add constructor parameters
             self.udp_server = udp_server
-            self.monitor_server = monitor_server
+            self.monitor_servers = monitor_servers
             self.aviso_rest_reporter = aviso_rest_reporter
             self.aviso_auth_reporter = aviso_auth_reporter
             self.etcd_reporter = etcd_reporter
+            self.prometheus_reporter = prometheus_reporter
 
-            logger.debug(f"Loading configuration completed")
+            logger.debug("Loading configuration completed")
 
         except Exception as e:
             logger.error(f"Error occurred while setting the configuration, exception: {type(e)} {e}")
@@ -49,52 +53,76 @@ class Config:
     @staticmethod
     def _create_default_config() -> Dict:
 
-        udp_server = {
-            "host": "127.0.0.1",
-            "port": 1111,
-            "buffer_size": 64 * 1024
-        }
-        # this are the setting for sending the telemetry to a monitoring server like Opsview
-        monitor_server = {
-            "url": "https://localhost",
-            "username": "TBD",
-            "password": "TBD",
-            "service_host": "aviso",
-            "req_timeout": 60,  # seconds
+        udp_server = {"host": "127.0.0.1", "port": 1111, "buffer_size": 64 * 1024}
 
-        }
+        # this are the setting for sending the telemetry to a monitoring server like Opsview
+        monitor_servers = [
+            {
+                "url": "https://localhost",
+                "username": "TBD",
+                "password": "TBD",
+                "service_host": "aviso",
+            }
+        ]
+
         aviso_rest_reporter = {
-            "tlm_type": "rest_resp_time",
             "enabled": False,
-            "frequency": 1,  # in minutes
-            "warning_t": 10,  # s
-            "critical_t": 20,  # s
+            "frequency": 1,  # min
+            "tlms": {
+                "rest_resp_time": {
+                    "warning_t": 10,  # s
+                    "critical_t": 20,  # s
+                },
+                "rest_pod_available": {
+                    "warning_t": 2,  # pods
+                    "critical_t": 1,  # pods
+                    "req_timeout": 60,
+                    "metric_server_url": None,
+                },
+                "rest_error_log": {},
+            },
         }
 
         aviso_auth_reporter = {
-            "tlm_type": "auth_resp_time",
             "enabled": False,
             "frequency": 1,  # in minutes
-            "warning_t": 10,  # s
-            "critical_t": 20,  # s
-            "sub_tlms": []
+            "tlms": {
+                "auth_resp_time": {"warning_t": 10, "critical_t": 20, "sub_tlms": []},  # s  # s
+                "auth_pod_available": {
+                    "warning_t": 2,  # pods
+                    "critical_t": 1,  # pods
+                    "req_timeout": 60,
+                    "metric_server_url": None,
+                },
+                "auth_error_log": {},
+            },
         }
 
         etcd_reporter = {
             "enabled": False,
-            "frequency": 5,  # in minutes
+            "frequency": 5,  # min
             "member_urls": ["http://localhost:2379"],
-            "tlm_type": ["etcd_store_size", "etcd_cluster_status", "etcd_total_keys"],
-            "req_timeout": 60,  # seconds
+            "req_timeout": 60,  # s
+            "tlms": {"etcd_store_size": {}, "etcd_cluster_status": {}, "etcd_error_log": {}},
+        }
+
+        prometheus_reporter = {
+            "enabled": False,
+            "host": "127.0.0.1",
+            "port": 8080,
+            "tlms": {
+                "auth_users_counter": {"retention_window": 24},  # h
+            },
         }
 
         # main config
         config = {}
         config["udp_server"] = udp_server
-        config["monitor_server"] = monitor_server
+        config["monitor_servers"] = monitor_servers
         config["aviso_rest_reporter"] = aviso_rest_reporter
         config["aviso_auth_reporter"] = aviso_auth_reporter
         config["etcd_reporter"] = etcd_reporter
+        config["prometheus_reporter"] = prometheus_reporter
         return config
 
     def _read_env_variables(self) -> Dict:
@@ -121,24 +149,22 @@ class Config:
         self._udp_server = u
 
     @property
-    def monitor_server(self):
-        return self._monitor_server
+    def monitor_servers(self):
+        return self._monitor_servers
 
-    @monitor_server.setter
-    def monitor_server(self, monitor_server):
-        m = self._config.get("monitor_server")
-        if monitor_server is not None and m is not None:
-            Config.deep_update(m, monitor_server)
-        elif monitor_server is not None:
-            m = monitor_server
+    @monitor_servers.setter
+    def monitor_servers(self, monitor_servers):
+        m = self._config.get("monitor_servers")
+        if monitor_servers is not None:
+            m = monitor_servers
         # verify is valid
-        assert m is not None, "monitor_server has not been configured"
-        assert m.get("url") is not None, "monitor_server url has not been configured"
-        assert m.get("username") is not None, "monitor_server username has not been configured"
-        assert m.get("password") is not None, "monitor_server password has not been configured"
-        assert m.get("service_host") is not None, "monitor_server service_host has not been configured"
-        assert m.get("req_timeout") is not None, "monitor_server req_timeout has not been configured"
-        self._monitor_server = m
+        assert m is not None, "monitor_servers has not been configured"
+        for server in m:
+            assert server.get("url") is not None, "monitor_server url has not been configured"
+            assert server.get("username") is not None, "monitor_server username has not been configured"
+            assert server.get("password") is not None, "monitor_server password has not been configured"
+            assert server.get("service_host") is not None, "monitor_server service_host has not been configured"
+        self._monitor_servers = m
 
     @property
     def aviso_rest_reporter(self):
@@ -153,11 +179,11 @@ class Config:
             ar = aviso_rest_reporter
         # verify is valid
         assert ar is not None, "aviso_rest_reporter has not been configured"
-        assert ar.get("tlm_type") is not None, "aviso_rest_reporter tlm_type has not been configured"
+        assert ar.get("tlms") is not None, "aviso_rest_reporter tlms has not been configured"
         assert ar.get("enabled") is not None, "aviso_rest_reporter enabled has not been configured"
+        if type(ar["enabled"]) is str:
+            ar["enabled"] = ar["enabled"].casefold() == "true".casefold()
         assert ar.get("frequency") is not None, "aviso_rest_reporter frequency has not been configured"
-        assert ar.get("warning_t") is not None, "aviso_rest_reporter warning_t has not been configured"
-        assert ar.get("critical_t") is not None, "aviso_rest_reporter critical_t has not been configured"
         self._aviso_rest_reporter = ar
 
     @property
@@ -173,11 +199,11 @@ class Config:
             aa = aviso_auth_reporter
         # verify is valid
         assert aa is not None, "aviso_auth_reporter has not been configured"
-        assert aa.get("tlm_type") is not None, "aviso_auth_reporter tlm_type has not been configured"
+        assert aa.get("tlms") is not None, "aviso_auth_reporter tlms has not been configured"
         assert aa.get("enabled") is not None, "aviso_auth_reporter enabled has not been configured"
+        if type(aa["enabled"]) is str:
+            aa["enabled"] = aa["enabled"].casefold() == "true".casefold()
         assert aa.get("frequency") is not None, "aviso_auth_reporter frequency has not been configured"
-        assert aa.get("warning_t") is not None, "aviso_auth_reporter warning_t has not been configured"
-        assert aa.get("critical_t") is not None, "aviso_auth_reporter critical_t has not been configured"
         self._aviso_auth_reporter = aa
 
     @property
@@ -193,20 +219,43 @@ class Config:
             e = etcd_reporter
         # verify is valid
         assert e is not None, "etcd_reporter has not been configured"
-        assert e.get("tlm_type") is not None, "etcd_reporter tlm_type has not been configured"
+        assert e.get("tlms") is not None, "etcd_reporter tlms has not been configured"
         assert e.get("enabled") is not None, "etcd_reporter enabled has not been configured"
+        if type(e["enabled"]) is str:
+            e["enabled"] = e["enabled"].casefold() == "true".casefold()
         assert e.get("frequency") is not None, "etcd_reporter frequency has not been configured"
         assert e.get("member_urls") is not None, "etcd_reporter member_urls has not been configured"
         assert e.get("req_timeout") is not None, "etcd_reporter req_timeout has not been configured"
         self._etcd_reporter = e
 
+    @property
+    def prometheus_reporter(self):
+        return self._prometheus_reporter
+
+    @prometheus_reporter.setter
+    def prometheus_reporter(self, prometheus_reporter):
+        pr = self._config.get("prometheus_reporter")
+        if prometheus_reporter is not None and pr is not None:
+            Config.deep_update(pr, prometheus_reporter)
+        elif prometheus_reporter is not None:
+            pr = prometheus_reporter
+        # verify is valid
+        assert pr is not None, "prometheus_reporter has not been configured"
+        assert pr.get("host") is not None, "prometheus_reporter host has not been configured"
+        assert pr.get("enabled") is not None, "prometheus_reporter enabled has not been configured"
+        if type(pr["enabled"]) is str:
+            pr["enabled"] = pr["enabled"].casefold() == "true".casefold()
+        assert pr.get("port") is not None, "prometheus_reporter port has not been configured"
+        self._prometheus_reporter = pr
+
     def __str__(self):
         config_string = (
-                f"udp_server: {self.udp_server}" +
-                f", monitor_server: {self.monitor_server}" +
-                f", aviso_rest_reporter: {self.aviso_rest_reporter}" +
-                f", aviso_auth_reporter: {self.aviso_auth_reporter}" +
-                f", etcd_reporter: {self.etcd_reporter}"
+            f"udp_server: {self.udp_server}"
+            + f", monitor_servers: {self.monitor_servers}"
+            + f", aviso_rest_reporter: {self.aviso_rest_reporter}"
+            + f", aviso_auth_reporter: {self.aviso_auth_reporter}"
+            + f", etcd_reporter: {self.etcd_reporter}"
+            + f", prometheus_reporter: {self.prometheus_reporter}"
         )
         return config_string
 

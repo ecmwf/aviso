@@ -6,7 +6,7 @@ listeners:
       - type: post
         protocol: 
           type: cloudevents
-          url: http://127.0.0.1:8001/test
+          url: http://127.0.0.1:8051/test
           headers:
             X-TEST: "test"
           timeout: 30

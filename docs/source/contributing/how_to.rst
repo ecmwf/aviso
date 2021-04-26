@@ -15,17 +15,39 @@ Below a few steps to guide the development:
 
     git clone https://github.com/ecmwf/aviso.git
 
-* Install Aviso following :ref:`getting_started` and then install development dependencies::
+* Install pyaviso for development, from inside the main aviso folder::
+
+    pip install -e .
+
+* Install development dependencies::
 
     pip install -U -r tests/requirements-dev.txt
 
-* Unit tests can be run with `pytest <https://pytest.org>`_ with::
+* Unit and system tests for pyaviso can be run with `pytest <https://pytest.org>`_ with::
 
-    pytest -v --cov=pyaviso --cov-report=html --cache-clear
+    pytest tests -v --cov=pyaviso --cache-clear
 
-* Coverage can be checked opening in a browser the file ``htmlcov/index.html`` . Without the option ``--cov-report=html`` it will be printed to the console output. Please ensure the coverage at least stays the same before you submit a pull request.
+* Ensure to comply with PEP8 code quality::
+    
+    tox -e quality
 
-* Please ensure to comply with PEP8 code quality 
+.. note::
+
+    In order to run the tests, an instance of etcd has to run on ``127.0.0.1/2379`` with default configurations. 
+    Please check :ref:`getting_started` for more info on how to install it.
+
+To develop on the Aviso server components:
+
+* Install the following module::
+  
+    pip install -e aviso-server/monitoring
+    pip install -e aviso-server/rest
+    pip install -e aviso-server/auth
+    pip install -e aviso-server/admin
+
+* Before submitting a pull request run all tests and code quality check::
+
+    tox
 
 
 

@@ -1,0 +1,8 @@
+listeners:
+  - event: flight
+    request:
+      country: [Italy, Germany]
+    triggers:
+      - type: command
+        working_dir: tests/system/fixtures
+        command: ./not_to_file.sh
