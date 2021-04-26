@@ -290,13 +290,3 @@ def test_notify_missing_params(conf):
 
     assert result.exit_code == 2
     assert "Missing argument" in result.output
-
-
-def test_notify_bad_server(conf):
-    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
-    runner = CliRunner()
-    result = runner.invoke(
-        notify, ["event=flight,country=Italy,airport=fco,date=20210101,number=AZ203,payload=Landed", "-Hhost"]
-    )
-
-    assert result.exit_code == -1
