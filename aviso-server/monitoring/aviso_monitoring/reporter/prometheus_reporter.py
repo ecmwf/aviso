@@ -159,8 +159,8 @@ class UsersCounter:
         Returns:
             str: metric
         """
-        metric = "# HELP aviso_auth_users Number of users in the last 24 hours\n# TYPE aviso_auth_users\
-         gauge\naviso_auth_users "
+        metric = "# HELP aviso_auth_users Number of users in the last 24 hours\n"
+        metric += "# TYPE aviso_auth_users gauge\naviso_auth_users "
         if tlm:
             users_count = tlm.get(self.metric_name + "_counter")
             metric += f"{users_count}\n"

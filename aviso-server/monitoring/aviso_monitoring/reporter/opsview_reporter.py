@@ -60,8 +60,7 @@ class OpsviewReporter(ABC):
             "X-Opsview-Username": f"{m_server['username']}",
             "X-Opsview-Token": token,
         }
-        url = f"{m_server['url']}/detail?hostname={m_server['service_host']}&servicename=Passive Check: \
-            {metric.get('name')}"
+        url = f"{m_server['url']}/detail?hostname={m_server['service_host']}&servicename=Passive Check: {metric.get('name')}"  # noqa: E501
         data = {
             "passive_checks": {"enabled": 1},
             "set_state": {"result": metric.get("status"), "output": f"{metric.get('message')} "},
