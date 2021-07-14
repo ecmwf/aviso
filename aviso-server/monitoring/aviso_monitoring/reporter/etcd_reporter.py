@@ -281,6 +281,12 @@ class ErrorLog(EtcdChecker):
             # select warnings and errors
             warns = list(filter(lambda log: ("warn" in log), new_errs))
             errs = list(filter(lambda log: ("error" in log), new_errs))
+            fatals = list(filter(lambda log: ("fatal" in log), new_errs))
+            panics = list(filter(lambda log: ("panic" in log), new_errs))
+
+            # put together the worst errors
+            errs += fatals
+            errs += panics
 
             if len(errs):
                 status = 2

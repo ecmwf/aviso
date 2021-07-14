@@ -122,7 +122,8 @@ class Authenticator:
             raise InternalSystemError(f"Error in authenticating token {token}, please contact the support team")
         email = resp_body.get("email")
 
-        logger.debug(f"Token correctly validated with user {username}, email {email}")
+        logger.debug(f"Token correctly validated for user {username}, email {email}")
+        logger.info(f"Token correctly validated for user {username}")
         return username, email
 
     def wait_for_resp(self, token):
