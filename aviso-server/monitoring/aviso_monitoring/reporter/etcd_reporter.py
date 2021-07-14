@@ -155,7 +155,10 @@ class ClusterStatus(EtcdChecker):
         cluster_size = self.cluster_size(self.member_urls[0])  # any of the member should give the same info
         if cluster_size != len(self.member_urls):
             status = 2
-            message = f"Cluster size is {cluster_size}"
+            if cluster_size:
+                message = f"Cluster size is {cluster_size}"
+            else:
+                message = "Not able to get cluster info"
 
         if status == 0:
             # now check the health of each member
@@ -275,12 +278,9 @@ class ErrorLog(EtcdChecker):
         if len(new_errs):
             logger.debug(f"Processing {len(new_errs)} tlms {self.metric_name}...")
 
-            # replace the | with - Opsview does not like it otherwise
-            new_errs = list(map(lambda log: log.replace("|", "-"), new_errs))
-
             # select warnings and errors
-            warns = list(filter(lambda log: (" W " in log), new_errs))
-            errs = list(filter(lambda log: (" E " in log), new_errs))
+            warns = list(filter(lambda log: ("warn" in log), new_errs))
+            errs = list(filter(lambda log: ("error" in log), new_errs))
 
             if len(errs):
                 status = 2
