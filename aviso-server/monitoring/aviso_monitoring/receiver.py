@@ -10,7 +10,7 @@ import json
 
 from . import logger
 
-ETCD_APP_NAME = "etcd"
+ETCD_APP_NAME = "aviso-etcd"
 AVISO_AUTH_APP_NAME = "aviso-auth"
 AVISO_REST_APP_NAME = "aviso-rest"
 

@@ -30,6 +30,7 @@ class UdpServer(Thread):
         # Create a datagram socket
         self.server = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
         self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+        self.server.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 10000000)
         # Bind to address and ip
         try:
             self.server.bind((config.get("host"), config.get("port")))
