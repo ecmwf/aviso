@@ -36,8 +36,7 @@ class OpsviewReporter(ABC):
                 m_server["url"] + "/login", data=json.dumps(data), headers=headers, verify=False, timeout=60
             )
         except Exception as e:
-            logger.error("Not able to authenticate with monitoring server")
-            logger.exception(e)
+            logger.exception(f"Not able to authenticate with monitoring server, error {e}")
             return None
         if resp.status_code != 200:
             logger.error(
@@ -72,8 +71,7 @@ class OpsviewReporter(ABC):
         try:
             resp = requests.post(url, data=json.dumps(data), headers=headers, verify=False, timeout=60)
         except Exception as e:
-            logger.error("Not able to post metric")
-            logger.exception(e)
+            logger.exception(f"Not able to post metric, error {e}")
             return False
         if resp.status_code != 200:
             logger.error(
@@ -200,8 +198,7 @@ class OpsviewReporter(ABC):
             try:
                 resp = requests.get(url, verify=False, timeout=req_timeout)
             except Exception as e:
-                logger.error(f"Not able to get metrics from {url}")
-                logger.exception(e)
+                logger.exception(f"Not able to get metrics from {url}, error {e}")
                 raw_tlms[u] = None
                 continue
             if resp.status_code != 200:

@@ -97,8 +97,7 @@ class Frontend:
 
         @handler.errorhandler(Exception)
         def default_error_handler(e):
-            logging.exception(str(e))
-            logging.error(f"Request: {request.json}")
+            logger.exception(f"Request: {request.json} raised the following error: {e}")
             return (
                 json.dumps({"message": "Server error occurred", "details": str(e)}),
                 getattr(e, "code", 500),
@@ -163,7 +162,7 @@ class Frontend:
             }
             GunicornServer(self.handler, options).run()
         else:
-            logging.error(f"server_type {self.config.frontend['server_type']} not supported")
+            logger.error(f"server_type {self.config.frontend['server_type']} not supported")
             raise NotImplementedError
 
     def post_worker_init(self, worker):

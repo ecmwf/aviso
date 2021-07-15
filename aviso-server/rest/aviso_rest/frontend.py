@@ -64,7 +64,7 @@ class Frontend:
         # handler.register_blueprint(SWAGGERUI_BLUEPRINT, url_prefix=SWAGGER_URL)
 
         def bad_request(m):
-            logging.error(f"Request: {request.json}")
+            logger.error(f"Request: {request.json}")
             return json.dumps({"message": str(m)}), 400, {"Content-Type": "application/json"}
 
         def ok(m):
@@ -72,8 +72,7 @@ class Frontend:
 
         @handler.errorhandler(Exception)
         def default_error_handler(error):
-            logging.exception(str(error))
-            logging.error(f"Request: {request.json}")
+            logger.exception(f"Request: {request.json} raised the following error: {error}")
             return (
                 json.dumps({"message": "Server error occurred", "details": str(error)}),
                 getattr(error, "code", 500),
@@ -154,7 +153,7 @@ class Frontend:
             }
             GunicornServer(self.handler, options).run()
         else:
-            logging.error(f"server_type {self.config.server_type} not supported")
+            logger.error(f"server_type {self.config.server_type} not supported")
             raise NotImplementedError
 
     def _parse_cloud_event(self, req) -> Dict:

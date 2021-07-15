@@ -51,7 +51,7 @@ class PrometheusReporter(Thread):
 
         @handler.errorhandler(Exception)
         def default_error_handler(e):
-            logging.exception(str(e))
+            logger.exception(e)
             return json_response(e, 500)
 
         @handler.route("/metrics", methods=["GET"])

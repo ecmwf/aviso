@@ -9,7 +9,7 @@
 import logging
 
 # version number for the application.
-__version__ = "0.4.1"
+__version__ = "0.4.2"
 
 logger = logging.getLogger("aviso-monitoring")
 logger.setLevel(logging.DEBUG)

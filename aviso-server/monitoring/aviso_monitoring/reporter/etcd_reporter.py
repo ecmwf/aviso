@@ -198,8 +198,7 @@ class ClusterStatus(EtcdChecker):
         try:
             resp = requests.get(url, timeout=self.req_timeout)
         except Exception as e:
-            logger.error(f"Not able to get health on {url}")
-            logger.exception(e)
+            logger.exception(f"Not able to get health on {url}, error {e}")
             return False
         if resp.status_code != 200:
             logger.error(
@@ -221,8 +220,7 @@ class ClusterStatus(EtcdChecker):
         try:
             resp = requests.post(url, timeout=self.req_timeout)
         except Exception as e:
-            logger.error(f"Not able to get cluster info on {url}")
-            logger.exception(e)
+            logger.exception(f"Not able to get cluster info on {url}, error {e}")
             return False
         if resp.status_code != 200:
             logger.error(
