@@ -106,7 +106,7 @@ class Frontend:
 
         @handler.route(self.config.backend["route"], methods=["POST"])
         def root():
-            logger.info(f"New request received: {request.data}")
+            logger.info(f"New request received from {request.remote_addr}, content: {request.data}")
 
             resp_content = timed_process_request()
 
