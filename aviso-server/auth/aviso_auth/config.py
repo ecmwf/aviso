@@ -417,7 +417,8 @@ class HostnameFilter(logging.Filter):
         record.hostname = HostnameFilter.hostname
         return True
 
-# class to add a counter number to each log record to use it as id of the log record. Useful to check if any log got 
+
+# class to add a counter number to each log record to use it as id of the log record. Useful to check if any log got
 # lost. To avoid skipping ids it needs to be applied to one handler. Also it will be replicated for each worker.
 class CounterFilter(logging.Filter):
     logging_counter = 0
