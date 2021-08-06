@@ -85,7 +85,7 @@ class Authenticator:
             logger.debug(f"Emails not matching {auth_email.casefold()}, {email.casefold()}")
             raise TokenNotValidException("Invalid email associate to the token.")
 
-        logger.info(f"User {username} correctly authenticated, source ip: {request.remote_addr}")
+        logger.info(f"User {username} correctly authenticated, client IP: {request.headers.get('X-Forwarded-For')}")
         return username
 
     def _token_to_username_impl(self, token):
