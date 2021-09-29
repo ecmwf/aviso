@@ -164,6 +164,11 @@ class ErrorLog(AvisoAuthChecker):
         assert self.msg_receiver, "Msg receiver is None"
         new_errs = self.msg_receiver.extract_incoming_errors(AVISO_AUTH_APP_NAME)
 
+        # discard errors that are not related to the application
+        new_errs = list(
+            filter(lambda log: ("404 Not Found: The requested URL was not found on the server" not in log), new_errs)
+        )
+
         if len(new_errs):
             logger.debug(f"Processing {len(new_errs)} tlms {self.metric_name}...")
 

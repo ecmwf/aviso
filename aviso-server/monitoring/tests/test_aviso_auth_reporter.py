@@ -106,9 +106,16 @@ def receiver():
             "aviso-auth-green-7f6d59848f-cg6zv", "process": 49, "thread": 140428749499272, "name": "aviso-monitoring",\
                  "filename": "time_collector.py", "lineno": 38, "levelname": "ERROR", "message": "Time collected"}'
 
+    not_found_auth_log = '<187>1 2021-09-23T09:44:47.344845+00:00 aviso-auth-green-867855599d-vm86g aviso-auth 90 - \
+        [origin software="aviso"] \ufeff{"asctime": "2021-09-23 09:44:47,344", "hostname": "aviso-auth-green-867855599d\
+            -vm86g", "process": 90, "thread": 140502496553864, "name": "aviso-auth", "filename": "frontend.py", \
+                "lineno": 100, "levelname": "ERROR", "message": "Request: None raised the following error: 404 Not \
+                    Found: The requested URL was not found on the server. If you entered the URL manually please check \
+                        your spelling and try again.", "counter": 40988}'
+
     receiver = Receiver()
     receiver._incoming_tlms[time_type] = [time_tlm1, time_tlm2, time_tlm1t1, time_tlm2t1, time_tlm1t2, time_tlm2t2]
-    receiver._incoming_errors[AVISO_AUTH_APP_NAME] = [err_auth_log]
+    receiver._incoming_errors[AVISO_AUTH_APP_NAME] = [err_auth_log, not_found_auth_log]
     return receiver
 
 
@@ -128,4 +135,5 @@ def test_process_tlms():
     assert len(timer.get("metrics")) == 6
     assert len(list(filter(lambda m: m["m_value"] == 4, timer.get("metrics")))) == 1
     errors = list(filter(lambda m: m["name"] == "auth_error_log", metrics))[0]
+    assert "404 Not Found" not in errors["message"]
     assert errors["status"] == 2
