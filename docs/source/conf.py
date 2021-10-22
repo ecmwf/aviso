@@ -21,7 +21,7 @@ import sys
 top = os.path.realpath(os.path.dirname(os.path.dirname(__file__)))
 sys.path.insert(0, top)
 
-import pyaviso  # noqa: E402
+from pyaviso.version import __version__ as aviso_version  # noqa: E402
 
 source_suffix = ".rst"
 master_doc = "index"
@@ -42,7 +42,7 @@ else:
 copyright = "%s, ECMWF" % (years,)
 
 # The full version, including alpha/beta/rc tags
-release = pyaviso.__version__
+release = aviso_version
 
 
 # -- General configuration ---------------------------------------------------
@@ -83,5 +83,4 @@ html_theme = "sphinx_rtd_theme"
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
-
-html_context = {"css_files": ["_static/style.css"]}
+html_css_files = ["style.css"]
