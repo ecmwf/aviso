@@ -24,7 +24,8 @@ class ProtocolType(Enum):
     Enum for the various protocols accepted by the post triggers
     """
 
-    cloudevents = ("post_trigger", "PostCloudEvent")
+    cloudevents = ("post_trigger", "PostCloudEvents")
+    aws = ("post_trigger", "PostAwsEvent")
 
     def get_class(self):
         module = importlib.import_module("pyaviso.triggers." + self.value[0])
@@ -53,7 +54,7 @@ class PostTrigger(trigger.Trigger):
         logger.debug("Post Trigger completed")
 
 
-class PostCloudEvent:
+class PostCloudEvents:
     """
     This class implements a trigger in charge of translating the notification in a CloudEvents message and
     POST it to the URL specified by the user.
@@ -110,3 +111,63 @@ class PostCloudEvent:
             )
 
         logger.debug("CloudEvents notification sent successfully")
+
+
+class PostAwsEvent:
+    """
+    This class implements a trigger in charge of translating the notification in a AWS topic message and
+    POST it to the URL specified by the user.
+    This class expects the params to contain the URL where to send the message to. The remaining fields are optional.
+    """
+
+    TIMEOUT_DEFAULT = 60
+    TYPE_DEFAULT = "aviso"
+    SOURCE_DEFAULT = "https://aviso.ecmwf.int"
+
+    def __init__(self, notification: Dict, params: Dict):
+        self.notification = notification
+        assert params.get("url") is not None, "url is a mandatory field"
+        self.url = params.get("url")
+        self.timeout = params.get("timeout", self.TIMEOUT_DEFAULT)
+        self.headers = params.get("headers", {})
+
+        # aws topic specific fields
+        if params.get("aws"):
+            self.type = params.get("aws").get("type", self.TYPE_DEFAULT)
+            self.source = params.get("aws").get("source", self.SOURCE_DEFAULT)
+        else:
+            self.type = self.TYPE_DEFAULT
+            self.source = self.SOURCE_DEFAULT
+
+    def execute(self):
+
+        # prepare the AWS topic message
+
+        attributes = {
+            "type": self.type,
+            "source": self.source,
+            "time": datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+        }
+        data = self.notification
+        event = CloudEvent(attributes, data)
+
+        # Creates the HTTP request representation of the CloudEvents in structured content mode
+        headers, body = to_structured(event)
+        self.headers.update(headers)
+
+        logger.debug(f"Sending AWS topic notification {data}")
+
+        # send the message
+        try:
+            resp = requests.post(self.url, data=body, headers=self.headers, verify=False, timeout=self.timeout)
+        except Exception as e:
+            logger.error("Not able to POST AWS topic notification")
+            raise TriggerException(e)
+        if resp.status_code != 200:
+            raise TriggerException(
+                f"Not able to POST AWS topic notification to {self.url}, "
+                f"status {resp.status_code}, {resp.reason}, {resp.content.decode()}"
+            )
+
+        logger.debug("AWS topic notification sent successfully")
+
