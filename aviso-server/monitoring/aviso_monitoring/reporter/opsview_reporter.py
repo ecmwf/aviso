@@ -23,6 +23,7 @@ class OpsviewReporter(ABC):
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         self.monitor_servers = config.monitor_servers
         self.msg_receiver = msg_receiver
+        self.token = {}
 
     def ms_authenticate(self, m_server):
         """
@@ -73,6 +74,13 @@ class OpsviewReporter(ABC):
         except Exception as e:
             logger.exception(f"Not able to post metric, error {e}")
             return False
+        if resp.status_code == 401:
+            # we need to repeat the login
+            token = self.ms_authenticate(m_server)
+            if token:
+                self.token[m_server] = token
+                if self.submit_metric(m_server, token, metric):
+                    return True
         if resp.status_code != 200:
             logger.error(
                 f"Not able to post metric to {url}, "
@@ -98,7 +106,12 @@ class OpsviewReporter(ABC):
 
         # authenticate to monitoring server
         for m_server in self.monitor_servers:
-            token = self.ms_authenticate(m_server)
+            if m_server["url"] not in self.token:
+                token = self.ms_authenticate(m_server)
+                if token:
+                    self.token[m_server["url"]] = token
+            else:
+                token = self.token[m_server["url"]]
             if token:
                 # send metrics
                 for m in metrics:
