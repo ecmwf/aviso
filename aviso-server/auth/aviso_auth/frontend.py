@@ -11,6 +11,7 @@ import logging
 
 import aviso_auth.custom_exceptions as custom
 import gunicorn.app.base
+import os
 from aviso_auth import __version__, logger
 from aviso_auth.authentication import Authenticator
 from aviso_auth.authorisation import Authoriser
@@ -20,7 +21,7 @@ from aviso_monitoring import __version__ as monitoring_version
 from aviso_monitoring.collector.count_collector import UniqueCountCollector
 from aviso_monitoring.collector.time_collector import TimeCollector
 from aviso_monitoring.reporter.aviso_auth_reporter import AvisoAuthMetricType
-from flask import Flask, Response, request
+from flask import Flask, Response, request, render_template
 from flask_caching import Cache
 from gunicorn import glogging
 from six import iteritems
@@ -103,6 +104,10 @@ class Frontend:
                 getattr(e, "code", 500),
                 {"Content-Type": "application/json"},
             )
+
+        @handler.route("/", methods=["GET"])
+        def index(): 
+            return render_template('index.html')
 
         @handler.route(self.config.backend["route"], methods=["POST"])
         def root():
