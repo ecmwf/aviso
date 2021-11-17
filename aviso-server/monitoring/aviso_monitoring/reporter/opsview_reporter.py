@@ -62,7 +62,6 @@ class OpsviewReporter(ABC):
         }
         url = f"{m_server['url']}/detail?hostname={m_server['service_host']}&servicename=Passive Check: {metric.get('name')}"  # noqa: E501
         data = {
-            "passive_checks": {"enabled": 1},
             "set_state": {"result": metric.get("status"), "output": f"{metric.get('message')} "},
         }
         if metric.get("metrics"):
