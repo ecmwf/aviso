@@ -19,13 +19,16 @@ from aviso_monitoring.receiver import (
 )
 from aviso_monitoring.udp_server import UdpServer
 
-warn_etcd_log = '<189>1 2021-04-13T09:02:09+00:00 aviso-etcd-4-7cc86d75b4-zrtnf etcd - - [origin enterpriseId="7464" \
-    software="aviso"][meta sequenceId="1"] 09:02:09.076897 W | etcdmain: no data-dir provided, using default data-dir \
-        ./default.etcd'
+warn_etcd_log = '<189>1 2021-08-21T21:11:18+00:00 aviso-etcd-1 etcd - - [origin enterpriseId="7464" \
+    software="aviso"] {"level":"warn","ts":"2021-08-21T21:11:18.819Z","caller":"rafthttp/probing_status.go:68", \
+    "msg":"prober detected unhealthy status","round-tripper-name":"ROUND_TRIPPER_RAFT_MESSAGE", \
+    "remote-peer-id":"ae1516e20f24c2ba","rtt":"2.5562ms","error":"dial tcp: i/o timeout"}'
 
-err_etcd_log = '<189>1 2021-04-13T09:02:09+00:00 aviso-etcd-4-7cc86d75b4-zrtnf etcd - - [origin enterpriseId="7464" \
-    software="aviso"][meta sequenceId="1"] 09:02:09.076897 E | etcdserver: publish error: etcdserver: request timed \
-        out, possibly due to connection lost'
+err_etcd_log = '<189>1 2021-08-21T21:11:18+00:00 aviso-etcd-1 etcd - - [origin enterpriseId="7464" \
+    software="aviso"] {"level":"error","ts":"2021-08-21T21:11:18.819Z","caller":"rafthttp/probing_status.go:68", \
+    "msg":"prober detected unhealthy status","round-tripper-name":"ROUND_TRIPPER_RAFT_MESSAGE", \
+    "remote-peer-id":"ae1516e20f24c2ba","rtt":"2.5562ms","error":"etcdserver: request timed out, \
+    possibly due to connection lost"}'
 
 err_rest_log = '<191>1 2021-04-12T09:19:12.252093+00:00 aviso-rest-green-9c975dc86-mvplw aviso-rest 58 - \
     [origin software="aviso"]  {"asctime": "2021-03-09 07:18:34,385", "hostname": "aviso-rest-blue-56698cb9bc-4s2z7", \
