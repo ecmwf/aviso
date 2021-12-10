@@ -67,7 +67,7 @@ class Config:
 
         aviso_rest_reporter = {
             "enabled": False,
-            "frequency": 1,  # min
+            "frequency": 4,  # min
             "tlms": {
                 "rest_resp_time": {
                     "warning_t": 10,  # s
@@ -85,7 +85,7 @@ class Config:
 
         aviso_auth_reporter = {
             "enabled": False,
-            "frequency": 1,  # in minutes
+            "frequency": 4,  # in minutes
             "tlms": {
                 "auth_resp_time": {"warning_t": 10, "critical_t": 20, "sub_tlms": []},  # s  # s
                 "auth_pod_available": {
@@ -100,7 +100,7 @@ class Config:
 
         etcd_reporter = {
             "enabled": False,
-            "frequency": 5,  # min
+            "frequency": 4,  # min
             "member_urls": ["http://localhost:2379"],
             "req_timeout": 60,  # s
             "tlms": {"etcd_store_size": {}, "etcd_cluster_status": {}, "etcd_error_log": {}},
