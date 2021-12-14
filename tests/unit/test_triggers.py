@@ -209,11 +209,11 @@ def received():
 # test_frontend.run(host="127.0.0.1", port=8001)
 
 
-def test_post_complete_listener(conf, listener_factory, caplog):
+def test_post_cloudEventshttp_listener(conf, listener_factory, caplog):
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     with caplog_for_logger(caplog):  # this allows to assert over the logging output
         # open the listener yaml file
-        with open("tests/unit/fixtures/good_listeners/post_complete_listener.yaml", "r") as f:
+        with open("tests/unit/fixtures/good_listeners/post_cloudEventsHttp_listener.yaml", "r") as f:
             listeners_dict = yaml.safe_load(f.read())
         # parse it
         listeners: list = listener_factory.create_listeners(listeners_dict)
@@ -234,6 +234,34 @@ def test_post_complete_listener(conf, listener_factory, caplog):
             assert record.levelname != "ERROR"
         assert "Post Trigger completed" in caplog.text
         assert "CloudEvents notification sent successfully" in caplog.text
+
+
+@pytest.mark.skip  # we don't have a AWS topic available for testing
+def test_post_cloudeventsaws_listener(conf, listener_factory, caplog):
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
+    with caplog_for_logger(caplog):  # this allows to assert over the logging output
+        # open the listener yaml file
+        with open("tests/unit/fixtures/good_listeners/post_cloudEventsAws_fifo_listener.yaml", "r") as f:
+            listeners_dict = yaml.safe_load(f.read())
+        # parse it
+        listeners: list = listener_factory.create_listeners(listeners_dict)
+        assert listeners.__len__() == 1
+        listener = listeners.pop()
+
+        # start a test frontend to send the notification to
+        server = Thread(target=test_frontend.run, daemon=True, kwargs={"host": "127.0.0.1", "port": 8051})
+        server.start()
+        time.sleep(1)
+
+        # simulate a notification
+        listener.callback("/tmp/aviso/flight/20210101/italy/FCO/AZ203", "Landed")
+        time.sleep(1)
+
+        # check if the change has been logged
+        for record in caplog.records:
+            assert record.levelname != "ERROR"
+        assert "Post Trigger completed" in caplog.text
+        assert "AWS topic notification sent successfully" in caplog.text
 
 
 def test_multiple_nots_echo(conf, listener_factory, caplog):

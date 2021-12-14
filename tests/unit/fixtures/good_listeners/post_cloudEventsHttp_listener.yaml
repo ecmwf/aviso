@@ -5,7 +5,7 @@ listeners:
     triggers:
       - type: post
         protocol: 
-          type: cloudevents
+          type: cloudevents_http
           url: http://127.0.0.1:8051/test
           headers:
             X-TEST: "test"
