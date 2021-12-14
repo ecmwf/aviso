@@ -1,5 +1,5 @@
 # (C) Copyright 1996- ECMWF.
-# 
+#
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -8,30 +8,30 @@
 
 import json
 import logging
-from flask import Flask
-from flask import Response
-from flask import request
-from flask_caching import Cache
-from gunicorn import glogging
-from six import iteritems
+
+import aviso_auth.custom_exceptions as custom
 import gunicorn.app.base
-from aviso_auth import logger, __version__
+from aviso_auth import __version__, logger
 from aviso_auth.authentication import Authenticator
 from aviso_auth.authorisation import Authoriser
 from aviso_auth.backend_adapter import BackendAdapter
 from aviso_auth.config import Config
-from aviso_auth.custom_exceptions import InvalidInputError, NotFoundException, InternalSystemError, \
-    AuthenticationException, ForbiddenRequestException
+from aviso_monitoring import __version__ as monitoring_version
+from aviso_monitoring.collector.count_collector import UniqueCountCollector
 from aviso_monitoring.collector.time_collector import TimeCollector
+from aviso_monitoring.reporter.aviso_auth_reporter import AvisoAuthMetricType
+from flask import Flask, Response, render_template, request
+from flask_caching import Cache
+from gunicorn import glogging
+from six import iteritems
 
 
 class Frontend:
-
     def __init__(self, config: Config):
         self.config = config
         self.handler = self.create_handler()
         self.handler.cache = Cache(self.handler, config=config.cache)
-        # we need to initialise our components and timer here if this app runs in Flask, 
+        # we need to initialise our components and timer here if this app runs in Flask,
         # if instead it runs in Gunicorn the hook post_worker_init will take over, and these components will not be used
         self.init_components()
 
@@ -39,13 +39,14 @@ class Frontend:
         """
         This method initialise a set of components and timers that are valid globally at application level or per worker
         """
-        # noinspection PyUnresolvedReferences
         self.authenticator = Authenticator(self.config, self.handler.cache)
-        # noinspection PyUnresolvedReferences
         self.authoriser = Authoriser(self.config, self.handler.cache)
         self.backend = BackendAdapter(self.config)
         # this is a time collector for the whole request
-        self.timer = TimeCollector(self.config.monitoring)
+        self.timer = TimeCollector(self.config.monitoring, tlm_type=AvisoAuthMetricType.auth_resp_time.name)
+        self.user_counter = UniqueCountCollector(
+            self.config.monitoring, tlm_type=AvisoAuthMetricType.auth_users_counter.name
+        )
 
     def create_handler(self) -> Flask:
         handler = Flask(__name__)
@@ -54,65 +55,82 @@ class Frontend:
         logger.handlers = handler.logger.handlers
 
         def json_response(m, code, header=None):
-            h = {'Content-Type': 'application/json'}
+            h = {"Content-Type": "application/json"}
             if header:
                 h.update(header)
             return json.dumps({"message": str(m)}), code, h
 
-        @handler.errorhandler(InvalidInputError)
-        def bad_request(e):
+        @handler.errorhandler(custom.InvalidInputError)
+        def invalid_input(e):
             logger.debug(f"Request malformed: {e}")
             return json_response(e, 400)
 
-        @handler.errorhandler(AuthenticationException)
-        def not_authenticated(e):
+        @handler.errorhandler(custom.TokenNotValidException)
+        def token_not_valid(e):
             logger.debug(f"Authentication failed: {e}")
             return json_response(e, 401, self.authenticator.UNAUTHORISED_RESPONSE_HEADER)
 
-        @handler.errorhandler(ForbiddenRequestException)
-        def forbidden_request(e):
-            logger.debug(f"Request not authorised: {e}")
+        @handler.errorhandler(custom.ForbiddenDestinationException)
+        def forbidden_destination(e):
+            logger.debug(f"Destination not authorised: {e}")
             return json_response(e, 403)
 
-        @handler.errorhandler(NotFoundException)
-        def not_found(e):
-            logger.debug(f"Backend could not find resource requested: {e}")
+        @handler.errorhandler(custom.UserNotFoundException)
+        def user_not_found(e):
             return json_response(e, 404)
 
-        @handler.errorhandler(InternalSystemError)
+        @handler.errorhandler(custom.InternalSystemError)
         def internal_error(e):
             return json_response(e, 500)
 
+        @handler.errorhandler(custom.AuthenticationUnavailableException)
+        def authentication_unavailable(e):
+            return json_response("Service currently unavailable, please try again later", 503, {"Retry-After": 30})
+
+        @handler.errorhandler(custom.AuthorisationUnavailableException)
+        def authorisation_unavailable(e):
+            return authentication_unavailable(e)  # same behaviour
+
+        @handler.errorhandler(custom.BackendUnavailableException)
+        def backend_unavailable(e):
+            return authentication_unavailable(e)  # same behaviour
+
         @handler.errorhandler(Exception)
         def default_error_handler(e):
-            logging.exception(str(e))
-            return json_response(e, 500)
+            logger.exception(f"Request: {request.json} raised the following error: {e}")
+            return (
+                json.dumps({"message": "Server error occurred", "details": str(e)}),
+                getattr(e, "code", 500),
+                {"Content-Type": "application/json"},
+            )
 
-        @handler.route(self.config.backend['route'], methods=["POST"])
+        @handler.route("/", methods=["GET"])
+        def index():
+            return render_template("index.html")
+
+        @handler.route(self.config.backend["route"], methods=["POST"])
         def root():
-            logger.debug("New request received")
-            try:
-                resp_content = timed_process_request()
+            logger.info(f"New request received from {request.remote_addr}, content: {request.data}")
 
-                # forward back the response
-                return Response(resp_content)
-            except ForbiddenRequestException:
-                return forbidden_request("User not allowed to access to the resource")
+            resp_content = timed_process_request()
+
+            # forward back the response
+            return Response(resp_content)
 
         def process_request():
-            # authenticate request
-            username = self.authenticator.authenticate(request)
+            # authenticate request and count the users
+            username = self.user_counter(self.authenticator.authenticate, args=request)
             logger.debug("Request successfully authenticated")
 
             # authorise request
             valid = self.authoriser.is_authorised(username, request)
             if not valid:
-                raise ForbiddenRequestException()
+                raise custom.ForbiddenDestinationException("User not allowed to access to the resource")
             logger.debug("Request successfully authorised")
 
             # forward request to backend
             resp_content = self.backend.forward(request)
-            logger.debug("Request successfully forwarded to Aviso server")
+            logger.info("Request completed")
 
             return resp_content
 
@@ -125,20 +143,30 @@ class Frontend:
         return handler
 
     def run_server(self):
-        logger.info(f"Running aviso-auth - version {__version__} on server {self.config.frontend['server_type']}")
+        logger.info(
+            f"Running aviso-auth - version {__version__} on server {self.config.frontend['server_type']}, \
+                aviso_monitoring module v.{monitoring_version}"
+        )
         logger.info(f"Configuration loaded: {self.config}")
 
         if self.config.frontend["server_type"] == "flask":
             # flask internal server for non-production environments
             # should only be used for testing and debugging
-            self.handler.run(debug=self.config.debug, host=self.config.frontend["host"],
-                             port=self.config.frontend["port"], use_reloader=False)
+            self.handler.run(
+                debug=self.config.debug,
+                host=self.config.frontend["host"],
+                port=self.config.frontend["port"],
+                use_reloader=False,
+            )
         elif self.config.frontend["server_type"] == "gunicorn":
-            options = {"bind": f"{self.config.frontend['host']}:{self.config.frontend['port']}",
-                       "workers": self.config.frontend['workers'], "post_worker_init": self.post_worker_init}
+            options = {
+                "bind": f"{self.config.frontend['host']}:{self.config.frontend['port']}",
+                "workers": self.config.frontend["workers"],
+                "post_worker_init": self.post_worker_init,
+            }
             GunicornServer(self.handler, options).run()
         else:
-            logging.error(f"server_type {self.config.frontend['server_type']} not supported")
+            logger.error(f"server_type {self.config.frontend['server_type']} not supported")
             raise NotImplementedError
 
     def post_worker_init(self, worker):
@@ -164,19 +192,20 @@ def main():
 
 
 class GunicornServer(gunicorn.app.base.BaseApplication):
-
     def __init__(self, app, options=None):
         self.options = options or {}
         self.application = app
         super(GunicornServer, self).__init__()
 
     def load_config(self):
-        config = dict([(key, value) for key, value in iteritems(self.options)
-                       if key in self.cfg.settings and value is not None])
+        config = dict(
+            [(key, value) for key, value in iteritems(self.options) if key in self.cfg.settings and value is not None]
+        )
         for key, value in iteritems(config):
             self.cfg.set(key.lower(), value)
 
-        self.cfg.set('logger_class', GunicornServer.CustomLogger)
+        # this approach does not support custom filters, therefore it's better to disable it
+        # self.cfg.set('logger_class', GunicornServer.CustomLogger)
 
     def load(self):
         return self.application
@@ -191,9 +220,7 @@ class GunicornServer(gunicorn.app.base.BaseApplication):
             formatter = logging.getLogger().handlers[0].formatter
 
             # Override Gunicorn's `error_log` configuration.
-            self._set_handler(
-                self.error_log, cfg.errorlog, formatter
-            )
+            self._set_handler(self.error_log, cfg.errorlog, formatter)
 
 
 # when running directly from this file

@@ -1,5 +1,5 @@
 # (C) Copyright 1996- ECMWF.
-# 
+#
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -8,8 +8,8 @@
 
 from timeit import default_timer as timer
 
-from .collector import Collector
 from .. import logger
+from .collector import Collector
 
 
 class TimeCollector(Collector):
@@ -28,13 +28,14 @@ class TimeCollector(Collector):
             kwargs(dict): Function arguments
         """
         if type(args) is not tuple and type(args) is not list:
-            args = [args] 
+            args = [args]
         start = timer()
         if not kwargs:
             kwargs = {}
         res = f(*args, **kwargs)
-        self.tlm_buffer.append(timer()-start)
-        logger.debug("Time collected")
+        if self.enabled:
+            self.tlm_buffer.append(timer() - start)
+            logger.debug("Time collected")
         return res
 
     def aggregate_tlms(self, tlms):
@@ -47,11 +48,11 @@ class TimeCollector(Collector):
         """
         if len(tlms):
             agg_tlm = {
-                self.telemetry_name+"_counter": len(tlms),
-                self.telemetry_name+"_avg": sum(tlms) / len(tlms),
-                self.telemetry_name+"_max": max(tlms),
-                self.telemetry_name+"_min": min(tlms)
+                self.telemetry_name + "_counter": len(tlms),
+                self.telemetry_name + "_avg": sum(tlms) / len(tlms),
+                self.telemetry_name + "_max": max(tlms),
+                self.telemetry_name + "_min": min(tlms),
             }
             return agg_tlm
-        else: 
+        else:
             return {}

@@ -11,7 +11,7 @@ import os
 
 import requests
 from aviso_admin import config, logger
-from aviso_admin.cleaner import Cleaner, DATE_FORMAT
+from aviso_admin.cleaner import DATE_FORMAT, Cleaner
 from aviso_admin.utils import encode_to_str_base64
 
 
@@ -21,15 +21,15 @@ def conf() -> config.Config:  # this automatically configure the logging
 
 
 def test_get_destinations():
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     config = conf().cleaner
     cleaner = Cleaner(config)
 
     date = datetime.datetime.now() - datetime.timedelta(days=1)
 
     # first put a few destinations
-    prefix = config["dest_path"]+date.strftime(DATE_FORMAT)+"/"
-    put_key(config["url"], prefix+"EC1")
+    prefix = config["dest_path"] + date.strftime(DATE_FORMAT) + "/"
+    put_key(config["url"], prefix + "EC1")
     put_key(config["url"], prefix + "FOO")
     put_key(config["url"], prefix + "FOO2")
 
@@ -39,7 +39,7 @@ def test_get_destinations():
 
 
 def test_delete_destination_keys():
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     config = conf().cleaner
     cleaner = Cleaner(config)
 
@@ -62,16 +62,16 @@ def test_delete_destination_keys():
 
 
 def test_delete_dissemination_keys():
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     config = conf().cleaner
     cleaner = Cleaner(config)
 
     date = datetime.datetime.now() - datetime.timedelta(days=1)
 
     # first put a few dissemination keys
-    put_key(config["url"], config["diss_path"] + "EC1/date=" + date.strftime(DATE_FORMAT)+"/aaaa")
-    put_key(config["url"], config["diss_path"] + "EC1/date=" + date.strftime(DATE_FORMAT)+"/bbbb")
-    put_key(config["url"], config["diss_path"] + "EC1/date=" + date.strftime(DATE_FORMAT)+"/cccc")
+    put_key(config["url"], config["diss_path"] + "EC1/date=" + date.strftime(DATE_FORMAT) + "/aaaa")
+    put_key(config["url"], config["diss_path"] + "EC1/date=" + date.strftime(DATE_FORMAT) + "/bbbb")
+    put_key(config["url"], config["diss_path"] + "EC1/date=" + date.strftime(DATE_FORMAT) + "/cccc")
 
     # delete dissemination keys
     n_deleted = cleaner.delete_keys(date, "EC1")
@@ -79,16 +79,16 @@ def test_delete_dissemination_keys():
 
 
 def test_delete_mars_keys():
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     config = conf().cleaner
     cleaner = Cleaner(config)
 
     date = datetime.datetime.now() - datetime.timedelta(days=1)
 
     # first put a few MARS keys
-    put_key(config["url"], config["mars_path"] + "date=" + date.strftime(DATE_FORMAT)+"/aaaa")
-    put_key(config["url"], config["mars_path"] + "date=" + date.strftime(DATE_FORMAT)+"/bbbb")
-    put_key(config["url"], config["mars_path"] + "date=" + date.strftime(DATE_FORMAT)+"/cccc")
+    put_key(config["url"], config["mars_path"] + "date=" + date.strftime(DATE_FORMAT) + "/aaaa")
+    put_key(config["url"], config["mars_path"] + "date=" + date.strftime(DATE_FORMAT) + "/bbbb")
+    put_key(config["url"], config["mars_path"] + "date=" + date.strftime(DATE_FORMAT) + "/cccc")
 
     # delete MARS keys
     n_deleted = cleaner.delete_keys(date)
@@ -96,7 +96,7 @@ def test_delete_mars_keys():
 
 
 def test_run_cleaner():
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     config = conf().cleaner
     cleaner = Cleaner(config)
 
@@ -122,13 +122,9 @@ def test_run_cleaner():
 
 def put_key(url, key):
     url = url + "/v3/kv/put"
-    body = {
-        "key": encode_to_str_base64(key),
-        "value": ""
-    }
+    body = {"key": encode_to_str_base64(key), "value": ""}
     # make the call
     resp = requests.post(url, json=body)
-    assert resp.status_code == 200, f'Not able to put key {key}, status {resp.status_code}, ' \
-        f'{resp.reason}, {resp.content.decode()}'
-
-
+    assert resp.status_code == 200, (
+        f"Not able to put key {key}, status {resp.status_code}, " f"{resp.reason}, {resp.content.decode()}"
+    )

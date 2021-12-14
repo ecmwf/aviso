@@ -37,11 +37,11 @@ These are the triggers currently available:
 * **echo** is the simplest trigger as it prints the notification to the console output. It is used for testing
 * **log** is useful for recording the received event to a log file
 * **command** allows the user to define a shell command to work with the notification
-* **post** allows the user to send the notification received as HTTP POST message formatted accordingly to the CloudEvent_ specification
+* **post** allows the user to send the notification received as HTTP POST message formatted accordingly to the CloudEvents_ specification
 
 More information are available in :ref:`triggers`.
 
-.. _CloudEvent: https://cloudevents.io/
+.. _CloudEvents: https://cloudevents.io/
 
 
 The example below shows how to configure multiple listeners executing scripts for different set of notifications, all flights going to or from italy, all flights AZ203, or all flights concerning Fiumicino(FCO) airport.

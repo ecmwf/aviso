@@ -30,16 +30,13 @@ def clear_history():
     key = conf().compactor["history_path"]
     encoded_key = encode_to_str_base64(key)
     encoded_end_key = encode_to_str_base64(str(incr_last_byte(key), "utf-8"))
-    body = {
-        "key": encoded_key,
-        "range_end": encoded_end_key
-    }
+    body = {"key": encoded_key, "range_end": encoded_end_key}
     # make the call
-    resp = requests.post(url, json=body)
+    requests.post(url, json=body)
 
 
 def test_get_current_server_rev():
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     compactor = Compactor(conf().compactor)
     rev = compactor.get_current_server_rev()
     print(rev)
@@ -48,7 +45,7 @@ def test_get_current_server_rev():
 
 
 def test_save_rev():
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     compactor = Compactor(conf().compactor)
     rev = random.randint(1, 100000)
     res = compactor.save_rev(rev, datetime.now())
@@ -60,7 +57,7 @@ def test_save_rev():
 
 
 def test_clean_history():
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     compactor = Compactor(conf().compactor)
 
     # first save a revision
@@ -73,7 +70,7 @@ def test_clean_history():
 
 
 def test_compact():
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     compactor = Compactor(conf().compactor)
 
     # first get the current version
@@ -85,7 +82,7 @@ def test_compact():
 
 
 def test_compact_run():
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     compactor = Compactor(conf().compactor)
     compactor.clean_history(datetime.now())
     rev_init = compactor.get_current_server_rev()
@@ -99,11 +96,11 @@ def test_compact_run():
     try:
         compactor.compact(rev_end - 6)
         assert False
-    except AssertionError as e:
+    except AssertionError:
         assert True
 
     try:
         compactor.compact(rev_end - 4)
         assert True
-    except AssertionError as e:
+    except AssertionError:
         assert False

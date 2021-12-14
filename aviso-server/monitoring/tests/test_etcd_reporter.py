@@ -10,6 +10,7 @@ import os
 
 from aviso_monitoring import logger
 from aviso_monitoring.config import Config
+from aviso_monitoring.receiver import ETCD_APP_NAME, Receiver
 from aviso_monitoring.reporter.etcd_reporter import EtcdReporter
 
 tlm_type = "test2"  # to be defined
@@ -19,31 +20,45 @@ config = {
         "member_urls": ["http://localhost:2379"],
     },
     # this are the setting for sending the telemetry to a monitoring server like Opsview
-    "monitor_server": {
-        "url": "https://monitoring-dev.ecmwf.int/rest",
-        "username": "TBD",
-        "password": "TBD",
-        "service_host": "aviso",
-        "req_timeout": 60,  # seconds
-    }
+    "monitor_servers": [
+        {"url": "https://monitoring-dev.ecmwf.int/rest", "username": "TBD", "password": "TBD", "service_host": "aviso"}
+    ],
+    "udp_server": {"host": "127.0.0.1", "port": 1115},
 }
+
+
+def receiver():
+    warn_etcd_log = '<189>1 2021-08-21T21:11:18+00:00 aviso-etcd-1 etcd - - [origin enterpriseId="7464" \
+    software="aviso"] {"level":"warn","ts":"2021-08-21T21:11:18.819Z","caller":"rafthttp/probing_status.go:68", \
+    "msg":"prober detected unhealthy status","round-tripper-name":"ROUND_TRIPPER_RAFT_MESSAGE", \
+    "remote-peer-id":"ae1516e20f24c2ba","rtt":"2.5562ms","error":"dial tcp: i/o timeout"}'
+
+    err_etcd_log = '<189>1 2021-08-21T21:11:18+00:00 aviso-etcd-1 etcd - - [origin enterpriseId="7464" \
+    software="aviso"] {"level":"error","ts":"2021-08-21T21:11:18.819Z","caller":"rafthttp/probing_status.go:68", \
+    "msg":"prober detected unhealthy status","round-tripper-name":"ROUND_TRIPPER_RAFT_MESSAGE", \
+    "remote-peer-id":"ae1516e20f24c2ba","rtt":"2.5562ms","error":"etcdserver: request timed out, \
+    possibly due to connection lost"}'
+
+    receiver = Receiver()
+    receiver._incoming_errors[ETCD_APP_NAME] = [warn_etcd_log, err_etcd_log]
+    return receiver
 
 
 # you need to set the connection to opsview to run this test and select a tml_type associated to a passive check
 def test_run_reporter():
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
-    reporter = EtcdReporter(Config(**config))
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
+    reporter = EtcdReporter(Config(**config), receiver())
     reporter.run()
 
 
 def test_process_tlms():
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
-    reporter = EtcdReporter(Config(**config))
-    metrics = reporter.process_tlms()
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
+    reporter = EtcdReporter(Config(**config), receiver())
+    metrics = reporter.process_messages()
     assert len(metrics) == 3
     store_size = list(filter(lambda m: m["name"] == "etcd_store_size", metrics))[0]
     assert len(store_size["metrics"]) == 3
     status = list(filter(lambda m: m["name"] == "etcd_cluster_status", metrics))[0]
-    assert len(status["metrics"]) == 1
-    keys = list(filter(lambda m: m["name"] == "etcd_total_keys", metrics))[0]
-    assert len(keys["metrics"]) == 1
+    assert status["status"] == 0
+    errors = list(filter(lambda m: m["name"] == "etcd_error_log", metrics))[0]
+    assert errors["status"] == 2

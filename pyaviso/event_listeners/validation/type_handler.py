@@ -1,5 +1,5 @@
 # (C) Copyright 1996- ECMWF.
-# 
+#
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -10,7 +10,6 @@ from abc import ABC, abstractmethod
 
 
 class TypeHandler(ABC):
-
     def __init__(self, key, required=False):
         super(TypeHandler, self).__init__()
         self._key = key
@@ -28,7 +27,6 @@ class TypeHandler(ABC):
         if self.required and value is None:
             raise KeyError(f"{self.key} is a mandatory key")
         elif not self.required and value is None:
-            # noinspection PyTypeChecker
             return None
         else:
             # validate the key

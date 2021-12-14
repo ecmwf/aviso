@@ -1,0 +1,9 @@
+listeners:
+  - event: flight
+    request:
+      country: italy
+    triggers:
+      - type: post
+        protocol: 
+          type: cloudevents_http
+          url: http://my.endpoint.com/

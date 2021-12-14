@@ -1,5 +1,5 @@
 # (C) Copyright 1996- ECMWF.
-# 
+#
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -12,13 +12,17 @@ import logging.config
 import logging.handlers
 import os
 import re
+import socket
 import sys
 from typing import Dict
-import yaml
 
-from . import logger, HOME_FOLDER, SYSTEM_FOLDER
-from pyaviso.user_config import UserConfig as AvisoConfig
+import yaml
 from aviso_monitoring.collector.config import Config as MonitoringConfig
+from yaml import Loader
+
+from pyaviso.user_config import UserConfig as AvisoConfig
+
+from . import HOME_FOLDER, SYSTEM_FOLDER, logger
 
 # Default configuration location
 CONF_FILE = "config.yaml"
@@ -30,18 +34,21 @@ class Config:
     environment variables, configuration files or defaults.
     """
 
-    def __init__(self,
-                 conf_path=None,
-                 logging_path=None,
-                 debug=None,
-                 host=None,
-                 port=None,
-                 server_type=None,
-                 workers=None,
-                 aviso=None,
-                 monitoring=None):
+    def __init__(
+        self,
+        conf_path=None,
+        logging_path=None,
+        debug=None,
+        host=None,
+        port=None,
+        server_type=None,
+        workers=None,
+        aviso=None,
+        monitoring=None,
+        skips=None,
+    ):
         """
-        
+
         :param conf_path: path to the system configuration file. If not provided,
         the default location is HOME_FOLDER/user_config.yaml.
         :param logging_path: path to the logging configuration file. If not provided,
@@ -49,6 +56,7 @@ class Config:
         :param debug: flag to activate the debug log to the console output
         :param aviso: configuration related to the aviso module
         :param monitoring: configuration related to the monitoring of this component
+        :param skips: dict of request fields to use to identify requests we want to ignore - {field1: [value1, value2]}
         """
         try:
             # we build the configuration in priority order from the lower to the higher
@@ -68,8 +76,9 @@ class Config:
             self.workers = workers
             self.aviso = aviso
             self.monitoring = monitoring
+            self.skips = skips
 
-            logger.debug(f"Loading configuration completed")
+            logger.debug("Loading configuration completed")
 
         except Exception as e:
             logger.error(f"Error occurred while setting the configuration, exception: {type(e)} {e}")
@@ -81,13 +90,14 @@ class Config:
 
         # main config
         config = {}
-        config["monitoring"] = {}
+        config["monitoring"] = None
         config["aviso"] = None
         config["debug"] = False
         config["host"] = "127.0.0.1"
         config["port"] = 8080
         config["server_type"] = "flask"
         config["workers"] = "1"
+        config["skips"] = {}
         return config
 
     def _parse_config_files(self, user_conf_path: str) -> Dict[str, any]:
@@ -132,8 +142,11 @@ class Config:
 
         # instantiate Aviso Config
         if "aviso" in current_config:
-            # noinspection PyTypeChecker
             current_config["aviso"] = AvisoConfig(conf_from_file=current_config["aviso"])
+
+        # instantiate Aviso Monitoring config
+        if "monitoring" in current_config:
+            current_config["monitoring"] = MonitoringConfig(conf_from_file=current_config["monitoring"])
 
         return current_config
 
@@ -156,7 +169,7 @@ class Config:
         if logging_conf_path is not None:
             try:
                 with open(logging_conf_path, "r") as f:
-                    log_config = yaml.safe_load(f.read())
+                    log_config = yaml.load(f.read(), Loader=Loader)
             except Exception as e:
                 logger.warning(f"Not able to load the logging configuration, exception: {type(e)} {e}")
                 logger.debug("", exc_info=True)
@@ -164,7 +177,7 @@ class Config:
         elif "AVISO_LOG" in os.environ:
             try:
                 with open(os.environ["AVISO_LOG"], "r") as f:
-                    log_config = yaml.safe_load(f.read())
+                    log_config = yaml.load(f.read(), Loader=Loader)
             except Exception as e:
                 logger.warning(f"Not able to load the logging configuration, exception: {type(e)} {e}")
                 logger.debug("", exc_info=True)
@@ -192,13 +205,13 @@ class Config:
     @monitoring.setter
     def monitoring(self, monitoring: Dict):
         m = self._config.get("monitoring")
-        if monitoring is not None and m is not None:
-            Config.deep_update(m, monitoring)
-        elif monitoring is not None:
-            m = monitoring
+        if monitoring is not None:
+            m = MonitoringConfig(**monitoring)
+        if m is None:
+            m = MonitoringConfig()
         # verify is valid
         assert m is not None, "monitoring has not been configured"
-        self._monitoring = MonitoringConfig(**m)
+        self._monitoring = m
 
     @property
     def aviso(self) -> AvisoConfig:
@@ -209,6 +222,8 @@ class Config:
         av = self._config.get("aviso")
         if aviso is not None:
             av = AvisoConfig(**aviso)
+        if av is None:
+            av = AvisoConfig()
         # verify is valid
         assert av is not None, "aviso has not been configured"
         self._aviso = av
@@ -266,15 +281,24 @@ class Config:
                 # set the general logger - Note this will affect also the logging file
                 logging.getLogger().setLevel(logging_level)
 
+    @property
+    def skips(self):
+        return self._skips
+
+    @skips.setter
+    def skips(self, skips: str):
+        self._skips = self._configure_property(skips, "skips")
+
     def __str__(self):
         config_string = (
-                f"host: {self.host}" +
-                f", port: {self.port}" +
-                f", server_type: {self.server_type}" +
-                f", debug: {self.debug}" +
-                f", workers: {self.workers}" +
-                f", aviso: {self.aviso}" +
-                f", monitoring: {self.monitoring}"
+            f"host: {self.host}"
+            + f", port: {self.port}"
+            + f", server_type: {self.server_type}"
+            + f", debug: {self.debug}"
+            + f", workers: {self.workers}"
+            + f", aviso: {self.aviso}"
+            + f", monitoring: {self.monitoring}"
+            + f", skips: {self.skips}"
         )
         return config_string
 
@@ -283,7 +307,7 @@ class Config:
         console_handler = logging.StreamHandler()
         console_handler.name = "console"
         console_handler.setLevel(logging.INFO)
-        console_handler.setFormatter(logging.Formatter('%(message)s'))
+        console_handler.setFormatter(logging.Formatter("%(message)s"))
         logging.getLogger().addHandler(console_handler)
 
     def _configure_property(self, param, name):
@@ -309,13 +333,33 @@ class Config:
 
 
 # class to allow yaml loader to replace ~ with HOME directory
-class HomeFolderLoader(yaml.SafeLoader):
-    path_matcher = re.compile('~')
+class HomeFolderLoader(yaml.Loader):
+    path_matcher = re.compile("~")
 
     @staticmethod
     def path_constructor(loader, node):
         return os.path.expanduser(node.value)
 
 
-HomeFolderLoader.add_implicit_resolver('!path', HomeFolderLoader.path_matcher, None)
-HomeFolderLoader.add_constructor('!path', HomeFolderLoader.path_constructor)
+HomeFolderLoader.add_implicit_resolver("!path", HomeFolderLoader.path_matcher, None)
+HomeFolderLoader.add_constructor("!path", HomeFolderLoader.path_constructor)
+
+
+# class to add hostname to the possible attributes to use in the logging
+class HostnameFilter(logging.Filter):
+    hostname = socket.gethostname()
+
+    def filter(self, record):
+        record.hostname = HostnameFilter.hostname
+        return True
+
+
+# class to add a counter number to each log record to use it as id of the log record. Useful to check if any log got
+# lost. To avoid skipping ids it needs to be applied to one handler. Also it will be replicated for each worker.
+class CounterFilter(logging.Filter):
+    logging_counter = 0
+
+    def filter(self, record):
+        record.counter = CounterFilter.logging_counter
+        CounterFilter.logging_counter += 1
+        return True

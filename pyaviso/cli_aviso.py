@@ -1,5 +1,5 @@
 # (C) Copyright 1996- ECMWF.
-# 
+#
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -11,23 +11,35 @@ import signal
 import sys
 import threading
 import time
-from typing import List, Dict
+from typing import Dict, List
 
 import click
 
-from . import logger, __version__
-from . import user_config as conf
-from .custom_exceptions import *
-from .engine import EngineType
-from .notification_manager import NotificationManager
-from .service_config_manager import ServiceConfigException
+from pyaviso import __version__, logger
+from pyaviso import user_config as conf
+from pyaviso.custom_exceptions import (
+    EngineException,
+    EventListenerException,
+    InvalidInputError,
+    TriggerException,
+)
+from pyaviso.engine import EngineType
+from pyaviso.notification_manager import NotificationManager
+from pyaviso.service_config_manager import ServiceConfigException
 
 # Create the listener manager
 manager: NotificationManager = NotificationManager()
 
 # set of known exceptions
-KNOWN_EXCEPTION = (ServiceConfigException, EventListenerException,
-                   TriggerException, EngineException, InvalidInputError, AssertionError)
+KNOWN_EXCEPTION = (
+    ServiceConfigException,
+    EventListenerException,
+    TriggerException,
+    EngineException,
+    InvalidInputError,
+    AssertionError,
+    KeyError,
+)
 
 
 def catch_all_exceptions(cls, handler):
@@ -60,7 +72,7 @@ def catch_all_exceptions(cls, handler):
         def invoke(self, ctx):
             try:
                 return super(Cls, self).invoke(ctx)
-            except Exception as e:
+            except Exception:
                 # call the handler
                 handler()
 
@@ -130,14 +142,14 @@ def notification_server_setup(f):
     @click.option("--test", help="Activate TestMode.", is_flag=True, default=False)
     @functools.wraps(f)
     def functor(*args, **kwargs):
-        if kwargs['host']:
-            kwargs['configuration'].notification_engine.host = kwargs['host']
+        if kwargs["host"]:
+            kwargs["configuration"].notification_engine.host = kwargs["host"]
         kwargs.pop("host")
-        if kwargs['port']:
-            kwargs['configuration'].notification_engine.port = kwargs['port']
+        if kwargs["port"]:
+            kwargs["configuration"].notification_engine.port = kwargs["port"]
         kwargs.pop("port")
-        if kwargs['test']:
-            kwargs['configuration'].notification_engine.type = EngineType.FILE_BASED
+        if kwargs["test"]:
+            kwargs["configuration"].notification_engine.type = EngineType.FILE_BASED
         kwargs.pop("test")
 
         return f(*args, **kwargs)
@@ -149,30 +161,32 @@ def user_config_setup(f):
     @click.option("--config", "-c", help="User configuration file path.")
     @click.option("--log", "-l", help="Logging configuration file path.")
     @click.option("--debug", "-d", help="Enable the debug log.", is_flag=True, default=False)
-    @click.option("--quiet", "-q", help="Suppress non-error messages from the console output.", is_flag=True,
-                  default=False)
+    @click.option(
+        "--quiet", "-q", help="Suppress non-error messages from the console output.", is_flag=True, default=False
+    )
     @click.option("--no-fail", help="Suppress any error exit code.", is_flag=True, default=False)
     @click.option("--username", "-u", help="Username required to authenticate to the server.")
     @click.option("--key", "-k", help="File path to the key required to authenticate to the server.")
     @functools.wraps(f)
     def functor(*args, **kwargs):
         # CLIK automatically sets the flags, put back None values like for the other parameters
-        kwargs['debug'] = None if not kwargs['debug'] else True
-        kwargs['quiet'] = None if not kwargs['quiet'] else True
-        kwargs['no_fail'] = None if not kwargs['no_fail'] else True
+        kwargs["debug"] = None if not kwargs["debug"] else True
+        kwargs["quiet"] = None if not kwargs["quiet"] else True
+        kwargs["no_fail"] = None if not kwargs["no_fail"] else True
 
         # create the configuration object
         configuration = conf.UserConfig(
-            conf_path=kwargs['config'],
-            logging_path=kwargs['log'],
-            debug=kwargs['debug'],
-            quiet=kwargs['quiet'],
-            no_fail=kwargs['no_fail'],
-            username=kwargs['username'],
-            key_file=kwargs['key'])
+            conf_path=kwargs["config"],
+            logging_path=kwargs["log"],
+            debug=kwargs["debug"],
+            quiet=kwargs["quiet"],
+            no_fail=kwargs["no_fail"],
+            username=kwargs["username"],
+            key_file=kwargs["key"],
+        )
 
         # pass it as a option in the same dictionary but remove the fields used for the configuration
-        kwargs['configuration'] = configuration
+        kwargs["configuration"] = configuration
         kwargs.pop("config")
         kwargs.pop("log")
         kwargs.pop("debug")
@@ -194,18 +208,23 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
 @click.group(context_settings=CONTEXT_SETTINGS)
 @click.version_option(version=__version__)
-def cli(): pass
+def cli():
+    pass
 
 
-# noinspection PyIncorrectDocstring
 @click.command(cls=catch_all_exceptions(click.Command, handler=stop_listeners), context_settings=CONTEXT_SETTINGS)
 @user_config_setup
 @notification_server_setup
 @click.argument("listener_files", nargs=-1)
-@click.option("--from", "from_date", type=click.DateTime(formats=["%Y-%m-%dT%H:%M:%S.%fZ"]),
-              help="Replay notification from this date.")
-@click.option("--to", "to_date", type=click.DateTime(formats=["%Y-%m-%dT%H:%M:%S.%fZ"]),
-              help="Replay notification to this date.")
+@click.option(
+    "--from",
+    "from_date",
+    type=click.DateTime(formats=["%Y-%m-%dT%H:%M:%S.%fZ"]),
+    help="Replay notification from this date.",
+)
+@click.option(
+    "--to", "to_date", type=click.DateTime(formats=["%Y-%m-%dT%H:%M:%S.%fZ"]), help="Replay notification to this date."
+)
 @click.option("--now", "now", is_flag=True, default=False, help="Ignore missed notifications, only listen to new ones.")
 @click.option("--catchup", "catchup", is_flag=True, default=False, help="Retrieve first the missed notifications.")
 def listen(listener_files: List[str], configuration: conf.UserConfig, from_date, to_date, now, catchup):
@@ -229,12 +248,14 @@ def listen(listener_files: List[str], configuration: conf.UserConfig, from_date,
             signal.signal(signal.SIGTERM, stop_listeners_and_exit)
 
         # call the main listen method
-        manager.listen(configuration,
-                       listeners_file_paths=listener_files,
-                       from_date=from_date,
-                       to_date=to_date,
-                       now=now,
-                       catchup=catchup)
+        manager.listen(
+            configuration,
+            listeners_file_paths=listener_files,
+            from_date=from_date,
+            to_date=to_date,
+            now=now,
+            catchup=catchup,
+        )
 
     except KNOWN_EXCEPTION as e:
         logger.error(f"{e}")
@@ -248,7 +269,6 @@ def listen(listener_files: List[str], configuration: conf.UserConfig, from_date,
         sys.exit(-1)
 
 
-# noinspection PyIncorrectDocstring
 @click.command(context_settings=CONTEXT_SETTINGS)
 @click.argument("parameters", required=True)
 @user_config_setup
@@ -271,13 +291,11 @@ def key(parameters: str, configuration: conf.UserConfig):
         logger.debug("", exc_info=True)
         sys.exit(-1)
     except Exception as e:
-        logger.error(f"Error occurred while generating key from {parameters}, "
-                     f"{e}")
+        logger.error(f"Error occurred while generating key from {parameters}, " f"{e}")
         logger.debug("", exc_info=True)
         sys.exit(-1)
 
 
-# noinspection PyIncorrectDocstring
 @click.command(context_settings=CONTEXT_SETTINGS)
 @click.argument("parameters", required=True)
 @user_config_setup
@@ -300,13 +318,11 @@ def value(parameters: str, configuration: conf.UserConfig):
         logger.debug("", exc_info=True)
         sys.exit(-1)
     except Exception as e:
-        logger.error(f"Error occurred while return value for {parameters}, "
-                     f"{e}")
+        logger.error(f"Error occurred while return value for {parameters}, " f"{e}")
         logger.debug("", exc_info=True)
         sys.exit(-1)
 
 
-# noinspection PyIncorrectDocstring
 @click.command(context_settings=CONTEXT_SETTINGS)
 @click.argument("parameters", required=True)
 @user_config_setup
@@ -327,8 +343,7 @@ def notify(parameters: str, configuration: conf.UserConfig):
         logger.debug("", exc_info=True)
         sys.exit(-1)
     except Exception as e:
-        logger.error(f"Error occurred while notifying the notification {parameters}, "
-                     f"{e}")
+        logger.error(f"Error occurred while notifying the notification {parameters}, " f"{e}")
         logger.debug("", exc_info=True)
         sys.exit(-1)
 

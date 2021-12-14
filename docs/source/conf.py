@@ -21,7 +21,7 @@ import sys
 top = os.path.realpath(os.path.dirname(os.path.dirname(__file__)))
 sys.path.insert(0, top)
 
-import pyaviso
+from pyaviso.version import __version__ as aviso_version  # noqa: E402
 
 source_suffix = ".rst"
 master_doc = "index"
@@ -31,8 +31,8 @@ html_logo = "_static/logo.png"
 
 # -- Project information -----------------------------------------------------
 
-project = 'Aviso'
-author = 'ECMWF'
+project = "Aviso"
+author = "ECMWF"
 year = datetime.datetime.now().year
 if year == 2020:
     years = "2020"
@@ -42,7 +42,7 @@ else:
 copyright = "%s, ECMWF" % (years,)
 
 # The full version, including alpha/beta/rc tags
-release = pyaviso.__version__
+release = aviso_version
 
 
 # -- General configuration ---------------------------------------------------
@@ -77,11 +77,10 @@ exclude_patterns = []
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'sphinx_rtd_theme'
+html_theme = "sphinx_rtd_theme"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
-
-html_context = {"css_files": ["_static/style.css"]}
+html_static_path = ["_static"]
+html_css_files = ["style.css"]

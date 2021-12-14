@@ -1,0 +1,15 @@
+listeners:
+  - event: flight
+    request:
+      country: italy
+    triggers:
+      - type: post
+        protocol: 
+          type: cloudevents_http
+          url: http://127.0.0.1:8051/test
+          headers:
+            X-TEST: "test"
+          timeout: 30
+          cloudevents: 
+            type: aviso_cloudevents
+            source: my_test

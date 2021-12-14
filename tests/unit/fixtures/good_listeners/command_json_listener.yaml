@@ -1,0 +1,11 @@
+listeners:
+  - event: flight
+    request:
+      country: italy
+      airport: [FCO, CIA]
+      date: 20210101
+      number: AZ203
+    triggers:
+      - type: command
+        working_dir: tests/unit/fixtures
+        command: ./my_script.sh --json ${json}

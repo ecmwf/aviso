@@ -1,5 +1,5 @@
 # (C) Copyright 1996- ECMWF.
-# 
+#
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -10,7 +10,6 @@ from .type_handler import TypeHandler
 
 
 class StringHandler(TypeHandler):
-
     def __init__(self, key, required=False, canonic=None):
         super(StringHandler, self).__init__(key, required)
         self._canonic = canonic
@@ -33,4 +32,3 @@ class StringHandler(TypeHandler):
                 raise AttributeError(f"Case {self.canonic} not recognised")
         else:
             return value_str
-

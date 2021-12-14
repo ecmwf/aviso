@@ -1,5 +1,5 @@
 # (C) Copyright 1996- ECMWF.
-# 
+#
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -9,9 +9,9 @@
 import json
 from typing import Dict
 
+from .. import logger
 from . import trigger
 from .trigger import TriggerType
-from .. import logger
 
 
 class EchoTrigger(trigger.Trigger):
@@ -25,8 +25,8 @@ class EchoTrigger(trigger.Trigger):
         self.trigger_type = TriggerType.echo
 
     def execute(self):
-        logger.info(f"Starting Echo Trigger...")
-        logger.info(f"Notification received:")
+        logger.info("Starting Echo Trigger...")
+        logger.info("Notification received:")
         print(json.dumps(self.notification, indent=4, sort_keys=True))
         logger.debug(f"{self.notification}")
-        logger.info(f"Echo Trigger completed")
+        logger.info("Echo Trigger completed")

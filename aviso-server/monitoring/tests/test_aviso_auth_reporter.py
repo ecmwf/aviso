@@ -6,126 +6,134 @@
 # granted to it by virtue of its status as an intergovernmental organisation
 # nor does it submit to any jurisdiction.
 
-import os
 import datetime
-from aviso_monitoring import logger
-from aviso_monitoring.reporter.aviso_auth_reporter import AvisoAuthReporter
-from aviso_monitoring.receiver import Receiver
-from aviso_monitoring.config import Config
+import os
 
-tlm_type = "test2"  # to be defined
+from aviso_monitoring import logger
+from aviso_monitoring.config import Config
+from aviso_monitoring.receiver import AVISO_AUTH_APP_NAME, Receiver
+from aviso_monitoring.reporter.aviso_auth_reporter import (
+    AvisoAuthMetricType,
+    AvisoAuthReporter,
+)
+
+time_type = AvisoAuthMetricType.auth_resp_time.name
 config = {
     "aviso_auth_reporter": {
-        "tlm_type": tlm_type,
         "enabled": True,
         "frequency": 2,  # in minutes
-        "sub_tlms": ["t1", "t2"]
-
+        "tlms": {"auth_resp_time": {"sub_tlms": ["t1", "t2"]}},
     },
     # this are the setting for sending the telemetry to a monitoring server like Opsview
-    "monitor_server": {
-        "url": "https://monitoring-dev.ecmwf.int/rest",
-        "username": "TBD",
-        "password": "TBD",
-        "service_host": "aviso",
-        "req_timeout": 60,  # seconds
-    },
-    "udp_server": {
-        "host": "127.0.0.1",
-        "port": 1111
-    }
+    "monitor_servers": [
+        {
+            "url": "https://monitoring-dev.ecmwf.int/rest",
+            "username": "TBD",
+            "password": "TBD",
+            "service_host": "aviso",
+        }
+    ],
+    "udp_server": {"host": "127.0.0.1", "port": 1110},
 }
 
 
 def receiver():
-    test_tlm1 = {
-        "telemetry_type": tlm_type,
-        "component_name": "test_comp",
+    time_tlm1 = {
+        "telemetry_type": time_type,
+        "component_name": "time_comp",
+        "hostname": "me",
+        "time": datetime.datetime.timestamp(datetime.datetime.utcnow()),
+        "telemetry": {f"{time_type}_counter": 2, f"{time_type}_avg": 2, f"{time_type}_max": 3, f"{time_type}_min": 1},
+    }
+    time_tlm2 = {
+        "telemetry_type": time_type,
+        "component_name": "time_comp",
+        "hostname": "me",
+        "time": datetime.datetime.timestamp(datetime.datetime.utcnow()),
+        "telemetry": {f"{time_type}_counter": 2, f"{time_type}_avg": 3, f"{time_type}_max": 4, f"{time_type}_min": 2},
+    }
+    time_tlm1t1 = {
+        "telemetry_type": time_type,
+        "component_name": "time_comp",
         "hostname": "me",
         "time": datetime.datetime.timestamp(datetime.datetime.utcnow()),
         "telemetry": {
-            f"{tlm_type}_counter": 2,
-            f"{tlm_type}_avg": 2,
-            f"{tlm_type}_max": 3,
-            f"{tlm_type}_min": 1
-        }
+            f"{time_type}_t1_counter": 20,
+            f"{time_type}_t1_avg": 20,
+            f"{time_type}_t1_max": 30,
+            f"{time_type}_t1_min": 10,
+        },
     }
-    test_tlm2 = {
-        "telemetry_type": tlm_type,
-        "component_name": "test_comp",
+    time_tlm2t1 = {
+        "telemetry_type": time_type,
+        "component_name": "time_comp",
         "hostname": "me",
         "time": datetime.datetime.timestamp(datetime.datetime.utcnow()),
         "telemetry": {
-            f"{tlm_type}_counter": 2,
-            f"{tlm_type}_avg": 3,
-            f"{tlm_type}_max": 4,
-            f"{tlm_type}_min": 2
-        }
+            f"{time_type}_t1_counter": 20,
+            f"{time_type}_t1_avg": 30,
+            f"{time_type}_t1_max": 40,
+            f"{time_type}_t1_min": 20,
+        },
     }
-    test_tlm1t1 = {
-        "telemetry_type": tlm_type,
-        "component_name": "test_comp",
+    time_tlm1t2 = {
+        "telemetry_type": time_type,
+        "component_name": "time_comp",
         "hostname": "me",
         "time": datetime.datetime.timestamp(datetime.datetime.utcnow()),
         "telemetry": {
-            f"{tlm_type}_t1_counter": 20,
-            f"{tlm_type}_t1_avg": 20,
-            f"{tlm_type}_t1_max": 30,
-            f"{tlm_type}_t1_min": 10
-        }
+            f"{time_type}_t2_counter": 200,
+            f"{time_type}_t2_avg": 200,
+            f"{time_type}_t2_max": 300,
+            f"{time_type}_t2_min": 100,
+        },
     }
-    test_tlm2t1 = {
-        "telemetry_type": tlm_type,
-        "component_name": "test_comp",
+    time_tlm2t2 = {
+        "telemetry_type": time_type,
+        "component_name": "time_comp",
         "hostname": "me",
         "time": datetime.datetime.timestamp(datetime.datetime.utcnow()),
         "telemetry": {
-            f"{tlm_type}_t1_counter": 20,
-            f"{tlm_type}_t1_avg": 30,
-            f"{tlm_type}_t1_max": 40,
-            f"{tlm_type}_t1_min": 20
-        }
+            f"{time_type}_t2_counter": 200,
+            f"{time_type}_t2_avg": 300,
+            f"{time_type}_t2_max": 400,
+            f"{time_type}_t2_min": 200,
+        },
     }
-    test_tlm1t2 = {
-        "telemetry_type": tlm_type,
-        "component_name": "test_comp",
-        "hostname": "me",
-        "time": datetime.datetime.timestamp(datetime.datetime.utcnow()),
-        "telemetry": {
-            f"{tlm_type}_t2_counter": 200,
-            f"{tlm_type}_t2_avg": 200,
-            f"{tlm_type}_t2_max": 300,
-            f"{tlm_type}_t2_min": 100
-        }
-    }
-    test_tlm2t2 = {
-        "telemetry_type": tlm_type,
-        "component_name": "test_comp",
-        "hostname": "me",
-        "time": datetime.datetime.timestamp(datetime.datetime.utcnow()),
-        "telemetry": {
-            f"{tlm_type}_t2_counter": 200,
-            f"{tlm_type}_t2_avg": 300,
-            f"{tlm_type}_t2_max": 400,
-            f"{tlm_type}_t2_min": 200
-        }
-    }
+
+    err_auth_log = '<191>1 2021-04-12T09:00:08.931717+00:00 aviso-auth-green-7f6d59848f-cg6zv aviso-auth 49 - \
+        [origin software="aviso"]  {"asctime": "2021-04-12 09:00:08,931", "hostname": \
+            "aviso-auth-green-7f6d59848f-cg6zv", "process": 49, "thread": 140428749499272, "name": "aviso-monitoring",\
+                 "filename": "time_collector.py", "lineno": 38, "levelname": "ERROR", "message": "Time collected"}'
+
+    not_found_auth_log = '<187>1 2021-09-23T09:44:47.344845+00:00 aviso-auth-green-867855599d-vm86g aviso-auth 90 - \
+        [origin software="aviso"] \ufeff{"asctime": "2021-09-23 09:44:47,344", "hostname": "aviso-auth-green-867855599d\
+            -vm86g", "process": 90, "thread": 140502496553864, "name": "aviso-auth", "filename": "frontend.py", \
+                "lineno": 100, "levelname": "ERROR", "message": "Request: None raised the following error: 404 Not \
+                    Found: The requested URL was not found on the server. If you entered the URL manually please check \
+                        your spelling and try again.", "counter": 40988}'
+
     receiver = Receiver()
-    receiver._incoming_tlms[tlm_type] = [test_tlm1, test_tlm2, test_tlm1t1, test_tlm2t1, test_tlm1t2, test_tlm2t2]
+    receiver._incoming_tlms[time_type] = [time_tlm1, time_tlm2, time_tlm1t1, time_tlm2t1, time_tlm1t2, time_tlm2t2]
+    receiver._incoming_errors[AVISO_AUTH_APP_NAME] = [err_auth_log, not_found_auth_log]
     return receiver
 
 
 # you need to set the connection to opsview to run this test and select a tml_type associated to a passive check
 def test_run_reporter():
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     reporter = AvisoAuthReporter(Config(**config), receiver())
     reporter.run()
 
 
 def test_process_tlms():
-    logger.debug(os.environ.get('PYTEST_CURRENT_TEST').split(':')[-1].split(' ')[0])
+    logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     reporter = AvisoAuthReporter(Config(**config), receiver())
-    metrics = reporter.process_tlms()
-    assert len(metrics) == 1
-    assert len(metrics[0].get("metrics")) == 6
-    assert len(list(filter(lambda m: m["m_value"] == 4, metrics[0].get("metrics")))) == 1
+    metrics = reporter.process_messages()
+    assert len(metrics) == 3
+    timer = list(filter(lambda m: m["name"] == time_type, metrics))[0]
+    assert len(timer.get("metrics")) == 6
+    assert len(list(filter(lambda m: m["m_value"] == 4, timer.get("metrics")))) == 1
+    errors = list(filter(lambda m: m["name"] == "auth_error_log", metrics))[0]
+    assert "404 Not Found" not in errors["message"]
+    assert errors["status"] == 2

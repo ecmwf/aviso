@@ -1,18 +1,18 @@
 # (C) Copyright 1996- ECMWF.
-# 
+#
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
 # granted to it by virtue of its status as an intergovernmental organisation
 # nor does it submit to any jurisdiction.
 
-from enum import Enum
-from typing import Dict
 import json
 import os
+from enum import Enum
+from typing import Dict
 
+from .. import HOME_FOLDER, SYSTEM_FOLDER, logger
 from ..custom_exceptions import ServiceConfigException
-from .. import logger, HOME_FOLDER, SYSTEM_FOLDER
 
 LOCAL_SCHEMA_FOLDER = "service_configuration"
 LISTENER_SCHEMA_FILE_NAME = "event_listener_schema.json"
@@ -24,6 +24,7 @@ class ListenerSchemaParserType(Enum):
     This Enum describes the various notification mechanism currently available. This identifies the type of server
     this client is connecting to.
     """
+
     GENERIC = "ListenerSchemaParser"
     ECMWF = "EcmwfSchemaParser"
 
@@ -32,10 +33,9 @@ class ListenerSchemaParserType(Enum):
 
 
 class ListenerSchemaParser:
-
     def load(self, config):
         """
-        This method implements the workflow regarding loading the listener schema file 
+        This method implements the workflow regarding loading the listener schema file
         from a remote location or local location or default.
 
         Args:
@@ -50,6 +50,7 @@ class ListenerSchemaParser:
         if config.remote_schema:
             # Pull the latest event listeners configuration files
             from ..service_config_manager import ServiceConfigManager
+
             config_manager = ServiceConfigManager(config)
             remote_schema_files = config_manager.pull(config.notification_engine.service)
         else:
@@ -97,8 +98,9 @@ class ListenerSchemaParser:
                 evl_schema = self._load_default_schema()
             else:
                 # search for the schema in the local folder
-                evl_schema_file_path = list(filter(
-                    lambda esfp: LISTENER_SCHEMA_FILE_NAME in esfp, local_schema_file_paths))
+                evl_schema_file_path = list(
+                    filter(lambda esfp: LISTENER_SCHEMA_FILE_NAME in esfp, local_schema_file_paths)
+                )
                 if len(evl_schema_file_path) != 1:
                     raise ServiceConfigException("No local event listener schema file found")
                 with open(evl_schema_file_path[0]) as evl_json:
@@ -135,7 +137,7 @@ class EcmwfSchemaParser(ListenerSchemaParser):
 
     def parse(self, local_schema_file_paths, remote_schema_files):
         """
-        This re-implements the parent parse method to include the enum values from the MARS language schema 
+        This re-implements the parent parse method to include the enum values from the MARS language schema
         """
 
         # load event listener schema

@@ -1,5 +1,5 @@
 # (C) Copyright 1996- ECMWF.
-# 
+#
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -9,9 +9,9 @@
 import logging
 from typing import Dict
 
+from .. import logger
 from . import trigger
 from .trigger import TriggerType
-from .. import logger
 
 
 class LogTrigger(trigger.Trigger):
@@ -25,7 +25,7 @@ class LogTrigger(trigger.Trigger):
         self.trigger_type = TriggerType.log
 
     def execute(self):
-        logger.info(f"Starting Log Trigger...")
+        logger.info("Starting Log Trigger...")
         # create a file handler for the log specified
         log_path = self.params.get("path")
         handler = logging.FileHandler(log_path, "a")
@@ -38,4 +38,4 @@ class LogTrigger(trigger.Trigger):
         logger.info(f"Notification received: {self.notification}")
         # remove the logger
         log.removeHandler(handler)
-        logger.info(f"Log Trigger completed")
+        logger.info("Log Trigger completed")

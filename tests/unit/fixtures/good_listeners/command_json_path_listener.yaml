@@ -1,0 +1,8 @@
+listeners:
+  - event: flight
+    request:
+      number: AZ203
+    triggers:
+      - type: command
+        working_dir: tests/unit/fixtures
+        command: ./my_script.sh --jsonpath ${jsonpath}

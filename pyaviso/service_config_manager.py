@@ -1,5 +1,5 @@
 # (C) Copyright 1996- ECMWF.
-# 
+#
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -9,7 +9,7 @@
 import json
 import os
 from shutil import rmtree
-from typing import List, Dict
+from typing import Dict, List
 
 from . import logger
 from .authentication.auth import Auth
@@ -62,7 +62,7 @@ class ServiceConfigManager:
                 # prepare the key with suffix and prefix
                 local_path = x[0]
                 # removing the directory part so to have just the relative path
-                suffix = local_path[len(directory):]
+                suffix = local_path[len(directory) :]
                 key: str = os.path.join(service_key, suffix, fp)
                 fp_path = os.path.join(local_path, fp)
 
@@ -71,8 +71,10 @@ class ServiceConfigManager:
                     logger.warning(f"File {fp} exceeds hard limit of max file size allowed of {MAX_FILE_SIZE_HARD}B ")
                     continue
                 if os.path.getsize(fp_path) > max_file_size_soft:
-                    logger.warning(f"File {fp} exceeds the configured max file size allowed of {max_file_size_soft}B, "
-                                   f"try increasing the limit in the configuration")
+                    logger.warning(
+                        f"File {fp} exceeds the configured max file size allowed of {max_file_size_soft}B, "
+                        f"try increasing the limit in the configuration"
+                    )
                     continue
                 # prepare the value, read the file as binary
                 with open(fp_path, "rb") as f:
@@ -80,7 +82,7 @@ class ServiceConfigManager:
                 kv: Dict[str, bytes] = {"key": key, "value": value}
                 kvs.append(kv)
                 pushed_files.append(f.name)
-                logger.debug(f"Pushing file")
+                logger.debug("Pushing file")
 
         # check if we need to delete any file
         ks_delete = []
@@ -181,13 +183,11 @@ class ServiceConfigManager:
             # save the files retrieved with .tmp suffix
             for kv in kvs:
                 # extract the file path and create the directory structure
-                # noinspection PyTypeChecker
-                relative_file_path = kv["key"][len(service_key):]
+                relative_file_path = kv["key"][len(service_key) :]
                 full_path = os.path.join(directory, relative_file_path)
                 full_path_tmp = full_path + ".tmp"
                 os.makedirs(os.path.dirname(full_path_tmp), exist_ok=True)
                 with open(full_path_tmp, "wb") as f:
-                    # noinspection PyTypeChecker
                     f.write(kv["value"])
                     logger.debug(f"File successfully saved: {full_path_tmp}")
                     pulled_files.append(full_path)
@@ -230,7 +230,7 @@ class ServiceConfigManager:
             logger.error(f"Error in retrieving the status of service {service}, more than one KV returned")
             return {}
 
-        logger.debug(f"Reading status from retrieved result")
+        logger.debug("Reading status from retrieved result")
         status = kvs[0]["value"].decode()
         status = json.loads(status)
         # add version to it
