@@ -64,7 +64,7 @@ def test_bad_dates_listen(conf):
         listen, ["tests/unit/fixtures/basic_flight_listener.yaml", "--from", "2019-20-01T00:00:00.0Z"]
     )
     assert result.exit_code == 2
-    assert result.output.find(" invalid datetime format: 2019-20-01T00:00:00.0Z") != -1
+    assert result.output.find("Invalid value for '--from': '2019-20-01T00:00:00.0Z'") != -1
 
     result = runner.invoke(
         listen, ["tests/unit/fixtures/basic_flight_listener.yaml", "--from", "2030-02-01T00:00:00.0Z"]
@@ -118,7 +118,7 @@ def test_bad_options(conf):
     result = runner.invoke(listen, ["tests/unit/fixtures/basic_flight_listener.yaml", "--bad"])
     # The process stops and return an error
     assert result.exit_code == 2
-    assert result.output.find("no such option") != -1
+    assert result.output.find("No such option") != -1
 
 
 def test_bad_logging(conf):

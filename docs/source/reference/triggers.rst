@@ -75,10 +75,9 @@ Here is an example of a notification:
 Post
 -------------------
 This trigger allows the user to send as HTTP POST message the notification received and 
-formatted accordingly to protocol indicated. Currently the only protocol implemented is the CloudEvent_ specification. 
-This trigger basically turns Aviso client in a proxy
-forwarding the notification to the user's notification system compatible with CloudEvent_ specification, as shown 
-by the figure below:
+formatted accordingly to protocol indicated. Currently the only format implemented is the CloudEvents_ specification and
+it can be sent via HTTP to a endpoint or to a AWS topic. 
+This trigger basically turns Aviso client in a proxy forwarding the notification to the user's notification system compatible with CloudEvents_ specification, as shown by the figure below:
 
 .. image:: ../_static/cloudEvents.png
 
@@ -89,10 +88,11 @@ Here is a basic example of a Post trigger:
   triggers:
     - type: post
       protocol:
-        type: cloudevents
+        type: cloudevents_http
         url: http://my.endpoint.com/api
 
-This is the basic configuration. More parameters can be specified to customise the CloudEvents message. More info the reference documentation.
+This is the basic configuration. More parameters can be specified to customise the CloudEvents message. 
+More info the reference documentation.
 
 The CloudEvents message sent would look like the following: 
 
@@ -124,7 +124,7 @@ Here is a complete example showing how to customise the CloudEvents fields as we
   triggers:
     - type: post
       protocol: 
-        type: cloudevents
+        type: cloudevents_http
         url: http://my.endpoint.com/api
         headers:
           HTTP_TEST: "test"
@@ -134,7 +134,35 @@ Here is a complete example showing how to customise the CloudEvents fields as we
           source: my_test
 
 
-.. _CloudEvent: https://cloudevents.io/
+.. _CloudEvents: https://cloudevents.io/
+
+
+In the case of a notification to a AWS topic defined by the user, the structure of the trigger is similar; 
+the type has to be ``cloudevents_aws`` and ``arn`` and ``region_name`` are the only mandatory parameters. The optionals 
+are: ``MessageAttributes``, ``aws_access_key_id``, ``aws_secret_access_key`` for the AWS topic fields and
+``cloudevents`` for the CloudEvents fields. Note that if ``aws_access_key_id`` and ``aws_secret_access_key`` are not specified the 
+AWS credentials are taken from `~/.aws/credentials` if available.
+
+.. code-block:: yaml
+
+  triggers:
+    - type: post
+      protocol: 
+        type: cloudevents_aws
+        arn: arn:aws:sns:us-east-2:848972885776:aviso
+        region_name: us-east-2
+        MessageAttributes:
+          attribute1: 
+            DataType: String
+            StringValue: valueAttribute1
+          attribute2: 
+            DataType: String
+            StringValue: valueAttribute2 
+        cloudevents: 
+          type: aviso_topic
+          source: my_test
+
+Finally, in case of a AWS FIFO topic ``MessageGroupId`` is required.
 
 Function
 -------------------

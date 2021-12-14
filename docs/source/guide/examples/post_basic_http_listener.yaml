@@ -5,5 +5,5 @@ listeners:
     triggers:
       - type: post
         protocol: 
-          type: cloudevents
+          type: cloudevents_http
           url: http://my.endpoint.com/

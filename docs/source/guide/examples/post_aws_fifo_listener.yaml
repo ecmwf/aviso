@@ -1,0 +1,11 @@
+listeners:
+  - event: flight
+    request:
+      country: italy
+    triggers:
+      - type: post
+        protocol: 
+          type: cloudevents_aws
+          arn: arn:aws:sns:us-east-2:848972885776:aviso.fifo
+          region_name: us-east-2
+          MessageGroupId: aviso
