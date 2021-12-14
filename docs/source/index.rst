@@ -43,6 +43,7 @@ See :ref:`overview` for more information.
    :maxdepth: 1
    :caption: Contributing:
 
+   contributing/whats_new
    contributing/how_to
    contributing/aviso_client
    contributing/aviso_server
