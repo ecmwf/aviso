@@ -74,14 +74,14 @@ Here is an example of a notification:
 
 Post
 -------------------
-This trigger allows the user to send as HTTP POST message the notification received and 
-formatted accordingly to protocol indicated. Currently the only format implemented is the CloudEvents_ specification and
-it can be sent via HTTP to a endpoint or to a AWS topic. 
+This trigger will format the notification according to the CloudEvents_ 
+specification and will send it to either a endpoint as HTTP POST request or to a AWS Simple Notification Service (SNS) topic.
 This trigger basically turns Aviso client in a proxy forwarding the notification to the user's notification system compatible with CloudEvents_ specification, as shown by the figure below:
 
 .. image:: ../_static/cloudEvents.png
 
-Here is a basic example of a Post trigger:
+Here is a basic example of a Post trigger sending the notification to a HTTP endpoint defined by the user. 
+The type is ``cloudevents_http`` and ``url`` is the only mandatory parameter.
 
 .. code-block:: yaml
 
@@ -92,7 +92,7 @@ Here is a basic example of a Post trigger:
         url: http://my.endpoint.com/api
 
 This is the basic configuration. More parameters can be specified to customise the CloudEvents message. 
-More info the reference documentation.
+More info in the reference documentation.
 
 The CloudEvents message sent would look like the following: 
 
@@ -117,7 +117,7 @@ The CloudEvents message sent would look like the following:
     "time": "2020-03-02T13:34:40.245Z",            # Timestamp of when this message is created
   }
 
-Here is a complete example showing how to customise the CloudEvents fields as well as the HTTP headers:
+Here is a complete example showing how to customise the CloudEvents fields as well as the HTTP headers using optional parameters:
 
 .. code-block:: yaml
 
@@ -137,11 +137,16 @@ Here is a complete example showing how to customise the CloudEvents fields as we
 .. _CloudEvents: https://cloudevents.io/
 
 
-In the case of a notification to a AWS topic defined by the user, the structure of the trigger is similar; 
-the type has to be ``cloudevents_aws`` and ``arn`` and ``region_name`` are the only mandatory parameters. The optionals 
+In the case of a notification to a AWS SNS topic defined by the user, the structure of the trigger is similar; 
+the type has to be ``cloudevents_aws`` and ``arn`` and ``region_name`` are the only mandatory parameters. 
+
+The optional parameters 
 are: ``MessageAttributes``, ``aws_access_key_id``, ``aws_secret_access_key`` for the AWS topic fields and
 ``cloudevents`` for the CloudEvents fields. Note that if ``aws_access_key_id`` and ``aws_secret_access_key`` are not specified the 
-AWS credentials are taken from `~/.aws/credentials` if available.
+AWS credentials are taken from `~/.aws/credentials` if available. 
+
+AWS SNS protocol does not enforce any specification on the message payload. Aviso uses the CloudEvents_ specification also in this case 
+for consistency.
 
 .. code-block:: yaml
 
