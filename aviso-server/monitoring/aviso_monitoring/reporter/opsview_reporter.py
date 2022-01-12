@@ -77,7 +77,7 @@ class OpsviewReporter(ABC):
             # we need to repeat the login
             token = self.ms_authenticate(m_server)
             if token:
-                self.token[m_server] = token
+                self.token[m_server["url"]] = token
                 if self.submit_metric(m_server, token, metric):
                     return True
         if resp.status_code != 200:
