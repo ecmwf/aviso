@@ -5,6 +5,12 @@
 What's New
 ==============
 
+v0.11.1 (02 February 2022)
+--------------------------
+
+HTTP 404 has been added among the exceptions handled by the automatic restart mechanism of aviso listeners. This is needed during maintenance sessions.
+
+
 v0.11.0 (14 December 2021)
 --------------------------
 
