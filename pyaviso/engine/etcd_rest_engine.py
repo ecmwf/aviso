@@ -93,7 +93,11 @@ class EtcdRestEngine(EtcdEngine):
                 resp = requests.post(url, json=body, headers=self.auth.header(), timeout=self.timeout)
                 resp.raise_for_status()
             except requests.exceptions.HTTPError as err:
-                if resp.status_code == 408 or (resp.status_code >= 500 and resp.status_code < 600):
+                if (
+                    resp.status_code == 408
+                    or resp.status_code == 404
+                    or (resp.status_code >= 500 and resp.status_code < 600)
+                ):
                     logger.warning(f"Unable to connect to {url}, trying again in {self.automatic_retry_delay}s...")
                     logger.debug(f"Not able to pull key {key}, {str(err)}, trying again...")
                     time.sleep(self.automatic_retry_delay)
