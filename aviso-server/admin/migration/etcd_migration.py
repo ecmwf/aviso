@@ -11,9 +11,10 @@ from typing import Dict
 
 import requests
 
-old_etcd = "http://k8s-dataservices-master.ecmwf.int:30000"
-new_etcd = "http://localhost:2379"
-from_revision = 145679891
+old_etcd = "http://127.0.0.1:2379"
+new_etcd = "http://127.0.0.1:2389"
+from_revision = 1
+to_revision = 9
 MAX_KV_RETURNED = 10000
 
 
@@ -62,7 +63,7 @@ def pull_kvpairs(etcd_repo, revision):
     :param revision
     :return: kv pairs as dictionary
     """
-    main_key = "/ec/"
+    main_key = "f"
 
     old_etcd_url = etcd_repo + "/v3/kv/range"
 
@@ -80,12 +81,11 @@ def pull_kvpairs(etcd_repo, revision):
         "limit": MAX_KV_RETURNED,
         "sort_order": "DESCEND",
         "sort_target": "KEY",
-        "min_mod_revision": revision,
+        "revision": revision,
     }
     # make the call
     # print(f"Pull request: {body}")
 
-    # start an infinite loop of request if the server side is unreachable
     resp = requests.post(old_etcd_url, json=body)
     resp.raise_for_status()
 
@@ -171,8 +171,14 @@ def incr_last_byte(path: str) -> bytes:
     return bytes(s)
 
 
-# first get the key-value pairs from the old repo
-kvs = pull_kvpairs(old_etcd, from_revision)
+################
+# main worflow #
+################
 
-# send them to the new repo
-completed = push_kvpairs(new_etcd, kvs)
+for rev in range(from_revision, to_revision + 1):
+
+    # first get the key-value pairs from the old repo
+    kvs = pull_kvpairs(old_etcd, rev)
+
+    # send them to the new repo
+    completed = push_kvpairs(new_etcd, kvs)
