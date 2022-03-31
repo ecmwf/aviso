@@ -11,11 +11,11 @@ from typing import Dict
 
 import requests
 
-old_etcd = "http://127.0.0.1:2379"
-new_etcd = "http://127.0.0.1:2389"
-from_revision = 1
-to_revision = 9
-MAX_KV_RETURNED = 10000
+old_etcd = "http://k8s-dataservices-master.ecmwf.int:30000"
+new_etcd = "http://k8s-dataservices-master.ecmwf.int:31302"
+from_revision = 192631533
+to_revision = 192631538
+MAX_KV_RETURNED = 100
 
 
 def push_kvpairs(etcd_repo, kvs):
@@ -63,11 +63,11 @@ def pull_kvpairs(etcd_repo, revision):
     :param revision
     :return: kv pairs as dictionary
     """
-    main_key = "f"
+    main_key = "/ec/"
 
     old_etcd_url = etcd_repo + "/v3/kv/range"
 
-    print(f"Getting key-value pairs to {etcd_repo} newer than {revision} ...")
+    print(f"Getting key-value pairs to {etcd_repo} for rev {revision} ...")
 
     range_end = encode_to_str_base64(str(incr_last_byte(main_key), "utf-8"))
 
@@ -81,7 +81,10 @@ def pull_kvpairs(etcd_repo, revision):
         "limit": MAX_KV_RETURNED,
         "sort_order": "DESCEND",
         "sort_target": "KEY",
+        "min_mod_revision": revision,
+        "max_mod_revision": revision,
         "revision": revision,
+
     }
     # make the call
     # print(f"Pull request: {body}")
@@ -95,7 +98,6 @@ def pull_kvpairs(etcd_repo, revision):
     new_kvs = []
     resp_body = resp.json()
     if "kvs" in resp_body:
-        print("Building key-value list")
         for kv in resp_body["kvs"]:
             new_kv = parse_raw_kv(kv, False)
             new_kvs.append(new_kv)
