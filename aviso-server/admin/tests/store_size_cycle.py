@@ -148,7 +148,7 @@ for day in range(run_days):
         # print(f"Total number of keys deleted {tot}")
         # defrag
         # r = defrag()
-        # print(f"Deframentation: {r}")
+        # print(f"Defragmentation: {r}")
     print(store_size())
     # print(f"Current store size {store_size()}")
 

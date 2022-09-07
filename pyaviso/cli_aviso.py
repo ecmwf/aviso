@@ -169,7 +169,7 @@ def user_config_setup(f):
     @click.option("--key", "-k", help="File path to the key required to authenticate to the server.")
     @functools.wraps(f)
     def functor(*args, **kwargs):
-        # CLIK automatically sets the flags, put back None values like for the other parameters
+        # CLICK automatically sets the flags, put back None values like for the other parameters
         kwargs["debug"] = None if not kwargs["debug"] else True
         kwargs["quiet"] = None if not kwargs["quiet"] else True
         kwargs["no_fail"] = None if not kwargs["no_fail"] else True

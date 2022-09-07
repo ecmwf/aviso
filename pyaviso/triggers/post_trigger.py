@@ -117,7 +117,7 @@ class PostCloudEventsHttp:
 
 class PostCloudEventsAws:
     """
-    This class implements a trigger in charge of translating the notification in a CloudEvents messag and send it to a
+    This class implements a trigger in charge of translating the notification in a CloudEvents message and send it to a
     AWS topic specified by the user.
     """
 
