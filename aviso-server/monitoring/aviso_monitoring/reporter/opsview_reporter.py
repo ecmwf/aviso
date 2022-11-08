@@ -199,7 +199,7 @@ class OpsviewReporter(ABC):
         }
         return agg_tlm
 
-    def retrive_metrics(metric_servers, req_timeout):
+    def retrieve_metrics(metric_servers, req_timeout):
         """
         This methods retrieves the metrics provided by specific metric servers using a Prometheus interface.
         """

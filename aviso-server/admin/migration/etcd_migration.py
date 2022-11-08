@@ -89,7 +89,7 @@ def pull_kvpairs(etcd_repo, revision):
     resp = requests.post(old_etcd_url, json=body)
     resp.raise_for_status()
 
-    print("Retrival completed")
+    print("Retrieval completed")
 
     # parse the result to return just key-value pairs
     new_kvs = []

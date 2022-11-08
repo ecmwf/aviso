@@ -120,7 +120,7 @@ class EtcdRestEngine(EtcdEngine):
                     f"Not able to pull key {key}, status {resp.status_code}, {resp.reason}, " f"{resp.content.decode()}"
                 )
 
-            # we got a good responce, exit from the loop
+            # we got a good response, exit from the loop
             break
 
         logger.debug(f"Query for {key} completed")
@@ -304,7 +304,7 @@ class EtcdRestEngine(EtcdEngine):
                     f"{resp.content.decode()}"
                 )
 
-            # we got a good responce, exit from the loop
+            # we got a good response, exit from the loop
             break
 
         logger.debug("Query for latest revision completed")

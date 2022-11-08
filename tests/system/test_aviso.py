@@ -120,7 +120,7 @@ def caplog_for_logger(caplog):  # this is needed to assert over the logging outp
     lo.removeHandler(caplog.handler)
 
 
-def reset_previuous_run():
+def reset_previous_run():
     file_path = "tests/system/fixtures/received.txt"
     full_path = os.path.join(os.getcwd(), file_path)
     if os.path.exists(full_path):
@@ -136,7 +136,7 @@ def test_command_listener(config):
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
 
     # delete previous file of notification
-    file_path = reset_previuous_run()
+    file_path = reset_previous_run()
 
     aviso._listen(config, ["tests/system/fixtures/listeners/command_listener.yaml"])
 
@@ -157,7 +157,7 @@ def test_command_listener(config):
     assert received
 
     # delete result of notification
-    file_path = reset_previuous_run()
+    file_path = reset_previous_run()
 
 
 @pytest.mark.parametrize("config", configs)

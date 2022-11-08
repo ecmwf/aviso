@@ -33,7 +33,7 @@ class EtcdReporter(OpsviewReporter):
         logger.debug("Etcd processing metrics...")
 
         # fetch the raw tlms provided by etcd
-        raw_tlms = OpsviewReporter.retrive_metrics(self.member_urls, self.req_timeout)  # noqa: F841
+        raw_tlms = OpsviewReporter.retrieve_metrics(self.member_urls, self.req_timeout)  # noqa: F841
 
         # array of metric to return
         metrics = []

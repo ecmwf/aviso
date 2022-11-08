@@ -13,7 +13,7 @@ where each step merges on the previous one:
 3. Loading Home config file `~/.aviso/config.yaml`
 4. Loading config defined by environment variables, AVISO_CONFIG
 5. Loading config defined by command line option, ``-c``, ``--config``
-6. Loading all environnement variables
+6. Loading all environment variables
 7. Loading all command line options
 
 System and Home config files are optional.

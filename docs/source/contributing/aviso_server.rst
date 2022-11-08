@@ -17,7 +17,7 @@ The source of the components presented here is available in the ``aviso-server``
 
 Key-Value store
 ---------------
-The core component of Aviso Server is a Key-Value store. This is a critical component because it guarantees persistency and consistency for all the notifications processed.
+The core component of Aviso Server is a Key-Value store. This is a critical component because it guarantees persistence and consistency for all the notifications processed.
 The current Key-Value store technology used is etcd_. This is a strongly consistent, distributed key-value store able to reach consensus thanks to Raft algorithm.
 This allows it to gracefully tolerate machine failure and network partition. Moreover, it is designed for high-throughput.
 We are running it in is default configuration of a cluster of 3 components.

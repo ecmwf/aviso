@@ -191,7 +191,7 @@ class PodAvailable(AvisoRestChecker):
 
         # fetch the cluster metrics
         if self.metric_server_url:
-            metrics = OpsviewReporter.retrive_metrics([self.metric_server_url], self.req_timeout)[
+            metrics = OpsviewReporter.retrieve_metrics([self.metric_server_url], self.req_timeout)[
                 self.metric_server_url
             ]
             if metrics:
