@@ -8,6 +8,7 @@
 
 import datetime
 import os
+from pathlib import Path
 
 import requests
 from aviso_admin import config, logger
@@ -16,7 +17,8 @@ from aviso_admin.utils import encode_to_str_base64
 
 
 def conf() -> config.Config:  # this automatically configure the logging
-    c = config.Config(conf_path="aviso-server/admin/tests/config.yaml")
+    here = Path(__file__).parent
+    c = config.Config(conf_path=str(Path(here / "config.yaml")))
     return c
 
 
