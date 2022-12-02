@@ -37,6 +37,24 @@ Installing
    # start a local etcd server
    /tmp/etcd-download-test/etcd
 
+Or if you prefer to use Docker:
+
+.. code-block:: console
+
+   export NODE1=$(hostname -I | awk '{ print $1 }')
+   export REGISTRY=gcr.io/etcd-development/etcd
+   
+   docker run --rm \
+     -p 2379:2379 \
+     -p 2380:2380 \
+     --volume=${DATA_DIR}:/etcd-data \
+     --name etcd ${REGISTRY}:v3.4.14 \
+     /usr/local/bin/etcd \
+     --data-dir=/etcd-data --name node1 \
+     --initial-advertise-peer-urls http://${NODE1}:2380 --listen-peer-urls http://0.0.0.0:2380 \
+     --advertise-client-urls http://${NODE1}:2379 --listen-client-urls http://0.0.0.0:2379 \
+     --initial-cluster node1=http://${NODE1}:2380
+
 For more advanced configuration or installation on different platforms please refer to the official documentation on the release_ page. Note that the etcd version mentioned in the script above is the latest available at the time of writing this documentation. Use any compatible version.
 
 .. _release: https://github.com/etcd-io/etcd/releases
