@@ -23,17 +23,20 @@ from pyaviso.authentication import auth
 from pyaviso.engine.etcd_engine import LOCAL_STATE_FOLDER
 from pyaviso.engine.etcd_grpc_engine import EtcdGrpcEngine
 from pyaviso.engine.etcd_rest_engine import EtcdRestEngine
+from pathlib import Path
 
 
 def rest_engine():  # this automatically configure the logging
-    c = user_config.UserConfig(conf_path="tests/config.yaml")
+    tests_path = Path(__file__).parent.parent
+    c = user_config.UserConfig(conf_path= Path(tests_path / "config.yaml"))
     authenticator = auth.Auth.get_auth(c)
     engine = EtcdRestEngine(c.notification_engine, authenticator)
     return engine
 
 
 def grpc_engine():  # this automatically configure the logging
-    c = user_config.UserConfig(conf_path="tests/config.yaml")
+    tests_path = Path(__file__).parent.parent
+    c = user_config.UserConfig(conf_path= Path(tests_path / "config.yaml"))
     authenticator = auth.Auth.get_auth(c)
     engine = EtcdGrpcEngine(c.notification_engine, authenticator)
     return engine
