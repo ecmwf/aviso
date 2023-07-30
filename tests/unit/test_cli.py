@@ -14,12 +14,14 @@ from click.testing import CliRunner
 from pyaviso import logger, user_config
 from pyaviso.cli_aviso import cli, key, listen, notify, value
 from pyaviso.engine.engine_factory import EngineType
+from pathlib import Path
 
 
 @pytest.fixture()
 def conf() -> user_config.UserConfig:  # this automatically configure the logging
-    c = user_config.UserConfig(conf_path="tests/config.yaml")
-    os.environ["AVISO_CONFIG"] = "tests/config.yaml"
+    tests_path = Path(__file__).parent.parent
+    c = user_config.UserConfig(conf_path= Path(tests_path / "config.yaml"))
+    os.environ["AVISO_CONFIG"] = str(Path(tests_path / "config.yaml"))
     return c
 
 
