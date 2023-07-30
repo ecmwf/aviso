@@ -7,6 +7,7 @@
 # nor does it submit to any jurisdiction.
 
 import os
+from pathlib import Path
 
 import pytest
 
@@ -20,7 +21,8 @@ from pyaviso.event_listeners.listener_schema_parser import ListenerSchemaParser
 
 @pytest.fixture()
 def conf() -> user_config.UserConfig:  # this automatically configure the logging
-    c = user_config.UserConfig(conf_path="tests/config.yaml")
+    tests_path = Path(__file__).parent.parent
+    c = user_config.UserConfig(conf_path= Path(tests_path / "config.yaml"))
     return c
 
 
