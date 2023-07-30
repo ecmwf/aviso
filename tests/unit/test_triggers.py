@@ -25,6 +25,12 @@ from pyaviso.event_listeners.listener_schema_parser import ListenerSchemaParser
 
 tests_path = Path(__file__).parent.parent
 
+
+def base_path() -> Path:
+    """Get the current folder of the test"""
+    return Path(__file__).parent.parent.parent
+
+
 @pytest.fixture()
 def conf() -> user_config.UserConfig:  # this automatically configure the logging
     tests_path = Path(__file__).parent.parent
@@ -53,7 +59,8 @@ def caplog_for_logger(caplog):  # this is needed to assert over the logging outp
     lo.removeHandler(caplog.handler)
 
 
-def test_echo_trigger(conf, listener_factory, caplog):
+def test_echo_trigger(conf, listener_factory, caplog, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.chdir(base_path())
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     with caplog_for_logger(caplog):  # this allows to assert over the logging output
         # open the listener yaml file
@@ -79,7 +86,8 @@ def test_echo_trigger(conf, listener_factory, caplog):
         assert "Echo Trigger completed" in caplog.text
 
 
-def test_function_trigger(conf, listener_factory, caplog):
+def test_function_trigger(conf, listener_factory, caplog, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.chdir(base_path())
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     # create a list that increments every time there is a new event
     trigger_list = []
@@ -105,7 +113,8 @@ def test_function_trigger(conf, listener_factory, caplog):
     assert trigger_list.__len__() == 1
 
 
-def test_logger_listener(conf, listener_factory, caplog):
+def test_logger_listener(conf, listener_factory, caplog, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.chdir(base_path())
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     with caplog_for_logger(caplog):  # this allows to assert over the logging output
         # open the listener yaml file
@@ -126,7 +135,7 @@ def test_logger_listener(conf, listener_factory, caplog):
         # check  the trigger has logged the notification on the system log
         assert "Log Trigger completed" in caplog.text
         # check  the trigger has logged the notification on the log specified
-        with open(listener.triggers[0].get("path")).open(mode='r') as f:
+        with open(listener.triggers[0].get("path"), 'r') as f:
             assert "Notification received" in f.read()
 
         # clean up
@@ -134,7 +143,8 @@ def test_logger_listener(conf, listener_factory, caplog):
             os.remove("testLog.log")
 
 
-def test_command_listener(conf, listener_factory, caplog):
+def test_command_listener(conf, listener_factory, caplog, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.chdir(base_path())
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     with caplog_for_logger(caplog):  # this allows to assert over the logging output
         # open the listener yaml file
@@ -155,7 +165,8 @@ def test_command_listener(conf, listener_factory, caplog):
         assert "Command Trigger completed" in caplog.text
 
 
-def test_command_json_listener(conf, listener_factory, caplog):
+def test_command_json_listener(conf, listener_factory, caplog, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.chdir(base_path())
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     with caplog_for_logger(caplog):  # this allows to assert over the logging output
         # open the listener yaml file
@@ -176,7 +187,8 @@ def test_command_json_listener(conf, listener_factory, caplog):
         assert "Command Trigger completed" in caplog.text
 
 
-def test_command_json_path_listener(conf, listener_factory, caplog):
+def test_command_json_path_listener(conf, listener_factory, caplog, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.chdir(base_path())
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     with caplog_for_logger(caplog):  # this allows to assert over the logging output
         # open the listener yaml file
@@ -287,7 +299,8 @@ def test_multiple_nots_echo(conf, listener_factory, caplog):
         assert caplog.text.count("Echo Trigger completed") == n_nots
 
 
-def test_multiple_nots_cmd(conf, listener_factory, caplog):
+def test_multiple_nots_cmd(conf, listener_factory, caplog, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.chdir(base_path())
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     with caplog_for_logger(caplog):  # this allows to assert over the logging output
         # open the listener yaml file
@@ -331,7 +344,8 @@ def test_multiple_listeners(conf, listener_factory, caplog):
         assert caplog.text.count("Echo Trigger completed") == 3
 
 
-def test_multiple_triggers(conf, listener_factory, caplog):
+def test_multiple_triggers(conf, listener_factory, caplog, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.chdir(base_path())
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     with caplog_for_logger(caplog):  # this allows to assert over the logging output
         # open the listener yaml file
