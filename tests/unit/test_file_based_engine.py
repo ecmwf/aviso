@@ -9,6 +9,7 @@
 import os
 import time
 from shutil import rmtree
+from pathlib import Path
 
 import pytest
 
@@ -20,7 +21,8 @@ from pyaviso.engine.file_based_engine import FileBasedEngine
 
 @pytest.fixture()
 def test_engine():  # this automatically configure the logging
-    c = user_config.UserConfig(conf_path="tests/config.yaml")
+    tests_path = Path(__file__).parent.parent
+    c = user_config.UserConfig(conf_path= Path(tests_path / "config.yaml"))
     authenticator = auth.Auth.get_auth(c)
     engine = FileBasedEngine(c.notification_engine, authenticator)
     return engine
