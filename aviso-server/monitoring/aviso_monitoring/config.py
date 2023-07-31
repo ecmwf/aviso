@@ -28,7 +28,6 @@ class Config:
         etcd_reporter=None,
         prometheus_reporter=None,
     ):
-
         try:
             # we build the configuration in priority order from the lower to the higher
             # start from the defaults
@@ -52,7 +51,6 @@ class Config:
 
     @staticmethod
     def _create_default_config() -> Dict:
-
         udp_server = {"host": "127.0.0.1", "port": 1111, "buffer_size": 64 * 1024}
 
         # this are the setting for sending the telemetry to a monitoring server like Opsview

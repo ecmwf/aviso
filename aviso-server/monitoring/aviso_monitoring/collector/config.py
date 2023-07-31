@@ -55,7 +55,6 @@ class Config:
 
     @staticmethod
     def _create_default_config() -> Dict:
-
         transmitter = {
             "monitoring_server_host": "127.0.0.1",
             "monitoring_server_port": 1111,

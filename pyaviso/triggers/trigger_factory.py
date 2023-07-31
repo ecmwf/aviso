@@ -18,7 +18,6 @@ class TriggerFactory:
     """
 
     def create_trigger(self, notification: Dict[str, any], params: Dict[str, any]) -> Trigger:
-
         assert "type" in params, "'type' is a mandatory field in trigger"
         # find specific trigger class
         trigger_type = TriggerType[params.get("type").lower()]

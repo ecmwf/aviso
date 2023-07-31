@@ -78,7 +78,6 @@ class ResponseTime(AvisoAuthChecker):
         super().__init__(*args, **kwargs)
 
     def metric(self):
-
         # incoming tlms
         assert self.msg_receiver, "Msg receiver is None"
         new_tlms = self.msg_receiver.extract_incoming_tlms(self.metric_name)

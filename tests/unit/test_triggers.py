@@ -53,7 +53,6 @@ def caplog_for_logger(caplog):  # this is needed to assert over the logging outp
 def test_echo_trigger(conf, listener_factory, caplog):
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     with caplog_for_logger(caplog):  # this allows to assert over the logging output
-
         # open the listener yaml file
         with open("tests/unit/fixtures/good_listeners/echo_listener.yaml", "r") as f:
             listeners_dict = yaml.safe_load(f.read())
@@ -106,7 +105,6 @@ def test_function_trigger(conf, listener_factory, caplog):
 def test_logger_listener(conf, listener_factory, caplog):
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     with caplog_for_logger(caplog):  # this allows to assert over the logging output
-
         # open the listener yaml file
         with open("tests/unit/fixtures/good_listeners/log_listener.yaml", "r") as f:
             listeners_dict = yaml.safe_load(f.read())
@@ -136,7 +134,6 @@ def test_logger_listener(conf, listener_factory, caplog):
 def test_command_listener(conf, listener_factory, caplog):
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     with caplog_for_logger(caplog):  # this allows to assert over the logging output
-
         # open the listener yaml file
         with open("tests/unit/fixtures/good_listeners/command_listener.yaml", "r") as f:
             listeners_dict = yaml.safe_load(f.read())

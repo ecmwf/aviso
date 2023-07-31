@@ -170,7 +170,6 @@ class Authoriser:
 
         # now check if we are accessing to a key space that is open only to authorised users
         elif len(list(filter(lambda x: backend_key.startswith(x), self.protected_keys))) > 0:
-
             allowed_destinations = self._allowed_destinations(username)
             logger.debug(f"Destination allowed: {allowed_destinations}")
 

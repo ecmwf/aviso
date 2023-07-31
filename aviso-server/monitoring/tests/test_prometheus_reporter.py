@@ -23,7 +23,6 @@ config = {"prometheus_reporter": {"enabled": True, "port": 8090}, "udp_server": 
 
 
 def receiver():
-
     counter_tlm1 = {
         "telemetry_type": counter_type,
         "component_name": "counter_comp",

@@ -83,7 +83,6 @@ class PostCloudEventsHttp:
             self.source = self.SOURCE_DEFAULT
 
     def execute(self):
-
         # prepare the CloudEvents message
 
         attributes = {
@@ -147,7 +146,6 @@ class PostCloudEventsAws:
             self.source = self.SOURCE_DEFAULT
 
     def execute(self):
-
         # prepare the AWS topic message
 
         attributes = {

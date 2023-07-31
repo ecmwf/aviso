@@ -58,7 +58,6 @@ class Transmitter(Thread):
         # logger.debug("Telemetry transmitter cycle started")
 
         if len(self.tlm_buffer):  # don't do anything if the buffer is empty
-
             # read the event buffer and clear it
             tlms = self.tlm_buffer.copy()
             logger.debug(f"{len(tlms)} TLMs found in the buffer")

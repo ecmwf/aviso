@@ -121,7 +121,6 @@ class UsersCounter:
         self.msg_receiver = kwargs["msg_receiver"]
 
     def metric(self):
-
         logger.debug(f"Processing tlms {self.metric_name}...")
 
         assert self.msg_receiver, "Msg receiver is None"

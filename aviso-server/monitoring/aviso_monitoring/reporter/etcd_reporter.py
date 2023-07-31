@@ -89,7 +89,6 @@ class StoreSize(EtcdChecker):
     """
 
     def metric(self):
-
         # defaults
         status = 0
         message = "Store size is nominal"
