@@ -39,9 +39,9 @@ def test_auth_type(conf):
     auth2 = auth.Auth.get_auth(conf)
     conf.auth_type = "ecmwf"
     auth3 = auth.Auth.get_auth(conf)
-    assert type(auth1) == none_auth.NoneAuth
-    assert type(auth2) == etcd_auth.EtcdAuth
-    assert type(auth3) == ecmwf_auth.EcmwfAuth
+    assert isinstance(auth1, none_auth.NoneAuth)
+    assert isinstance(auth2, etcd_auth.EtcdAuth)
+    assert isinstance(auth3, ecmwf_auth.EcmwfAuth)
 
 
 @pytest.mark.skip  # we cannot authenticate in this test setup

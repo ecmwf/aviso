@@ -170,7 +170,7 @@ class EcmwfSchemaParser(ListenerSchemaParser):
         # search for all the enum keys in all event listener types and add the mars values to it
         logger.debug("Parsing mars language schema...")
         for e in evl_schema.items():
-            if type(e[1]) == dict and e[1].get("request"):
+            if isinstance(e[1], dict) and e[1].get("request"):
                 request = e[1].get("request")
                 for k in request:
                     for t in request[k]:
@@ -180,7 +180,7 @@ class EcmwfSchemaParser(ListenerSchemaParser):
                             # check the mars schema
                             mars_enums = mars_schema["_field"][k]["values"]
                             for me in mars_enums:
-                                if type(me) == list:
+                                if isinstance(me, list):
                                     for en in me:
                                         t["values"].append(en)
                                 else:
