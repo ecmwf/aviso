@@ -87,7 +87,6 @@ class Config:
 
     @staticmethod
     def _create_default_config() -> Dict:
-
         # main config
         config = {}
         config["monitoring"] = None
@@ -165,7 +164,6 @@ class Config:
         return config
 
     def logging_setup(self, logging_conf_path: str):
-
         if logging_conf_path is not None:
             try:
                 with open(logging_conf_path, "r") as f:

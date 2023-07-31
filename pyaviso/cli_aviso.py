@@ -52,11 +52,9 @@ def catch_all_exceptions(cls, handler):
     """
 
     class Cls(cls):
-
         _original_args = None
 
         def make_context(self, info_name, args, parent=None, **extra):
-
             # grab the original command line arguments
             self._original_args = " ".join(args)
 

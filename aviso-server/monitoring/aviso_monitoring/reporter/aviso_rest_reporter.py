@@ -76,7 +76,6 @@ class ResponseTime(AvisoRestChecker):
         super().__init__(*args, **kwargs)
 
     def metric(self):
-
         logger.debug(f"Processing tlms {self.metric_name}...")
 
         assert self.msg_receiver, "Msg receiver is None"

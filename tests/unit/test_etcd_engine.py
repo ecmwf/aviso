@@ -429,7 +429,6 @@ def test_find_compacted_revision(engine):
 
 @pytest.mark.parametrize("engine", engines)
 def test_push_with_lease(engine):
-
     # submit a key expiring
     kvs = [{"key": "test/test0", "value": "0"}]
     assert engine.push_with_status(kvs, base_key="test/", message="test/test0", ttl=1)
@@ -448,7 +447,6 @@ def test_push_with_lease(engine):
 
 @pytest.mark.parametrize("engine", engines)
 def test_status_as_linked_list(engine):
-
     status0 = {"date_time": "2020-08-28T10:58:17.829Z"}
     kv0 = {"mod_rev": "100", "value": json.dumps(status0).encode()}
 
