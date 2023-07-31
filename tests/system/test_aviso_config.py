@@ -7,6 +7,7 @@
 # nor does it submit to any jurisdiction.
 
 import os
+from pathlib import Path
 import time
 from filecmp import dircmp
 from shutil import rmtree
@@ -24,8 +25,14 @@ config_folder_to_push2 = "tests/system/fixtures/config_test_push2"
 config_folder_to_pull = "tests/system/fixtures/config_test_pull1"
 
 
+def base_path() -> Path:
+    """Get the current folder of the test"""
+    return Path(__file__).parent.parent.parent
+
+
 def create_conf() -> user_config.UserConfig:  # this automatically configure the logging
-    c = user_config.UserConfig(conf_path="tests/config.yaml")
+    tests_path = Path(__file__).parent.parent
+    c = user_config.UserConfig(conf_path= Path(tests_path / "config.yaml"))
     return c
 
 
@@ -39,7 +46,8 @@ confs = [c1, c2]
 
 @pytest.mark.parametrize("conf", confs)
 @pytest.fixture(autouse=True)  # this runs before and after every test
-def pre_post_test(conf):
+def pre_post_test(conf, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.chdir(base_path())
     # set environment
     os.environ["AVISO_CONFIG"] = "tests/config.yaml"
     yield
@@ -55,7 +63,8 @@ def clear_environment():
 
 
 @pytest.fixture(autouse=True)
-def remove_test_svc():
+def remove_test_svc(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.chdir(base_path())
     yield
     result = CliRunner().invoke(cli, ["remove", test_svc, "-f"])
     assert result.exit_code == 0
@@ -118,7 +127,8 @@ def test_help(conf):
 
 
 @pytest.mark.parametrize("conf", confs)
-def test_push_and_pull(conf):
+def test_push_and_pull(conf, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.chdir(base_path())
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
     result = runner.invoke(cli, ["push", test_svc, "-D", config_folder_to_push1, "-m", "test configuration"])
@@ -149,13 +159,14 @@ def test_push_and_pull(conf):
 
 
 @pytest.mark.parametrize("conf", confs)
-def test_push_and_pull_workflow1(conf):
+def test_push_and_pull_workflow1(conf, monkeypatch: pytest.MonkeyPatch):
     """
     First push larger set, then a small set with NO delete -> pulled folder is like the union of the larger and smaller
     set
     :param conf:
     :return:
     """
+    monkeypatch.chdir(base_path())
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
     # First push larger set
@@ -193,12 +204,13 @@ def test_push_and_pull_workflow1(conf):
 
 
 @pytest.mark.parametrize("conf", confs)
-def test_push_and_pull_workflow2(conf):
+def test_push_and_pull_workflow2(conf, monkeypatch: pytest.MonkeyPatch):
     """
     First push larger set, then a small set with delete -> pulled folder is like the smaller set
     :param conf:
     :return:
     """
+    monkeypatch.chdir(base_path())
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
     # First push larger set
@@ -233,13 +245,14 @@ def test_push_and_pull_workflow2(conf):
 
 
 @pytest.mark.parametrize("conf", confs)
-def test_push_and_pull_workflow3(conf):
+def test_push_and_pull_workflow3(conf, monkeypatch: pytest.MonkeyPatch):
     """
     First push larger set and pull, then push small set with delete and pull with NO delete -> pulled folder
     is like the union of larger and smaller set
     :param conf:
     :return:
     """
+    monkeypatch.chdir(base_path())
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
     # First push larger set
@@ -288,13 +301,14 @@ def test_push_and_pull_workflow3(conf):
 
 
 @pytest.mark.parametrize("conf", confs)
-def test_push_and_pull_workflow4(conf):
+def test_push_and_pull_workflow4(conf, monkeypatch: pytest.MonkeyPatch):
     """
     First push larger set and pull, then push small set with delete and pull with delete -> pulled folder
     is like the smaller set
     :param conf:
     :return:
     """
+    monkeypatch.chdir(base_path())
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
     # First push larger set
@@ -338,7 +352,8 @@ def test_push_and_pull_workflow4(conf):
 
 
 @pytest.mark.parametrize("conf", confs)
-def test_remove(conf):
+def test_remove(conf, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.chdir(base_path())
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
     # First push
@@ -371,7 +386,8 @@ def test_remove(conf):
 
 
 @pytest.mark.parametrize("conf", confs)
-def test_remove_doit(conf):
+def test_remove_doit(conf, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.chdir(base_path())
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
     # First push
@@ -400,7 +416,8 @@ def test_remove_doit(conf):
 
 
 @pytest.mark.parametrize("conf", confs)
-def test_revert(conf):
+def test_revert(conf, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.chdir(base_path())
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
     # First push
@@ -455,7 +472,8 @@ def test_revert(conf):
 
 
 @pytest.mark.parametrize("conf", confs)
-def test_status(conf):
+def test_status(conf, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.chdir(base_path())
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
     # First push
@@ -470,7 +488,8 @@ def test_status(conf):
 
 
 @pytest.mark.parametrize("conf", confs)
-def test_pull_nothing(conf):
+def test_pull_nothing(conf, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.chdir(base_path())
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
     result = runner.invoke(cli, ["pull", test_svc, "-D", config_folder_to_pull])
@@ -479,7 +498,8 @@ def test_pull_nothing(conf):
 
 
 @pytest.mark.parametrize("conf", confs)
-def test_remove_nothing(conf):
+def test_remove_nothing(conf, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.chdir(base_path())
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
     result = runner.invoke(cli, ["remove", test_svc, "-f"])
@@ -488,7 +508,8 @@ def test_remove_nothing(conf):
 
 
 @pytest.mark.parametrize("conf", confs)
-def test_revert_nothing(conf):
+def test_revert_nothing(conf, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.chdir(base_path())
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
     result = runner.invoke(cli, ["revert", test_svc])
@@ -497,7 +518,8 @@ def test_revert_nothing(conf):
 
 
 @pytest.mark.parametrize("conf", confs)
-def test_status_nothing(conf):
+def test_status_nothing(conf, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.chdir(base_path())
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     runner = CliRunner()
     result = runner.invoke(cli, ["status", test_svc])
