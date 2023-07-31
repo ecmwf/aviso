@@ -9,6 +9,7 @@
 import contextlib
 import logging
 import os
+from pathlib import Path
 import time
 from datetime import datetime
 from shutil import rmtree
@@ -28,8 +29,14 @@ from pyaviso.engine.file_based_engine import FileBasedEngine
 aviso = NotificationManager()
 
 
+def base_path() -> Path:
+    """Get the current folder of the test"""
+    return Path(__file__).parent.parent.parent
+
+
 def create_conf() -> user_config.UserConfig:  # this automatically configure the logging
-    c = user_config.UserConfig(conf_path="tests/config.yaml")
+    tests_path = Path(__file__).parent.parent
+    c = user_config.UserConfig(conf_path= Path(tests_path / "config.yaml"))
     return c
 
 
@@ -62,7 +69,8 @@ def clear_environment():
 
 @pytest.mark.parametrize("config", configs)
 @pytest.fixture(autouse=True)  # this runs before and after every test
-def pre_post_test(config):
+def pre_post_test(config, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.chdir(base_path())
     # delete the revision state
     full_home_path = os.path.expanduser(HOME_FOLDER)
     full_state_path = os.path.join(full_home_path, LOCAL_STATE_FOLDER)
@@ -120,7 +128,8 @@ def caplog_for_logger(caplog):  # this is needed to assert over the logging outp
     lo.removeHandler(caplog.handler)
 
 
-def reset_previous_run():
+def reset_previous_run(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.chdir(base_path())
     file_path = "tests/system/fixtures/received.txt"
     full_path = os.path.join(os.getcwd(), file_path)
     if os.path.exists(full_path):
@@ -132,7 +141,8 @@ def reset_previous_run():
 
 
 @pytest.mark.parametrize("config", [c1, c2])
-def test_command_listener(config):
+def test_command_listener(config, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.chdir(base_path())
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
 
     # delete previous file of notification
@@ -250,7 +260,8 @@ def test_notify_ttl(config):
 
 @pytest.mark.skip
 @pytest.mark.parametrize("config", [c1])
-def test_history_on_server(config: user_config.UserConfig, caplog):
+def test_history_on_server(config: user_config.UserConfig, caplog, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.chdir(base_path())
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     with caplog_for_logger(caplog):  # this allows to assert over the logging output
         config.notification_engine.host = "aviso.ecmwf.int"
