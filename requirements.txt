@@ -7,7 +7,4 @@ parse
 pyinotify
 cloudevents>=1.2.0
 boto3
-
-
-
-
+protobuf<=3.20.3
