@@ -10,6 +10,7 @@ import json
 import os
 import threading
 import time
+from pathlib import Path
 
 import pytest
 import requests
@@ -20,7 +21,8 @@ from aviso_rest.frontend import Frontend
 from pyaviso.cli_aviso import _parse_inline_params
 from pyaviso.notification_manager import NotificationManager
 
-config = Config(conf_path="aviso-server/rest/tests/config.yaml")
+tests_path = Path(__file__).parent
+config = Config(conf_path=Path(tests_path / "config.yaml"))
 frontend_url_home = f"http://{config.host}:{config.port}"
 frontend_url_api = f"{frontend_url_home}/api/v1"
 

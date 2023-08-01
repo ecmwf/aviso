@@ -8,6 +8,7 @@
 
 import datetime
 import queue
+from pathlib import Path
 
 import requests
 from aviso_admin import config
@@ -35,7 +36,8 @@ starting_day_s = "20201101"
 
 
 def conf() -> config.Config:  # this automatically configure the logging
-    c = config.Config(conf_path="tests/config.yaml")
+    tests_path = Path(__file__).parent
+    c = config.Config(conf_path=Path(tests_path / "config.yaml"))
     return c
 
 
@@ -68,7 +70,9 @@ def delete_destination_keys(date):
 def store_size():
     reporter = EtcdReporter(conf().monitoring)
     checker = StoreSize(
-        EtcdMetricType.etcd_store_size, member_urls=reporter.member_urls, raw_tlms=reporter.retrive_raw_tlms()
+        EtcdMetricType.etcd_store_size,
+        member_urls=reporter.member_urls,
+        raw_tlms=reporter.retrive_raw_tlms(),
     )
     size = checker.max_store_size("etcd_mvcc_db_total_size_in_use_in_bytes")
     return size
