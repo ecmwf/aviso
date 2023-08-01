@@ -10,6 +10,7 @@ import os
 import random
 import time
 from datetime import datetime
+from pathlib import Path
 
 import pytest
 import requests
@@ -19,7 +20,8 @@ from aviso_admin.utils import encode_to_str_base64, incr_last_byte
 
 
 def conf() -> config.Config:  # this automatically configure the logging
-    c = config.Config(conf_path="aviso-server/admin/tests/config.yaml")
+    tests_path = Path(__file__).parent
+    c = config.Config(conf_path=Path(tests_path / "config.yaml"))
     return c
 
 

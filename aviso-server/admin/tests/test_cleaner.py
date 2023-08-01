@@ -8,6 +8,7 @@
 
 import datetime
 import os
+from pathlib import Path
 
 import requests
 from aviso_admin import config, logger
@@ -16,7 +17,8 @@ from aviso_admin.utils import encode_to_str_base64
 
 
 def conf() -> config.Config:  # this automatically configure the logging
-    c = config.Config(conf_path="aviso-server/admin/tests/config.yaml")
+    tests_path = Path(__file__).parent
+    c = config.Config(conf_path=Path(tests_path / "config.yaml"))
     return c
 
 
@@ -69,9 +71,18 @@ def test_delete_dissemination_keys():
     date = datetime.datetime.now() - datetime.timedelta(days=1)
 
     # first put a few dissemination keys
-    put_key(config["url"], config["diss_path"] + "EC1/date=" + date.strftime(DATE_FORMAT) + "/aaaa")
-    put_key(config["url"], config["diss_path"] + "EC1/date=" + date.strftime(DATE_FORMAT) + "/bbbb")
-    put_key(config["url"], config["diss_path"] + "EC1/date=" + date.strftime(DATE_FORMAT) + "/cccc")
+    put_key(
+        config["url"],
+        config["diss_path"] + "EC1/date=" + date.strftime(DATE_FORMAT) + "/aaaa",
+    )
+    put_key(
+        config["url"],
+        config["diss_path"] + "EC1/date=" + date.strftime(DATE_FORMAT) + "/bbbb",
+    )
+    put_key(
+        config["url"],
+        config["diss_path"] + "EC1/date=" + date.strftime(DATE_FORMAT) + "/cccc",
+    )
 
     # delete dissemination keys
     n_deleted = cleaner.delete_keys(date, "EC1")
@@ -86,9 +97,18 @@ def test_delete_mars_keys():
     date = datetime.datetime.now() - datetime.timedelta(days=1)
 
     # first put a few MARS keys
-    put_key(config["url"], config["mars_path"] + "date=" + date.strftime(DATE_FORMAT) + "/aaaa")
-    put_key(config["url"], config["mars_path"] + "date=" + date.strftime(DATE_FORMAT) + "/bbbb")
-    put_key(config["url"], config["mars_path"] + "date=" + date.strftime(DATE_FORMAT) + "/cccc")
+    put_key(
+        config["url"],
+        config["mars_path"] + "date=" + date.strftime(DATE_FORMAT) + "/aaaa",
+    )
+    put_key(
+        config["url"],
+        config["mars_path"] + "date=" + date.strftime(DATE_FORMAT) + "/bbbb",
+    )
+    put_key(
+        config["url"],
+        config["mars_path"] + "date=" + date.strftime(DATE_FORMAT) + "/cccc",
+    )
 
     # delete MARS keys
     n_deleted = cleaner.delete_keys(date)
@@ -109,9 +129,18 @@ def test_run_cleaner():
     # first put a few destinations and keys
     prefix = config["dest_path"] + date.strftime(DATE_FORMAT) + "/"
     put_key(config["url"], prefix + "EC1")
-    put_key(config["url"], config["diss_path"] + "EC1/date=" + date.strftime(DATE_FORMAT) + "/aaaa")
-    put_key(config["url"], config["diss_path"] + "EC1/date=" + date.strftime(DATE_FORMAT) + "/bbbb")
-    put_key(config["url"], config["diss_path"] + "EC1/date=" + date.strftime(DATE_FORMAT) + "/cccc")
+    put_key(
+        config["url"],
+        config["diss_path"] + "EC1/date=" + date.strftime(DATE_FORMAT) + "/aaaa",
+    )
+    put_key(
+        config["url"],
+        config["diss_path"] + "EC1/date=" + date.strftime(DATE_FORMAT) + "/bbbb",
+    )
+    put_key(
+        config["url"],
+        config["diss_path"] + "EC1/date=" + date.strftime(DATE_FORMAT) + "/cccc",
+    )
 
     # run the whole workflow
     cleaner.run()
