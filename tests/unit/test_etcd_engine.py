@@ -13,6 +13,7 @@ import logging
 import os
 import subprocess
 import time
+from pathlib import Path
 from shutil import rmtree
 from threading import Thread
 
@@ -23,12 +24,11 @@ from pyaviso.authentication import auth
 from pyaviso.engine.etcd_engine import LOCAL_STATE_FOLDER
 from pyaviso.engine.etcd_grpc_engine import EtcdGrpcEngine
 from pyaviso.engine.etcd_rest_engine import EtcdRestEngine
-from pathlib import Path
 
 
 def rest_engine():  # this automatically configure the logging
     tests_path = Path(__file__).parent.parent
-    c = user_config.UserConfig(conf_path= Path(tests_path / "config.yaml"))
+    c = user_config.UserConfig(conf_path=Path(tests_path / "config.yaml"))
     authenticator = auth.Auth.get_auth(c)
     engine = EtcdRestEngine(c.notification_engine, authenticator)
     return engine
@@ -36,7 +36,7 @@ def rest_engine():  # this automatically configure the logging
 
 def grpc_engine():  # this automatically configure the logging
     tests_path = Path(__file__).parent.parent
-    c = user_config.UserConfig(conf_path= Path(tests_path / "config.yaml"))
+    c = user_config.UserConfig(conf_path=Path(tests_path / "config.yaml"))
     authenticator = auth.Auth.get_auth(c)
     engine = EtcdGrpcEngine(c.notification_engine, authenticator)
     return engine

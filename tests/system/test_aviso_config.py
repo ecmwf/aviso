@@ -7,9 +7,9 @@
 # nor does it submit to any jurisdiction.
 
 import os
-from pathlib import Path
 import time
 from filecmp import dircmp
+from pathlib import Path
 from shutil import rmtree
 
 import pytest
@@ -32,7 +32,7 @@ def base_path() -> Path:
 
 def create_conf() -> user_config.UserConfig:  # this automatically configure the logging
     tests_path = Path(__file__).parent.parent
-    c = user_config.UserConfig(conf_path= Path(tests_path / "config.yaml"))
+    c = user_config.UserConfig(conf_path=Path(tests_path / "config.yaml"))
     return c
 
 

@@ -17,9 +17,9 @@ from pyaviso.engine import EngineType
 from pyaviso.event_listeners.listener_schema_parser import ListenerSchemaParserType
 from pyaviso.user_config import KEY_FILE, UserConfig
 
-
 tests_path = Path(__file__).parent.parent
 test_config_folder = str(Path(tests_path / "unit/fixtures/"))
+
 
 def base_path() -> Path:
     """Get the current folder of the test"""
