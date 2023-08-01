@@ -9,8 +9,8 @@
 import contextlib
 import logging
 import os
-from pathlib import Path
 import time
+from pathlib import Path
 from threading import Thread
 
 import pytest
@@ -34,7 +34,7 @@ def base_path() -> Path:
 @pytest.fixture()
 def conf() -> user_config.UserConfig:  # this automatically configure the logging
     tests_path = Path(__file__).parent.parent
-    c = user_config.UserConfig(conf_path= Path(tests_path / "config.yaml"))
+    c = user_config.UserConfig(conf_path=Path(tests_path / "config.yaml"))
     return c
 
 
@@ -64,7 +64,7 @@ def test_echo_trigger(conf, listener_factory, caplog, monkeypatch: pytest.Monkey
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     with caplog_for_logger(caplog):  # this allows to assert over the logging output
         # open the listener yaml file
-        with Path(tests_path / "unit/fixtures/good_listeners/echo_listener.yaml").open(mode='r') as f:
+        with Path(tests_path / "unit/fixtures/good_listeners/echo_listener.yaml").open(mode="r") as f:
             listeners_dict = yaml.safe_load(f.read())
         # parse it
         listeners: list = listener_factory.create_listeners(listeners_dict)
@@ -118,7 +118,7 @@ def test_logger_listener(conf, listener_factory, caplog, monkeypatch: pytest.Mon
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     with caplog_for_logger(caplog):  # this allows to assert over the logging output
         # open the listener yaml file
-        with Path(tests_path / "unit/fixtures/good_listeners/log_listener.yaml").open(mode='r') as f:
+        with Path(tests_path / "unit/fixtures/good_listeners/log_listener.yaml").open(mode="r") as f:
             listeners_dict = yaml.safe_load(f.read())
         # parse it
         listeners: list = listener_factory.create_listeners(listeners_dict)
@@ -135,7 +135,7 @@ def test_logger_listener(conf, listener_factory, caplog, monkeypatch: pytest.Mon
         # check  the trigger has logged the notification on the system log
         assert "Log Trigger completed" in caplog.text
         # check  the trigger has logged the notification on the log specified
-        with open(listener.triggers[0].get("path"), 'r') as f:
+        with open(listener.triggers[0].get("path"), "r") as f:
             assert "Notification received" in f.read()
 
         # clean up
@@ -148,7 +148,7 @@ def test_command_listener(conf, listener_factory, caplog, monkeypatch: pytest.Mo
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     with caplog_for_logger(caplog):  # this allows to assert over the logging output
         # open the listener yaml file
-        with Path(tests_path / "unit/fixtures/good_listeners/command_listener.yaml").open(mode='r') as f:
+        with Path(tests_path / "unit/fixtures/good_listeners/command_listener.yaml").open(mode="r") as f:
             listeners_dict = yaml.safe_load(f.read())
         # parse it
         listeners: list = listener_factory.create_listeners(listeners_dict)
@@ -170,7 +170,7 @@ def test_command_json_listener(conf, listener_factory, caplog, monkeypatch: pyte
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     with caplog_for_logger(caplog):  # this allows to assert over the logging output
         # open the listener yaml file
-        with Path(tests_path / "unit/fixtures/good_listeners/command_json_listener.yaml").open(mode='r') as f:
+        with Path(tests_path / "unit/fixtures/good_listeners/command_json_listener.yaml").open(mode="r") as f:
             listeners_dict = yaml.safe_load(f.read())
         # parse it
         listeners: list = listener_factory.create_listeners(listeners_dict)
@@ -192,7 +192,7 @@ def test_command_json_path_listener(conf, listener_factory, caplog, monkeypatch:
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     with caplog_for_logger(caplog):  # this allows to assert over the logging output
         # open the listener yaml file
-        with Path(tests_path / "unit/fixtures/good_listeners/command_json_path_listener.yaml").open(mode='r') as f:
+        with Path(tests_path / "unit/fixtures/good_listeners/command_json_path_listener.yaml").open(mode="r") as f:
             listeners_dict = yaml.safe_load(f.read())
         # parse it
         listeners: list = listener_factory.create_listeners(listeners_dict)
@@ -225,7 +225,7 @@ def test_post_cloudEventshttp_listener(conf, listener_factory, caplog):
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     with caplog_for_logger(caplog):  # this allows to assert over the logging output
         # open the listener yaml file
-        with Path(tests_path / "unit/fixtures/good_listeners/post_cloudEventsHttp_listener.yaml").open(mode='r') as f:
+        with Path(tests_path / "unit/fixtures/good_listeners/post_cloudEventsHttp_listener.yaml").open(mode="r") as f:
             listeners_dict = yaml.safe_load(f.read())
         # parse it
         listeners: list = listener_factory.create_listeners(listeners_dict)
@@ -253,7 +253,9 @@ def test_post_cloudeventsaws_listener(conf, listener_factory, caplog):
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     with caplog_for_logger(caplog):  # this allows to assert over the logging output
         # open the listener yaml file
-        with Path(tests_path / "unit/fixtures/good_listeners/post_cloudEventsAws_fifo_listener.yaml").open(mode='r') as f:
+        with Path(tests_path / "unit/fixtures/good_listeners/post_cloudEventsAws_fifo_listener.yaml").open(
+            mode="r"
+        ) as f:
             listeners_dict = yaml.safe_load(f.read())
         # parse it
         listeners: list = listener_factory.create_listeners(listeners_dict)
@@ -280,7 +282,7 @@ def test_multiple_nots_echo(conf, listener_factory, caplog):
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     with caplog_for_logger(caplog):  # this allows to assert over the logging output
         # open the listener yaml file
-        with Path(tests_path / "unit/fixtures/good_listeners/echo_listener.yaml").open(mode='r') as f:
+        with Path(tests_path / "unit/fixtures/good_listeners/echo_listener.yaml").open(mode="r") as f:
             listeners_dict = yaml.safe_load(f.read())
         # parse it
         listeners: list = listener_factory.create_listeners(listeners_dict)
@@ -304,7 +306,7 @@ def test_multiple_nots_cmd(conf, listener_factory, caplog, monkeypatch: pytest.M
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     with caplog_for_logger(caplog):  # this allows to assert over the logging output
         # open the listener yaml file
-        with Path(tests_path / "unit/fixtures/good_listeners/command_listener.yaml").open(mode='r') as f:
+        with Path(tests_path / "unit/fixtures/good_listeners/command_listener.yaml").open(mode="r") as f:
             listeners_dict = yaml.safe_load(f.read())
         # parse it
         listeners: list = listener_factory.create_listeners(listeners_dict)
@@ -327,7 +329,7 @@ def test_multiple_listeners(conf, listener_factory, caplog):
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     with caplog_for_logger(caplog):  # this allows to assert over the logging output
         # open the listener yaml file
-        with Path(tests_path / "unit/fixtures/good_listeners/multiple_listeners.yaml").open(mode='r') as f:
+        with Path(tests_path / "unit/fixtures/good_listeners/multiple_listeners.yaml").open(mode="r") as f:
             listeners_dict = yaml.safe_load(f.read())
         # parse it
         listeners: list = listener_factory.create_listeners(listeners_dict)
@@ -349,7 +351,7 @@ def test_multiple_triggers(conf, listener_factory, caplog, monkeypatch: pytest.M
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     with caplog_for_logger(caplog):  # this allows to assert over the logging output
         # open the listener yaml file
-        with Path(tests_path / "unit/fixtures/good_listeners/multiple_triggers.yaml").open(mode='r') as f:
+        with Path(tests_path / "unit/fixtures/good_listeners/multiple_triggers.yaml").open(mode="r") as f:
             listeners_dict = yaml.safe_load(f.read())
         # parse it
         listeners: list = listener_factory.create_listeners(listeners_dict)

@@ -7,18 +7,18 @@
 # nor does it submit to any jurisdiction.
 
 import os
+from pathlib import Path
 
 import pytest
 
 from pyaviso import logger, user_config
 from pyaviso.authentication import auth, ecmwf_auth, etcd_auth, none_auth
 from pyaviso.engine import engine_factory
-from pathlib import Path
 
 
 def conf() -> user_config.UserConfig:  # this automatically configure the logging
     tests_path = Path(__file__).parent.parent
-    c = user_config.UserConfig(conf_path= Path(tests_path / "config.yaml"))
+    c = user_config.UserConfig(conf_path=Path(tests_path / "config.yaml"))
     return c
 
 

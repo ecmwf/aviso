@@ -20,9 +20,10 @@ from pyaviso.event_listeners import event_listener_factory as elf
 
 tests_path = Path(__file__).parent.parent
 
+
 @pytest.fixture()
 def conf() -> user_config.UserConfig:  # this automatically configure the logging
-    c = user_config.UserConfig(conf_path= Path(tests_path / "config.yaml"))
+    c = user_config.UserConfig(conf_path=Path(tests_path / "config.yaml"))
     return c
 
 
@@ -40,7 +41,7 @@ def test_empty_file(conf: user_config.UserConfig, schema):
     engine_factory: ef.EngineFactory = ef.EngineFactory(conf.notification_engine, authenticator)
     listener_factory = elf.EventListenerFactory(engine_factory, schema)
     # open the listener yaml file
-    with Path(tests_path / "unit/fixtures/bad_listeners/empty.yaml").open(mode='r') as f:
+    with Path(tests_path / "unit/fixtures/bad_listeners/empty.yaml").open(mode="r") as f:
         listeners_dict = yaml.safe_load(f.read())
     # parse it
     try:
@@ -56,7 +57,7 @@ def test_no_listeners(conf: user_config.UserConfig, schema):
     engine_factory: ef.EngineFactory = ef.EngineFactory(conf.notification_engine, authenticator)
     listener_factory = elf.EventListenerFactory(engine_factory, schema)
     # open the listener yaml file
-    with Path(tests_path / "unit/fixtures/bad_listeners/noListeners.yaml").open(mode='r') as f:
+    with Path(tests_path / "unit/fixtures/bad_listeners/noListeners.yaml").open(mode="r") as f:
         listeners_dict = yaml.safe_load(f.read())
     # parse it
     try:
@@ -72,7 +73,7 @@ def test_bad_tree_structure(conf: user_config.UserConfig, schema):
     engine_factory: ef.EngineFactory = ef.EngineFactory(conf.notification_engine, authenticator)
     listener_factory = elf.EventListenerFactory(engine_factory, schema)
     # open the listener yaml file
-    with Path(tests_path / "unit/fixtures/bad_listeners/badTree.yaml").open(mode='r') as f:
+    with Path(tests_path / "unit/fixtures/bad_listeners/badTree.yaml").open(mode="r") as f:
         listeners_dict = yaml.safe_load(f.read())
     # parse it
     try:
@@ -88,7 +89,7 @@ def test_bad_attribute(conf: user_config.UserConfig, schema):
     engine_factory: ef.EngineFactory = ef.EngineFactory(conf.notification_engine, authenticator)
     listener_factory = elf.EventListenerFactory(engine_factory, schema)
     # open the listener yaml file
-    with Path(tests_path / "unit/fixtures/bad_listeners/badAttribute.yaml").open(mode='r') as f:
+    with Path(tests_path / "unit/fixtures/bad_listeners/badAttribute.yaml").open(mode="r") as f:
         listeners_dict = yaml.safe_load(f.read())
     # parse it
     try:
@@ -104,7 +105,7 @@ def test_bad_format(conf: user_config.UserConfig, schema):
     engine_factory: ef.EngineFactory = ef.EngineFactory(conf.notification_engine, authenticator)
     listener_factory = elf.EventListenerFactory(engine_factory, schema)
     # open the listener yaml file
-    with Path(tests_path / "unit/fixtures/bad_listeners/badFormat.yaml").open(mode='r') as f:
+    with Path(tests_path / "unit/fixtures/bad_listeners/badFormat.yaml").open(mode="r") as f:
         listeners_dict = yaml.safe_load(f.read())
     # parse it
     try:
@@ -120,7 +121,7 @@ def test_no_trigger(conf: user_config.UserConfig, schema):
     engine_factory: ef.EngineFactory = ef.EngineFactory(conf.notification_engine, authenticator)
     listener_factory = elf.EventListenerFactory(engine_factory, schema)
     # open the listener yaml file
-    with Path(tests_path / "unit/fixtures/bad_listeners/noTrigger.yaml").open(mode='r') as f:
+    with Path(tests_path / "unit/fixtures/bad_listeners/noTrigger.yaml").open(mode="r") as f:
         listeners_dict = yaml.safe_load(f.read())
     # parse it
     try:
@@ -136,7 +137,7 @@ def test_bad_trigger_type(conf: user_config.UserConfig, schema):
     engine_factory: ef.EngineFactory = ef.EngineFactory(conf.notification_engine, authenticator)
     listener_factory = elf.EventListenerFactory(engine_factory, schema)
     # open the listener yaml file
-    with Path(tests_path / "unit/fixtures/bad_listeners/badTriggerType.yaml").open(mode='r') as f:
+    with Path(tests_path / "unit/fixtures/bad_listeners/badTriggerType.yaml").open(mode="r") as f:
         listeners_dict = yaml.safe_load(f.read())
     # parse it
     try:
@@ -152,7 +153,7 @@ def test_bad_trigger(conf: user_config.UserConfig, schema):
     engine_factory: ef.EngineFactory = ef.EngineFactory(conf.notification_engine, authenticator)
     listener_factory = elf.EventListenerFactory(engine_factory, schema)
     # open the listener yaml file
-    with Path(tests_path / "unit/fixtures/bad_listeners/badTrigger.yaml").open(mode='r') as f:
+    with Path(tests_path / "unit/fixtures/bad_listeners/badTrigger.yaml").open(mode="r") as f:
         listeners_dict = yaml.safe_load(f.read())
     # parse it
     try:
@@ -168,7 +169,7 @@ def test_single_listener_complete(conf: user_config.UserConfig, schema):
     engine_factory: ef.EngineFactory = ef.EngineFactory(conf.notification_engine, authenticator)
     listener_factory = elf.EventListenerFactory(engine_factory, schema)
     # open the listener yaml file
-    with Path(tests_path / "unit/fixtures/good_listeners/complete_flight_listener.yaml").open(mode='r') as f:
+    with Path(tests_path / "unit/fixtures/good_listeners/complete_flight_listener.yaml").open(mode="r") as f:
         listeners_dict = yaml.safe_load(f.read())
     # parse it
     listeners: list = listener_factory.create_listeners(listeners_dict)
@@ -185,7 +186,7 @@ def test_single_listener(conf: user_config.UserConfig, schema):
     engine_factory: ef.EngineFactory = ef.EngineFactory(conf.notification_engine, authenticator)
     listener_factory = elf.EventListenerFactory(engine_factory, schema)
     # open the listener yaml file
-    with Path(tests_path / "unit/fixtures/good_listeners/basic_flight_listener.yaml").open(mode='r') as f:
+    with Path(tests_path / "unit/fixtures/good_listeners/basic_flight_listener.yaml").open(mode="r") as f:
         listeners_dict = yaml.safe_load(f.read())
     # parse it
     listeners: list = listener_factory.create_listeners(listeners_dict)
@@ -202,7 +203,7 @@ def test_multiple_listener(conf: user_config.UserConfig, schema):
     engine_factory: ef.EngineFactory = ef.EngineFactory(conf.notification_engine, authenticator)
     listener_factory = elf.EventListenerFactory(engine_factory, schema)
     # open the listener yaml file
-    with Path(tests_path / "unit/fixtures/good_listeners/multiple_flight_listeners.yaml").open(mode='r') as f:
+    with Path(tests_path / "unit/fixtures/good_listeners/multiple_flight_listeners.yaml").open(mode="r") as f:
         listeners_dict = yaml.safe_load(f.read())
     # parse it
     listeners: list = listener_factory.create_listeners(listeners_dict)
