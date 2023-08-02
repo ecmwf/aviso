@@ -14,8 +14,8 @@ from queue import Queue
 from shutil import rmtree
 from typing import Dict, List
 
-from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
+from watchdog.observers import Observer
 
 from .. import logger
 from ..authentication.auth import Auth
@@ -86,7 +86,9 @@ class FileBasedEngine(Engine):
                     for fp in x[2]:  # any file
                         kk: str = os.path.join(x[0], fp)
                         read_key(kk)
-                    if not prefix:  # we only look at the current directory, nothing deeper
+                    if (
+                        not prefix
+                    ):  # we only look at the current directory, nothing deeper
                         break
             else:
                 read_key(key)
@@ -131,7 +133,9 @@ class FileBasedEngine(Engine):
 
         return del_kvs
 
-    def push(self, kvs: List[Dict[str, any]], ks_delete: List[str] = None, ttl: int = None) -> bool:
+    def push(
+        self, kvs: List[Dict[str, any]], ks_delete: List[str] = None, ttl: int = None
+    ) -> bool:
         """
         Method to submit a list of key-value pairs and delete a list of keys from the server as a single transaction
         :param kvs: List of KV pair
@@ -236,7 +240,9 @@ class FileBasedEngine(Engine):
                                 # execute the trigger
                                 self._callback(k, v)
                             except Exception as ee:
-                                logger.error(f"Error with notification trigger, exception: {type(ee)} {ee}")
+                                logger.error(
+                                    f"Error with notification trigger, exception: {type(ee)} {ee}"
+                                )
                                 logger.debug("", exc_info=True)
 
             # define the event handler
