@@ -11,10 +11,10 @@ from typing import Dict
 
 import requests
 
-old_etcd = "http://k8s-dataservices-master.ecmwf.int:30000"
-new_etcd = "http://localhost:2379"
-from_revision = 145679891
-MAX_KV_RETURNED = 10000
+old_etcd: str = "__OLD_ETCD_ADDRESS__:PORT"
+new_etcd: str = "__NEW_ETCD_ADDRESS__:PORT"
+from_revision: int = 145679891
+MAX_KV_RETURNED: int = 10000
 
 
 def push_kvpairs(etcd_repo, kvs):
