@@ -8,14 +8,14 @@
 
 import _thread
 import os
-import threading
 import time
 from datetime import datetime
 from queue import Queue
 from shutil import rmtree
 from typing import Dict, List
 
-import pyinotify
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
 
 from .. import logger
 from ..authentication.auth import Auth
@@ -214,19 +214,17 @@ class FileBasedEngine(Engine):
                     logger.debug("", exc_info=True)
                     return False
 
-            # create a watch manager
-            wm = pyinotify.WatchManager()  # Watch Manager
-            mask = pyinotify.IN_CLOSE_WRITE  # watched events
-
             # define a class to handle the new events
-            class EventHandler(pyinotify.ProcessEvent):
-                def __init__(self, engine):
-                    super(EventHandler, self).__init__()
+            class WatchdogHandler(FileSystemEventHandler):
+                def __init__(self, engine, key, callback):
+                    super().__init__()
                     self._engine = engine
+                    self._key = key
+                    self._callback = callback
 
-                def process_IN_CLOSE_WRITE(self, event):
-                    if not os.path.isdir(event.pathname):
-                        kvs = self._engine.pull(key=event.pathname)
+                def on_modified(self, event):
+                    if not event.is_directory and event.src_path.endswith(self._key):
+                        kvs = self._engine.pull(key=event.src_path)
                         for kv in kvs:
                             k = kv["key"]
                             v = kv["value"].decode()
@@ -236,30 +234,30 @@ class FileBasedEngine(Engine):
                             logger.debug(f"Notification received for key {k}")
                             try:
                                 # execute the trigger
-                                callback(k, v)
+                                self._callback(k, v)
                             except Exception as ee:
                                 logger.error(f"Error with notification trigger, exception: {type(ee)} {ee}")
                                 logger.debug("", exc_info=True)
 
-            # add the handler to the watch manager and define the watching task
-            handler = EventHandler(engine=self)
-            notifier = pyinotify.Notifier(wm, handler, read_freq=self._polling_interval)
-            wm.add_watch(key, mask, rec=True, auto_add=True)
+            # define the event handler
+            event_handler = WatchdogHandler(engine=self, key=key, callback=callback)
 
-            # encapsulate the watcher in a daemon thread so we can stop it
-            def t_run():
-                notifier.loop()
+            # create an observer and schedule the event handler
+            observer = Observer()
+            observer.schedule(event_handler, path=key, recursive=True)
 
-            t = threading.Thread(target=t_run)
-            t.setDaemon(True)
-            t.start()
+            # start the observer in a daemon thread so we can stop it
+            observer.start()
 
             # this is the stop condition
             while key in self._listeners:
                 time.sleep(0.1)
-            notifier.stop()
+
+            # stop the observer
+            observer.stop()
+            observer.join()
 
         except Exception as e:
-            logger.error(f"Error while listening to key {key}, {e}")
+            logger.error(f"Error occurred during polling: {e}")
             logger.debug("", exc_info=True)
             _thread.interrupt_main()
