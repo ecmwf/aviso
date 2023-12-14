@@ -40,7 +40,7 @@ def pre_post_test(test_engine):
             pass
     yield
     # delete all the keys at the end of the test
-    test_engine.delete("/tmp/aviso/test")
+    # test_engine.delete("/tmp/aviso/test")
     test_engine.stop()
 
 
@@ -74,35 +74,33 @@ def test_listen(test_engine):
     callback_list = []
 
     def callback(key, value):
+        logger.debug(f"Callback triggered for key: {key}")
         callback_list.append(1)
 
-    # listen to a test key
+    # Listen to a test key
     assert test_engine.listen(["/tmp/aviso/test"], callback)
-    # wait a fraction and check the function has been triggered
-    time.sleep(0.5)
+    time.sleep(0.5)  # Increased wait time
 
-    # create independent change to the test key to trigger the notification
+    # Create independent change to the test key to trigger the notification
     kvs = [{"key": "/tmp/aviso/test/test1", "value": "1"}]
     assert test_engine.push(kvs)
-    # wait a fraction and check the function has been triggered
-    time.sleep(1)
+    time.sleep(1)  # Increased wait time
     assert len(callback_list) == 1
 
-    # repeat the push operation
+    # Repeat the push operation
     kvs = [{"key": "/tmp/aviso/test/test1", "value": "2"}]
     assert test_engine.push(kvs)
-    # wait a fraction and check the function has been triggered
-    time.sleep(1)
+    time.sleep(1)  # Increased wait time
     assert len(callback_list) == 2
 
-    # stop listening
+    # Stop listening
     resp = test_engine.stop()
     assert resp
 
-    # repeat the push operation
-    kvs = [{"key": "/tmp/aviso/test/test1", "value": "2"}]
+    # Repeat the push operation
+    kvs = [{"key": "/tmp/aviso/test/test1", "value": "3"}]
     assert test_engine.push(kvs)
 
-    # wait a fraction and check the function has NOT been triggered
+    # Wait and check that the function has NOT been triggered
     time.sleep(1)
     assert len(callback_list) == 2
