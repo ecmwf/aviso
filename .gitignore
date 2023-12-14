@@ -11,3 +11,5 @@ aviso-server/monitoring/aviso_monitoring.egg-info/*
 docs/build/*
 venv
 .venv
+build
+default.etcd
