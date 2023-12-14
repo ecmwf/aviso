@@ -128,8 +128,7 @@ def caplog_for_logger(caplog):  # this is needed to assert over the logging outp
     lo.removeHandler(caplog.handler)
 
 
-def reset_previous_run(monkeypatch: pytest.MonkeyPatch):
-    monkeypatch.chdir(base_path())
+def reset_previous_run():
     file_path = "tests/system/fixtures/received.txt"
     full_path = os.path.join(os.getcwd(), file_path)
     if os.path.exists(full_path):
