@@ -33,7 +33,7 @@ class EtcdGrpcEngine(EtcdEngine):
         self._base_url = f"http://{self._host}:{self._port}/v3/"
 
     def _initialise_server(self):
-        if isinstance(self.auth, EtcdAuth):
+        if type(self.auth) == EtcdAuth:  # noqa: E721
             self._server = Etcd3Client(
                 self.host, self.port, user=self.auth.username, password=self.auth.password, timeout=self.timeout
             )

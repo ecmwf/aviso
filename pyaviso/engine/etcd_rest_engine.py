@@ -247,7 +247,7 @@ class EtcdRestEngine(EtcdEngine):
         This method authenticates  the user and set the internal token, this is only done for Etcd authentication
         :return: True if successfully authenticated
         """
-        if isinstance(self.auth, EtcdAuth):
+        if type(self.auth) == EtcdAuth:  # noqa: E721
             logger.debug(f"Authenticating user {self.auth.username}...")
 
             url = self._base_url + "auth/authenticate"
