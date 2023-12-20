@@ -191,7 +191,7 @@ class PodAvailable(AvisoRestChecker):
             logger.warning("Could not determine the pod's namespace.")
             namespace = "aviso"
 
-        pattern = rf'kube_deployment_status_replicas{{namespace="{namespace}",deployment="aviso-rest-\w+"}}'
+        pattern = rf'kube_deployment_status_replicas{{namespace="{namespace}",deployment="aviso-rest"}}'
         # defaults
         status = 0
         message = "All pods available"
