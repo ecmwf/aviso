@@ -24,6 +24,9 @@ class OpsviewReporter(ABC):
         self.monitor_servers = config.monitor_servers
         self.msg_receiver = msg_receiver
         self.token = {}
+        if config.kube_state_metrics["ssl_enabled"]:
+            self.metric_ssl_enabled = True
+            self.metric_token = config.kube_state_metrics["token"]
 
     def ms_authenticate(self, m_server):
         """
@@ -199,7 +202,7 @@ class OpsviewReporter(ABC):
         }
         return agg_tlm
 
-    def retrieve_metrics(metric_servers, req_timeout):
+    def retrieve_metrics(self, metric_servers, req_timeout):
         """
         This methods retrieves the metrics provided by specific metric servers using a Prometheus interface.
         """
@@ -207,8 +210,11 @@ class OpsviewReporter(ABC):
         for u in metric_servers:
             url = u + "/metrics"
             logger.debug(f"Retrieving metrics from {url}...")
+            headers = {}
             try:
-                resp = requests.get(url, verify=False, timeout=req_timeout)
+                if self.metric_ssl_enabled:
+                    headers["Authorization"] = f"Bearer {self.metric_token}"
+                resp = requests.get(url, verify=False, timeout=req_timeout, headers=headers)
             except Exception as e:
                 logger.exception(f"Not able to get metrics from {url}, error {e}")
                 raw_tlms[u] = None
