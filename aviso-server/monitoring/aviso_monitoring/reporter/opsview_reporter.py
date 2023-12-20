@@ -202,7 +202,8 @@ class OpsviewReporter(ABC):
         }
         return agg_tlm
 
-    def retrieve_metrics(self, metric_servers, req_timeout):
+    @classmethod
+    def retrieve_metrics(cls, metric_servers, req_timeout):
         """
         This methods retrieves the metrics provided by specific metric servers using a Prometheus interface.
         """
@@ -212,8 +213,8 @@ class OpsviewReporter(ABC):
             logger.debug(f"Retrieving metrics from {url}...")
             headers = {}
             try:
-                if self.metric_ssl_enabled:
-                    headers["Authorization"] = f"Bearer {self.metric_token}"
+                if cls.metric_ssl_enabled:
+                    headers["Authorization"] = f"Bearer {cls.metric_token}"
                 resp = requests.get(url, verify=False, timeout=req_timeout, headers=headers)
             except Exception as e:
                 logger.exception(f"Not able to get metrics from {url}, error {e}")
