@@ -179,7 +179,6 @@ class PodAvailable(AvisoRestChecker):
         self.critical_t = kwargs["critical_t"]
         self.req_timeout = kwargs["req_timeout"]
         self.metric_server_url = kwargs["metric_server_url"]
-        self.opsview_reporter = OpsviewReporter()
         super().__init__(*args, **kwargs)
 
     def metric(self):
@@ -191,13 +190,13 @@ class PodAvailable(AvisoRestChecker):
 
         # fetch the cluster metrics
         if self.metric_server_url:
-            metrics = self.opsview_reporter.retrieve_metrics([self.metric_server_url], self.req_timeout)[
+            metrics = OpsviewReporter.retrieve_metrics([self.metric_server_url], self.req_timeout)[
                 self.metric_server_url
             ]
             if metrics:
                 logger.debug(f"Processing tlm {self.metric_name}...")
 
-                av_pod = self.opsview_reporter.read_from_metrics(metrics, pattern)
+                av_pod = OpsviewReporter.read_from_metrics(metrics, pattern)
                 if av_pod:
                     av_pod = int(av_pod)
                     if av_pod <= self.critical_t:
