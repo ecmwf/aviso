@@ -18,6 +18,8 @@ class AvisoRestReporter(OpsviewReporter):
         self.frequency = aviso_rest_config["frequency"]
         self.enabled = aviso_rest_config["enabled"]
         self.tlms = aviso_rest_config["tlms"]
+        #configure the metric vars once only here
+        OpsviewReporter.configure_metric_vars(config)
         super().__init__(config, *args, **kwargs)
 
     def process_messages(self):

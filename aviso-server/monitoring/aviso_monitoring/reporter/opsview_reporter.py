@@ -19,14 +19,24 @@ from ..config import Config
 
 
 class OpsviewReporter(ABC):
+    metric_ssl_enabled = False
+    metric_token = ""
+
     def __init__(self, config: Config, msg_receiver=None):
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         self.monitor_servers = config.monitor_servers
         self.msg_receiver = msg_receiver
         self.token = {}
+
+    @classmethod
+    def configure_metric_vars(cls, config):
+        """
+        Configures the class attributes based on the provided config.
+        """
+        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         if config.kube_state_metrics["ssl_enabled"]:
-            self.metric_ssl_enabled = True
-            self.metric_token = config.kube_state_metrics["token"]
+            cls.metric_ssl_enabled = True
+            cls.metric_token = config.kube_state_metrics["token"]
 
     def ms_authenticate(self, m_server):
         """
