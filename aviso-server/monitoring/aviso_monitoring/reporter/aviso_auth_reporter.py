@@ -202,9 +202,7 @@ class PodAvailable(AvisoAuthChecker):
 
     def metric(self):
         namespace = self.get_k8s_pod_namespace()
-        if namespace:
-            logger.info(f"The pod is running in the '{namespace}' namespace.")
-        else:
+        if not namespace:
             logger.warning("Could not determine the pod's namespace.")
             namespace = "aviso"
 
