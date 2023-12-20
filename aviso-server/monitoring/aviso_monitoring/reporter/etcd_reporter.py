@@ -23,6 +23,7 @@ class EtcdReporter(OpsviewReporter):
         self.req_timeout = self.etcd_config["req_timeout"]
         self.member_urls = self.etcd_config["member_urls"]
         self.tlms = self.etcd_config["tlms"]
+        self.opsview_reporter = OpsviewReporter()
         super().__init__(config, *args, **kwargs)
 
     def process_messages(self):
@@ -33,7 +34,7 @@ class EtcdReporter(OpsviewReporter):
         logger.debug("Etcd processing metrics...")
 
         # fetch the raw tlms provided by etcd
-        raw_tlms = OpsviewReporter.retrieve_metrics(self.member_urls, self.req_timeout)  # noqa: F841
+        raw_tlms = self.opsview_reporter.retrieve_metrics(self.member_urls, self.req_timeout)  # noqa: F841
 
         # array of metric to return
         metrics = []
