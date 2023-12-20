@@ -184,7 +184,7 @@ class Config:
         assert ar is not None, "aviso_rest_reporter has not been configured"
         assert ar.get("tlms") is not None, "aviso_rest_reporter tlms has not been configured"
         assert ar.get("enabled") is not None, "aviso_rest_reporter enabled has not been configured"
-        if type(ar["enabled"]) is str:
+        if isinstance(ar["enabled"], str):
             ar["enabled"] = ar["enabled"].casefold() == "true".casefold()
         assert ar.get("frequency") is not None, "aviso_rest_reporter frequency has not been configured"
         self._aviso_rest_reporter = ar
@@ -204,7 +204,7 @@ class Config:
         assert aa is not None, "aviso_auth_reporter has not been configured"
         assert aa.get("tlms") is not None, "aviso_auth_reporter tlms has not been configured"
         assert aa.get("enabled") is not None, "aviso_auth_reporter enabled has not been configured"
-        if type(aa["enabled"]) is str:
+        if isinstance(aa["enabled"], str):
             aa["enabled"] = aa["enabled"].casefold() == "true".casefold()
         assert aa.get("frequency") is not None, "aviso_auth_reporter frequency has not been configured"
         self._aviso_auth_reporter = aa
@@ -224,7 +224,7 @@ class Config:
         assert e is not None, "etcd_reporter has not been configured"
         assert e.get("tlms") is not None, "etcd_reporter tlms has not been configured"
         assert e.get("enabled") is not None, "etcd_reporter enabled has not been configured"
-        if type(e["enabled"]) is str:
+        if isinstance(e["enabled"], str):
             e["enabled"] = e["enabled"].casefold() == "true".casefold()
         assert e.get("frequency") is not None, "etcd_reporter frequency has not been configured"
         assert e.get("member_urls") is not None, "etcd_reporter member_urls has not been configured"
@@ -246,7 +246,7 @@ class Config:
         assert pr is not None, "prometheus_reporter has not been configured"
         assert pr.get("host") is not None, "prometheus_reporter host has not been configured"
         assert pr.get("enabled") is not None, "prometheus_reporter enabled has not been configured"
-        if type(pr["enabled"]) is str:
+        if isinstance(pr["enabled"], str):
             pr["enabled"] = pr["enabled"].casefold() == "true".casefold()
         assert pr.get("port") is not None, "prometheus_reporter port has not been configured"
         self._prometheus_reporter = pr
@@ -265,7 +265,8 @@ class Config:
         # verify is valid
         assert ksm is not None, "kube_state_metrics has not been configured"
         assert ksm.get("ssl_enabled") is not None, "kube_state_metrics ssl_enabled has not been configured"
-        assert ksm.get("token") is not None, "kube_state_metrics token has not been configured"
+        if ksm["ssl_enabled"]:
+            assert ksm.get("token") is not None, "kube_state_metrics token has not been configured"
         self._kube_state_metrics = ksm
 
     def __str__(self):
