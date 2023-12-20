@@ -201,7 +201,14 @@ class PodAvailable(AvisoAuthChecker):
         super().__init__(*args, **kwargs)
 
     def metric(self):
-        pattern = r'kube_deployment_status_replicas{namespace="aviso",deployment="aviso-auth-\w+"}'
+        namespace = self.get_k8s_pod_namespace()
+        if namespace:
+            logger.info(f"The pod is running in the '{namespace}' namespace.")
+        else:
+            logger.warning("Could not determine the pod's namespace.")
+            namespace = "aviso"
+
+        pattern = rf'kube_deployment_status_replicas{{namespace="{namespace}",deployment="aviso-auth-\w+"}}'
         # defaults
         status = 0
         message = "All pods available"
@@ -243,3 +250,30 @@ class PodAvailable(AvisoAuthChecker):
             m_status = {"name": self.metric_name, "status": 1, "message": "Metric could not be retrieved"}
         logger.debug(f"{self.metric_name} metric: {m_status}")
         return m_status
+
+    @staticmethod
+    def get_k8s_pod_namespace():
+        """
+        Retrieves the Kubernetes (k8s) namespace in which the current pod is running.
+
+        This function reads the namespace name from a file that Kubernetes automatically
+        mounts inside the pod. This file is typically located at:
+        '/var/run/secrets/kubernetes.io/serviceaccount/namespace'
+
+        Returns:
+            str: The namespace in which the pod is running. If the namespace cannot be determined
+                (e.g., the file doesn't exist or the pod is not running in a k8s environment),
+                the function returns None.
+        """
+        namespace_file = "/var/run/secrets/kubernetes.io/serviceaccount/namespace"
+        try:
+            with open(namespace_file, "r") as file:
+                return file.read().strip()
+        except FileNotFoundError:
+            logger.error(f"Namespace file not found: {namespace_file}")
+        except IOError as e:
+            logger.error(f"I/O error occurred when reading namespace file: {e}")
+        except Exception as e:
+            logger.exception(f"Unexpected error occurred when reading namespace file: {e}")
+
+        return None
