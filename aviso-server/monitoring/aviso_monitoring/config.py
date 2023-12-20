@@ -27,6 +27,7 @@ class Config:
         aviso_auth_reporter=None,
         etcd_reporter=None,
         prometheus_reporter=None,
+        kube_state_metrics=None,
     ):
         try:
             # we build the configuration in priority order from the lower to the higher
@@ -41,6 +42,7 @@ class Config:
             self.aviso_auth_reporter = aviso_auth_reporter
             self.etcd_reporter = etcd_reporter
             self.prometheus_reporter = prometheus_reporter
+            self.kube_state_metrics = kube_state_metrics
 
             logger.debug("Loading configuration completed")
 
@@ -113,6 +115,8 @@ class Config:
             },
         }
 
+        kube_state_metrics = {"ssl_enabled": False, "token": None}
+
         # main config
         config = {}
         config["udp_server"] = udp_server
@@ -121,6 +125,7 @@ class Config:
         config["aviso_auth_reporter"] = aviso_auth_reporter
         config["etcd_reporter"] = etcd_reporter
         config["prometheus_reporter"] = prometheus_reporter
+        config["kube_state_metrics"] = kube_state_metrics
         return config
 
     def _read_env_variables(self) -> Dict:
@@ -246,6 +251,23 @@ class Config:
         assert pr.get("port") is not None, "prometheus_reporter port has not been configured"
         self._prometheus_reporter = pr
 
+    @property
+    def kube_state_metrics(self):
+        return self._kube_state_metrics
+
+    @kube_state_metrics.setter
+    def kube_state_metrics(self, kube_state_metrics):
+        ksm = self._config.get("kube_state_metrics")
+        if kube_state_metrics is not None and ksm is not None:
+            Config.deep_update(ksm, kube_state_metrics)
+        elif kube_state_metrics is not None:
+            ksm = kube_state_metrics
+        # verify is valid
+        assert ksm is not None, "kube_state_metrics has not been configured"
+        assert ksm.get("ssl_enabled") is not None, "kube_state_metrics ssl_enabled has not been configured"
+        assert ksm.get("token") is not None, "kube_state_metrics token has not been configured"
+        self._kube_state_metrics = ksm
+
     def __str__(self):
         config_string = (
             f"udp_server: {self.udp_server}"
@@ -254,6 +276,7 @@ class Config:
             + f", aviso_auth_reporter: {self.aviso_auth_reporter}"
             + f", etcd_reporter: {self.etcd_reporter}"
             + f", prometheus_reporter: {self.prometheus_reporter}"
+            + f", kube_state_metrics: {self.kube_state_metrics}"
         )
         return config_string
 
