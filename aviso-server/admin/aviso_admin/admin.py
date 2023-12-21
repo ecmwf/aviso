@@ -22,53 +22,77 @@ from aviso_monitoring.reporter.prometheus_reporter import PrometheusReporter
 from aviso_monitoring.udp_server import UdpServer
 
 
-def main():
-    # load the configuration
-    config = Config()
-    logger.info(f"Running Aviso-admin v.{__version__}")
-    logger.info(f"aviso_monitoring module v.{monitoring_version}")
-    logger.info(f"Configuration loaded: {config}")
-
-    # instantiate the compactor and cleaner
+def setup_compactor_and_cleaner(config):
+    """Sets up the compactor and cleaner with scheduling."""
     compactor = Compactor(config.compactor)
-    cleaner = Cleaner(config.cleaner)
-
-    # Every day at scheduled time run the compactor
     if compactor.enabled:
         schedule.every().day.at(config.compactor["scheduled_time"]).do(compactor.run)
 
-    # Every day at scheduled time run the cleaner
+    cleaner = Cleaner(config.cleaner)
     if cleaner.enabled:
         schedule.every().day.at(config.cleaner["scheduled_time"]).do(cleaner.run)
 
-    # create the UDP server
-    receiver = Receiver()
-    udp_server = UdpServer(config.monitoring.udp_server, receiver)
-    udp_server.start()
 
-    # schedule reporters
-    rest_reporter = AvisoRestReporter(config.monitoring, receiver)
-    if rest_reporter.enabled:
-        schedule.every(rest_reporter.frequency).minutes.do(rest_reporter.run)
-    auth_reporter = AvisoAuthReporter(config.monitoring, receiver)
-    if auth_reporter.enabled:
-        schedule.every(auth_reporter.frequency).minutes.do(auth_reporter.run)
-    etcd_reporter = EtcdReporter(config.monitoring, receiver)
-    if etcd_reporter.enabled:
-        schedule.every(etcd_reporter.frequency).minutes.do(etcd_reporter.run)
+def setup_udp_server(config, receiver):
+    """Initializes and starts the UDP server."""
+    try:
+        udp_server = UdpServer(config.monitoring.udp_server, receiver)
+        udp_server.start()
+        return udp_server
+    except Exception as e:
+        logger.exception("Failed to start UDP Server: %s", e)
 
-    # launch the prometheus reporter, this expose some tlms to /metrics
+
+def schedule_reporters(config, receiver):
+    """Schedules various reporters based on the configuration."""
+    for reporter_class in [AvisoRestReporter, AvisoAuthReporter, EtcdReporter]:
+        reporter = reporter_class(config.monitoring, receiver)
+        if reporter.enabled:
+            schedule.every(reporter.frequency).minutes.do(reporter.run)
+
+
+def start_prometheus_reporter(config, receiver):
+    """Starts the Prometheus reporter if enabled."""
     prometheus_reporter = PrometheusReporter(config.monitoring, receiver)
     if prometheus_reporter.enabled:
         prometheus_reporter.start()
 
-    # Loop so that the scheduling task keeps on running all time.
-    while True:
-        # Checks whether a scheduled task is pending to run or not
-        schedule.run_pending()
-        time.sleep(30)
+
+def main():
+    """Main function to run the application."""
+    # Load the configuration
+    config = Config()
+    logger.info(f"Running Aviso-admin v.{__version__}")
+    logger.info(f"aviso_monitoring module v.{monitoring_version}")
+    logger.debug(f"Configuration loaded: {config}")
+
+    # Set up compactor and cleaner
+    setup_compactor_and_cleaner(config)
+
+    # Create the UDP server
+    receiver = Receiver()
+    udp_server = setup_udp_server(config, receiver)
+
+    # Schedule reporters
+    schedule_reporters(config, receiver)
+
+    # Start Prometheus reporter
+    start_prometheus_reporter(config, receiver)
+
+    # Main loop for running scheduled tasks
+    try:
+        while True:
+            schedule.run_pending()
+            time.sleep(30)
+    except KeyboardInterrupt:
+        logger.info("Application stopped by user.")
+    except Exception as e:
+        logger.exception("Unexpected error occurred: %s", e)
+    finally:
+        if udp_server:
+            udp_server.stop()  # Assuming a method to gracefully stop the UDP server
+        logger.info("Application shutdown.")
 
 
-# when running directly from this file
 if __name__ == "__main__":
     main()
