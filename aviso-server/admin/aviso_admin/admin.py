@@ -64,7 +64,7 @@ def main():
     config = Config()
     logger.info(f"Running Aviso-admin v.{__version__}")
     logger.info(f"aviso_monitoring module v.{monitoring_version}")
-    logger.debug(f"Configuration loaded: {config}")
+    logger.info(f"Configuration loaded: {config}")
 
     # Set up compactor and cleaner
     setup_compactor_and_cleaner(config)
