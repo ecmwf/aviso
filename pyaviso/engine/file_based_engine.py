@@ -15,7 +15,8 @@ from queue import Queue
 from shutil import rmtree
 from typing import Dict, List
 
-import pyinotify
+from watchdog.events import FileSystemEventHandler
+from watchdog.observers import Observer
 
 from .. import logger
 from ..authentication.auth import Auth
@@ -192,7 +193,7 @@ class FileBasedEngine(Engine):
         to_date: datetime = None,
     ):
         """
-        This method implements the active polling
+        This method implements the active polling using watchdog
         :param key: key to watch as a prefix
         :param callback: function to call if any change happen
         :param channel: global communication channel among threads
@@ -204,8 +205,9 @@ class FileBasedEngine(Engine):
             logger.warning("from_date option is disabled in TestMode")
         if to_date:
             logger.warning("to_date option is disabled in TestMode")
+
         try:
-            # first create the directory to watch
+            # Create the directory to watch if it doesn't exist
             if not os.path.exists(key):
                 try:
                     os.makedirs(key, exist_ok=True)
@@ -214,50 +216,50 @@ class FileBasedEngine(Engine):
                     logger.debug("", exc_info=True)
                     return False
 
-            # create a watch manager
-            wm = pyinotify.WatchManager()  # Watch Manager
-            mask = pyinotify.IN_CLOSE_WRITE  # watched events
-
-            # define a class to handle the new events
-            class EventHandler(pyinotify.ProcessEvent):
-                def __init__(self, engine):
-                    super(EventHandler, self).__init__()
+            # Define a class to handle the new events using watchdog
+            class EventHandler(FileSystemEventHandler):
+                def __init__(self, engine, debounce_time=0.5, polling_interval=1):
+                    super().__init__()
                     self._engine = engine
+                    self._last_processed_time = 0
+                    self._debounce_time = debounce_time
+                    self._polling_interval = polling_interval
 
-                def process_IN_CLOSE_WRITE(self, event):
-                    if not os.path.isdir(event.pathname):
-                        kvs = self._engine.pull(key=event.pathname)
+                def on_modified(self, event):
+                    if not event.is_directory:
+                        kvs = self._engine.pull(key=event.src_path)
                         for kv in kvs:
                             k = kv["key"]
                             v = kv["value"].decode()
-                            # skip the status
                             if kv["key"].endswith("status"):
                                 continue
                             logger.debug(f"Notification received for key {k}")
                             try:
-                                # execute the trigger
                                 callback(k, v)
                             except Exception as ee:
                                 logger.error(f"Error with notification trigger, exception: {type(ee)} {ee}")
                                 logger.debug("", exc_info=True)
+                    time.sleep(self._polling_interval)
 
-            # add the handler to the watch manager and define the watching task
-            handler = EventHandler(engine=self)
-            notifier = pyinotify.Notifier(wm, handler, read_freq=self._polling_interval)
-            wm.add_watch(key, mask, rec=True, auto_add=True)
+            # Set up the observer and event handler
+            event_handler = EventHandler(engine=self)
+            observer = Observer()
+            observer.schedule(event_handler, key, recursive=True)
+            observer.start()
 
-            # encapsulate the watcher in a daemon thread so we can stop it
+            # Daemon thread to allow stopping
             def t_run():
-                notifier.loop()
+                observer.join()
 
             t = threading.Thread(target=t_run)
             t.setDaemon(True)
             t.start()
 
-            # this is the stop condition
+            # Stop condition
             while key in self._listeners:
                 time.sleep(0.1)
-            notifier.stop()
+            observer.stop()
+            observer.join()
 
         except Exception as e:
             logger.error(f"Error while listening to key {key}, {e}")

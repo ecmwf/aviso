@@ -7,6 +7,7 @@
 # nor does it submit to any jurisdiction.
 
 import os
+from pathlib import Path
 
 import pytest
 
@@ -16,7 +17,8 @@ from pyaviso.engine import engine_factory
 
 
 def conf() -> user_config.UserConfig:  # this automatically configure the logging
-    c = user_config.UserConfig(conf_path="tests/config.yaml")
+    tests_path = Path(__file__).parent.parent
+    c = user_config.UserConfig(conf_path=Path(tests_path / "config.yaml"))
     return c
 
 
@@ -39,9 +41,9 @@ def test_auth_type(conf):
     auth2 = auth.Auth.get_auth(conf)
     conf.auth_type = "ecmwf"
     auth3 = auth.Auth.get_auth(conf)
-    assert type(auth1) == none_auth.NoneAuth
-    assert type(auth2) == etcd_auth.EtcdAuth
-    assert type(auth3) == ecmwf_auth.EcmwfAuth
+    assert isinstance(auth1, none_auth.NoneAuth)
+    assert isinstance(auth2, etcd_auth.EtcdAuth)
+    assert isinstance(auth3, ecmwf_auth.EcmwfAuth)
 
 
 @pytest.mark.skip  # we cannot authenticate in this test setup

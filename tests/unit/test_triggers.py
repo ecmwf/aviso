@@ -10,6 +10,7 @@ import contextlib
 import logging
 import os
 import time
+from pathlib import Path
 from threading import Thread
 
 import pytest
@@ -22,10 +23,18 @@ from pyaviso.engine import engine_factory as ef
 from pyaviso.event_listeners import event_listener_factory as elf
 from pyaviso.event_listeners.listener_schema_parser import ListenerSchemaParser
 
+tests_path = Path(__file__).parent.parent
+
+
+def base_path() -> Path:
+    """Get the current folder of the test"""
+    return Path(__file__).parent.parent.parent
+
 
 @pytest.fixture()
 def conf() -> user_config.UserConfig:  # this automatically configure the logging
-    c = user_config.UserConfig(conf_path="tests/config.yaml")
+    tests_path = Path(__file__).parent.parent
+    c = user_config.UserConfig(conf_path=Path(tests_path / "config.yaml"))
     return c
 
 
@@ -50,12 +59,12 @@ def caplog_for_logger(caplog):  # this is needed to assert over the logging outp
     lo.removeHandler(caplog.handler)
 
 
-def test_echo_trigger(conf, listener_factory, caplog):
+def test_echo_trigger(conf, listener_factory, caplog, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.chdir(base_path())
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     with caplog_for_logger(caplog):  # this allows to assert over the logging output
-
         # open the listener yaml file
-        with open("tests/unit/fixtures/good_listeners/echo_listener.yaml", "r") as f:
+        with Path(tests_path / "unit/fixtures/good_listeners/echo_listener.yaml").open(mode="r") as f:
             listeners_dict = yaml.safe_load(f.read())
         # parse it
         listeners: list = listener_factory.create_listeners(listeners_dict)
@@ -77,7 +86,8 @@ def test_echo_trigger(conf, listener_factory, caplog):
         assert "Echo Trigger completed" in caplog.text
 
 
-def test_function_trigger(conf, listener_factory, caplog):
+def test_function_trigger(conf, listener_factory, caplog, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.chdir(base_path())
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     # create a list that increments every time there is a new event
     trigger_list = []
@@ -103,12 +113,12 @@ def test_function_trigger(conf, listener_factory, caplog):
     assert trigger_list.__len__() == 1
 
 
-def test_logger_listener(conf, listener_factory, caplog):
+def test_logger_listener(conf, listener_factory, caplog, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.chdir(base_path())
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     with caplog_for_logger(caplog):  # this allows to assert over the logging output
-
         # open the listener yaml file
-        with open("tests/unit/fixtures/good_listeners/log_listener.yaml", "r") as f:
+        with Path(tests_path / "unit/fixtures/good_listeners/log_listener.yaml").open(mode="r") as f:
             listeners_dict = yaml.safe_load(f.read())
         # parse it
         listeners: list = listener_factory.create_listeners(listeners_dict)
@@ -133,12 +143,12 @@ def test_logger_listener(conf, listener_factory, caplog):
             os.remove("testLog.log")
 
 
-def test_command_listener(conf, listener_factory, caplog):
+def test_command_listener(conf, listener_factory, caplog, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.chdir(base_path())
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     with caplog_for_logger(caplog):  # this allows to assert over the logging output
-
         # open the listener yaml file
-        with open("tests/unit/fixtures/good_listeners/command_listener.yaml", "r") as f:
+        with Path(tests_path / "unit/fixtures/good_listeners/command_listener.yaml").open(mode="r") as f:
             listeners_dict = yaml.safe_load(f.read())
         # parse it
         listeners: list = listener_factory.create_listeners(listeners_dict)
@@ -155,11 +165,12 @@ def test_command_listener(conf, listener_factory, caplog):
         assert "Command Trigger completed" in caplog.text
 
 
-def test_command_json_listener(conf, listener_factory, caplog):
+def test_command_json_listener(conf, listener_factory, caplog, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.chdir(base_path())
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     with caplog_for_logger(caplog):  # this allows to assert over the logging output
         # open the listener yaml file
-        with open("tests/unit/fixtures/good_listeners/command_json_listener.yaml", "r") as f:
+        with Path(tests_path / "unit/fixtures/good_listeners/command_json_listener.yaml").open(mode="r") as f:
             listeners_dict = yaml.safe_load(f.read())
         # parse it
         listeners: list = listener_factory.create_listeners(listeners_dict)
@@ -176,11 +187,12 @@ def test_command_json_listener(conf, listener_factory, caplog):
         assert "Command Trigger completed" in caplog.text
 
 
-def test_command_json_path_listener(conf, listener_factory, caplog):
+def test_command_json_path_listener(conf, listener_factory, caplog, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.chdir(base_path())
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     with caplog_for_logger(caplog):  # this allows to assert over the logging output
         # open the listener yaml file
-        with open("tests/unit/fixtures/good_listeners/command_json_path_listener.yaml", "r") as f:
+        with Path(tests_path / "unit/fixtures/good_listeners/command_json_path_listener.yaml").open(mode="r") as f:
             listeners_dict = yaml.safe_load(f.read())
         # parse it
         listeners: list = listener_factory.create_listeners(listeners_dict)
@@ -213,7 +225,7 @@ def test_post_cloudEventshttp_listener(conf, listener_factory, caplog):
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     with caplog_for_logger(caplog):  # this allows to assert over the logging output
         # open the listener yaml file
-        with open("tests/unit/fixtures/good_listeners/post_cloudEventsHttp_listener.yaml", "r") as f:
+        with Path(tests_path / "unit/fixtures/good_listeners/post_cloudEventsHttp_listener.yaml").open(mode="r") as f:
             listeners_dict = yaml.safe_load(f.read())
         # parse it
         listeners: list = listener_factory.create_listeners(listeners_dict)
@@ -241,7 +253,9 @@ def test_post_cloudeventsaws_listener(conf, listener_factory, caplog):
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     with caplog_for_logger(caplog):  # this allows to assert over the logging output
         # open the listener yaml file
-        with open("tests/unit/fixtures/good_listeners/post_cloudEventsAws_fifo_listener.yaml", "r") as f:
+        with Path(tests_path / "unit/fixtures/good_listeners/post_cloudEventsAws_fifo_listener.yaml").open(
+            mode="r"
+        ) as f:
             listeners_dict = yaml.safe_load(f.read())
         # parse it
         listeners: list = listener_factory.create_listeners(listeners_dict)
@@ -268,7 +282,7 @@ def test_multiple_nots_echo(conf, listener_factory, caplog):
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     with caplog_for_logger(caplog):  # this allows to assert over the logging output
         # open the listener yaml file
-        with open("tests/unit/fixtures/good_listeners/echo_listener.yaml", "r") as f:
+        with Path(tests_path / "unit/fixtures/good_listeners/echo_listener.yaml").open(mode="r") as f:
             listeners_dict = yaml.safe_load(f.read())
         # parse it
         listeners: list = listener_factory.create_listeners(listeners_dict)
@@ -287,11 +301,12 @@ def test_multiple_nots_echo(conf, listener_factory, caplog):
         assert caplog.text.count("Echo Trigger completed") == n_nots
 
 
-def test_multiple_nots_cmd(conf, listener_factory, caplog):
+def test_multiple_nots_cmd(conf, listener_factory, caplog, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.chdir(base_path())
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     with caplog_for_logger(caplog):  # this allows to assert over the logging output
         # open the listener yaml file
-        with open("tests/unit/fixtures/good_listeners/command_listener.yaml", "r") as f:
+        with Path(tests_path / "unit/fixtures/good_listeners/command_listener.yaml").open(mode="r") as f:
             listeners_dict = yaml.safe_load(f.read())
         # parse it
         listeners: list = listener_factory.create_listeners(listeners_dict)
@@ -314,7 +329,7 @@ def test_multiple_listeners(conf, listener_factory, caplog):
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     with caplog_for_logger(caplog):  # this allows to assert over the logging output
         # open the listener yaml file
-        with open("tests/unit/fixtures/good_listeners/multiple_listeners.yaml", "r") as f:
+        with Path(tests_path / "unit/fixtures/good_listeners/multiple_listeners.yaml").open(mode="r") as f:
             listeners_dict = yaml.safe_load(f.read())
         # parse it
         listeners: list = listener_factory.create_listeners(listeners_dict)
@@ -331,11 +346,12 @@ def test_multiple_listeners(conf, listener_factory, caplog):
         assert caplog.text.count("Echo Trigger completed") == 3
 
 
-def test_multiple_triggers(conf, listener_factory, caplog):
+def test_multiple_triggers(conf, listener_factory, caplog, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.chdir(base_path())
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     with caplog_for_logger(caplog):  # this allows to assert over the logging output
         # open the listener yaml file
-        with open("tests/unit/fixtures/good_listeners/multiple_triggers.yaml", "r") as f:
+        with Path(tests_path / "unit/fixtures/good_listeners/multiple_triggers.yaml").open(mode="r") as f:
             listeners_dict = yaml.safe_load(f.read())
         # parse it
         listeners: list = listener_factory.create_listeners(listeners_dict)

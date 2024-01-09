@@ -13,6 +13,7 @@ import logging
 import os
 import subprocess
 import time
+from pathlib import Path
 from shutil import rmtree
 from threading import Thread
 
@@ -26,14 +27,16 @@ from pyaviso.engine.etcd_rest_engine import EtcdRestEngine
 
 
 def rest_engine():  # this automatically configure the logging
-    c = user_config.UserConfig(conf_path="tests/config.yaml")
+    tests_path = Path(__file__).parent.parent
+    c = user_config.UserConfig(conf_path=Path(tests_path / "config.yaml"))
     authenticator = auth.Auth.get_auth(c)
     engine = EtcdRestEngine(c.notification_engine, authenticator)
     return engine
 
 
 def grpc_engine():  # this automatically configure the logging
-    c = user_config.UserConfig(conf_path="tests/config.yaml")
+    tests_path = Path(__file__).parent.parent
+    c = user_config.UserConfig(conf_path=Path(tests_path / "config.yaml"))
     authenticator = auth.Auth.get_auth(c)
     engine = EtcdGrpcEngine(c.notification_engine, authenticator)
     return engine
@@ -429,7 +432,6 @@ def test_find_compacted_revision(engine):
 
 @pytest.mark.parametrize("engine", engines)
 def test_push_with_lease(engine):
-
     # submit a key expiring
     kvs = [{"key": "test/test0", "value": "0"}]
     assert engine.push_with_status(kvs, base_key="test/", message="test/test0", ttl=1)
@@ -448,7 +450,6 @@ def test_push_with_lease(engine):
 
 @pytest.mark.parametrize("engine", engines)
 def test_status_as_linked_list(engine):
-
     status0 = {"date_time": "2020-08-28T10:58:17.829Z"}
     kv0 = {"mod_rev": "100", "value": json.dumps(status0).encode()}
 

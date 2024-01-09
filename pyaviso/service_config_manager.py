@@ -169,7 +169,6 @@ class ServiceConfigManager:
         pulled_files = []
         pulled_files_tmp = []
         if len(kvs) > 0:
-
             # First check if we need to delete the existing folder
             if delete and os.path.exists(directory):
                 try:

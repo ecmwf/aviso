@@ -52,11 +52,9 @@ def catch_all_exceptions(cls, handler):
     """
 
     class Cls(cls):
-
         _original_args = None
 
         def make_context(self, info_name, args, parent=None, **extra):
-
             # grab the original command line arguments
             self._original_args = " ".join(args)
 
@@ -169,7 +167,7 @@ def user_config_setup(f):
     @click.option("--key", "-k", help="File path to the key required to authenticate to the server.")
     @functools.wraps(f)
     def functor(*args, **kwargs):
-        # CLIK automatically sets the flags, put back None values like for the other parameters
+        # CLICK automatically sets the flags, put back None values like for the other parameters
         kwargs["debug"] = None if not kwargs["debug"] else True
         kwargs["quiet"] = None if not kwargs["quiet"] else True
         kwargs["no_fail"] = None if not kwargs["no_fail"] else True

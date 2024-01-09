@@ -19,11 +19,24 @@ from ..config import Config
 
 
 class OpsviewReporter(ABC):
+    metric_token_enabled = False
+    metric_token = ""
+
     def __init__(self, config: Config, msg_receiver=None):
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         self.monitor_servers = config.monitor_servers
         self.msg_receiver = msg_receiver
         self.token = {}
+
+    @classmethod
+    def configure_metric_vars(cls, config):
+        """
+        Configures the class attributes based on the provided config.
+        """
+        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+        if config.kube_state_metrics["token_enabled"]:
+            cls.metric_token_enabled = True
+            cls.metric_token = config.kube_state_metrics["token"]
 
     def ms_authenticate(self, m_server):
         """
@@ -199,7 +212,8 @@ class OpsviewReporter(ABC):
         }
         return agg_tlm
 
-    def retrive_metrics(metric_servers, req_timeout):
+    @classmethod
+    def retrieve_metrics(cls, metric_servers, req_timeout):
         """
         This methods retrieves the metrics provided by specific metric servers using a Prometheus interface.
         """
@@ -207,8 +221,11 @@ class OpsviewReporter(ABC):
         for u in metric_servers:
             url = u + "/metrics"
             logger.debug(f"Retrieving metrics from {url}...")
+            headers = {}
             try:
-                resp = requests.get(url, verify=False, timeout=req_timeout)
+                if cls.metric_token_enabled:
+                    headers["Authorization"] = f"Bearer {cls.metric_token}"
+                resp = requests.get(url, verify=False, timeout=req_timeout, headers=headers)
             except Exception as e:
                 logger.exception(f"Not able to get metrics from {url}, error {e}")
                 raw_tlms[u] = None

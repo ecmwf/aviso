@@ -7,4 +7,3 @@ black
 isort
 flake8
 tox
-
