@@ -1,2 +1,8 @@
 [tool.black]
 line-length = 120
+exclude = '''
+/(
+    \.          # Ignore directories starting with .
+    | venv      # Ignore venv directory
+)/
+'''

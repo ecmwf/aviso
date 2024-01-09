@@ -120,7 +120,7 @@ class EtcdRestEngine(EtcdEngine):
                     f"Not able to pull key {key}, status {resp.status_code}, {resp.reason}, " f"{resp.content.decode()}"
                 )
 
-            # we got a good responce, exit from the loop
+            # we got a good response, exit from the loop
             break
 
         logger.debug(f"Query for {key} completed")
@@ -247,7 +247,7 @@ class EtcdRestEngine(EtcdEngine):
         This method authenticates  the user and set the internal token, this is only done for Etcd authentication
         :return: True if successfully authenticated
         """
-        if type(self.auth) == EtcdAuth:
+        if type(self.auth) == EtcdAuth:  # noqa: E721
             logger.debug(f"Authenticating user {self.auth.username}...")
 
             url = self._base_url + "auth/authenticate"
@@ -304,7 +304,7 @@ class EtcdRestEngine(EtcdEngine):
                     f"{resp.content.decode()}"
                 )
 
-            # we got a good responce, exit from the loop
+            # we got a good response, exit from the loop
             break
 
         logger.debug("Query for latest revision completed")

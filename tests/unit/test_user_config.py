@@ -7,6 +7,7 @@
 # nor does it submit to any jurisdiction.
 
 import os
+from pathlib import Path
 
 import pytest
 
@@ -16,7 +17,13 @@ from pyaviso.engine import EngineType
 from pyaviso.event_listeners.listener_schema_parser import ListenerSchemaParserType
 from pyaviso.user_config import KEY_FILE, UserConfig
 
-test_config_folder = "tests/unit/fixtures/"
+tests_path = Path(__file__).parent.parent
+test_config_folder = str(Path(tests_path / "unit/fixtures/"))
+
+
+def base_path() -> Path:
+    """Get the current folder of the test"""
+    return Path(__file__).parent.parent.parent
 
 
 @pytest.fixture(autouse=True)
@@ -124,7 +131,8 @@ def clear_environment():
         pass
 
 
-def test_default():
+def test_default(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.chdir(base_path())
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     c = UserConfig._create_default_config()
     assert not c["debug"]
@@ -155,9 +163,10 @@ def test_default():
     assert not c["remote_schema"]
 
 
-def test_config_file():
+def test_config_file(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.chdir(base_path())
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
-    c = UserConfig(conf_path=test_config_folder + "config.yaml")
+    c = UserConfig(conf_path=test_config_folder + "/config.yaml")
     assert c.debug
     assert c.notification_engine.polling_interval == 1
     assert c.notification_engine.type == EngineType.ETCD_GRPC
@@ -185,9 +194,10 @@ def test_config_file():
     assert c.schema_parser == ListenerSchemaParserType.ECMWF
 
 
-def test_config_file_with_ev():
+def test_config_file_with_ev(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.chdir(base_path())
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
-    os.environ["AVISO_CONFIG"] = test_config_folder + "config.yaml"
+    os.environ["AVISO_CONFIG"] = test_config_folder + "/config.yaml"
     c = UserConfig()
     assert c.debug
     assert c.notification_engine.polling_interval == 1
@@ -216,7 +226,8 @@ def test_config_file_with_ev():
     assert c.schema_parser == ListenerSchemaParserType.ECMWF
 
 
-def test_env_variables():
+def test_env_variables(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.chdir(base_path())
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     os.environ["AVISO_NOTIFICATION_HOST"] = "test_env"
     os.environ["AVISO_NOTIFICATION_PORT"] = "3"
@@ -273,7 +284,8 @@ def test_env_variables():
     assert c.schema_parser == ListenerSchemaParserType.ECMWF
 
 
-def test_env_variables_with_config_file():
+def test_env_variables_with_config_file(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.chdir(base_path())
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     os.environ["AVISO_NOTIFICATION_HOST"] = "test_env"
     os.environ["AVISO_NOTIFICATION_PORT"] = "3"
@@ -300,7 +312,7 @@ def test_env_variables_with_config_file():
     os.environ["AVISO_SCHEMA_PARSER"] = "generic"
 
     # create a config with the configuration file but the environment variables take priority
-    c = UserConfig(conf_path=test_config_folder + "config.yaml")
+    c = UserConfig(conf_path=test_config_folder + "/config.yaml")
 
     assert not c.debug
     assert c.notification_engine.polling_interval == 3
@@ -329,7 +341,8 @@ def test_env_variables_with_config_file():
     assert c.schema_parser == ListenerSchemaParserType.GENERIC
 
 
-def test_constructor():
+def test_constructor(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.chdir(base_path())
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     # create a config with passing the configuration file as well as the parameters. The parameters will take priority
     notification_engine = {
@@ -354,7 +367,7 @@ def test_constructor():
     }
 
     c = UserConfig(
-        conf_path=test_config_folder + "config.yaml",
+        conf_path=test_config_folder + "/config.yaml",
         notification_engine=notification_engine,
         configuration_engine=configuration_engine,
         debug=False,
@@ -394,7 +407,8 @@ def test_constructor():
     assert c.schema_parser == ListenerSchemaParserType.ECMWF
 
 
-def test_constructor_with_env_var():
+def test_constructor_with_env_var(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.chdir(base_path())
     logger.debug(os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0])
     os.environ["AVISO_NOTIFICATION_HOST"] = "test_env"
     os.environ["AVISO_NOTIFICATION_PORT"] = "3"
@@ -444,7 +458,7 @@ def test_constructor_with_env_var():
     }
 
     c = UserConfig(
-        conf_path=test_config_folder + "config.yaml",
+        conf_path=test_config_folder + "/config.yaml",
         notification_engine=notification_engine,
         configuration_engine=configuration_engine,
         debug=False,

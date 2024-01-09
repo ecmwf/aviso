@@ -62,7 +62,7 @@ class Authoriser:
         :param username:
         :return:
         - the list of allowed destinations associated to this username if valid
-        - UserNotFoundException if the user is not registred in ECPDS
+        - UserNotFoundException if the user is not registered in ECPDS
         - AuthorisationUnavailableException if the ECPDS server is unreachable
         - InternalSystemError otherwise
         """
@@ -132,7 +132,7 @@ class Authoriser:
         :return:
         - True if authorised
         - False if not authorised
-        - UserNotFoundException if the user is not registred in ECPDS
+        - UserNotFoundException if the user is not registered in ECPDS
         - AuthorisationUnavailableException if the ECPDS server is unreachable
         - InternalSystemError otherwise
         """
@@ -160,7 +160,7 @@ class Authoriser:
         :return:
         - True if authorised
         - False if not authorised
-        - UserNotFoundException if the user is not registred in ECPDS
+        - UserNotFoundException if the user is not registered in ECPDS
         - AuthorisationUnavailableException if the ECPDS server is unreachable
         - InternalSystemError otherwise
         """
@@ -170,7 +170,6 @@ class Authoriser:
 
         # now check if we are accessing to a key space that is open only to authorised users
         elif len(list(filter(lambda x: backend_key.startswith(x), self.protected_keys))) > 0:
-
             allowed_destinations = self._allowed_destinations(username)
             logger.debug(f"Destination allowed: {allowed_destinations}")
 

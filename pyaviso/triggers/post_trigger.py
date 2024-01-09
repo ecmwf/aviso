@@ -48,7 +48,7 @@ class PostTrigger(trigger.Trigger):
         self.protocol = ProtocolType[protocol_params.get("type").lower()].get_class()(notification, protocol_params)
 
     def execute(self):
-        logger.info("Starting Post Trigger for (params.get('protocol'))...'")
+        logger.info("Starting Post Trigger...'")
 
         # execute the specific protocol
         self.protocol.execute()
@@ -83,7 +83,6 @@ class PostCloudEventsHttp:
             self.source = self.SOURCE_DEFAULT
 
     def execute(self):
-
         # prepare the CloudEvents message
 
         attributes = {
@@ -117,7 +116,7 @@ class PostCloudEventsHttp:
 
 class PostCloudEventsAws:
     """
-    This class implements a trigger in charge of translating the notification in a CloudEvents messag and send it to a
+    This class implements a trigger in charge of translating the notification in a CloudEvents message and send it to a
     AWS topic specified by the user.
     """
 
@@ -147,7 +146,6 @@ class PostCloudEventsAws:
             self.source = self.SOURCE_DEFAULT
 
     def execute(self):
-
         # prepare the AWS topic message
 
         attributes = {

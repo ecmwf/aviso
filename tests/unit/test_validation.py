@@ -28,7 +28,7 @@ def test_int_handler():
     try:
         validator = IntHandler(key="test", **schema)
     except TypeError as e:
-        assert e.args[0] == "__init__() got an unexpected keyword argument 'error'"
+        assert e.args[0].split()[-3:] == "IntHandler.__init__() got an unexpected keyword argument 'error'".split()[-3:]
 
     schema = {"range": [0, 20], "canonic": "{0:0>4}"}
 

@@ -4,6 +4,7 @@ on:
   workflow_dispatch:
 
   push:
+  pull_request:
     branches: [develop]
 
 jobs:
@@ -23,8 +24,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: ["ubuntu-latest"]
-        python-version: ["3.6", "3.7", "3.8", "3.9"]
+        platform: ["ubuntu-20.04","macos-13"]
+        python-version: ["3.6", "3.7", "3.8", "3.9", "3.10", "3.11"]
 
     name: Python ${{ matrix.python-version }} on ${{ matrix.platform }}
     runs-on: ${{ matrix.platform }}
@@ -36,7 +37,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install etcd
+      - name: Install etcd for linux
         run: |
           ETCD_VER=v3.4.14
           DOWNLOAD_URL=https://github.com/etcd-io/etcd/releases/download
@@ -44,6 +45,18 @@ jobs:
           mkdir /tmp/etcd-download-test
           tar xzvf /tmp/etcd-${ETCD_VER}-linux-amd64.tar.gz -C /tmp/etcd-download-test --strip-components=1
           /tmp/etcd-download-test/etcd &
+        if: runner.os == 'Linux'
+
+      - name: Install etcd for macos
+        run: |
+          ETCD_VER=v3.4.14
+          DOWNLOAD_URL=https://github.com/etcd-io/etcd/releases/download
+          curl -L ${DOWNLOAD_URL}/${ETCD_VER}/etcd-${ETCD_VER}-darwin-amd64.zip -o /tmp/etcd-${ETCD_VER}-darwin-amd64.zip
+          mkdir /tmp/etcd-download-test
+          unzip /tmp/etcd-${ETCD_VER}-darwin-amd64.zip -d /tmp
+          mv /tmp/etcd-${ETCD_VER}-darwin-amd64/* /tmp/etcd-download-test
+          /tmp/etcd-download-test/etcd &
+        if: runner.os == 'macOS'
 
       - name: Install packages
         run: |

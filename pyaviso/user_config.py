@@ -67,19 +67,23 @@ class EngineConfig:
         self.automatic_retry_delay = automatic_retry_delay
 
     def __str__(self):
-        config_string = (
-            f"host: {self.host}"
-            + f", port: {self.port}"
-            + f", https: {self.https}"
-            + f", type: {self.type.name}"
-            + f", polling_interval: {self.polling_interval}"
-            + f", timeout: {self.timeout}"
-            + f", max_file_size: {self.max_file_size}"
-            + f", service: {self.service}"
-            + f", catchup: {self.catchup}"
-            + f", automatic_retry_delay: {self.automatic_retry_delay}"
-        )
-        return config_string
+        config_items = [
+            f"host: {self.host}",
+            f"port: {self.port}",
+            f"https: {self.https}",
+            f"type: {self.type.name}",
+            f"polling_interval: {self.polling_interval}",
+            f"timeout: {self.timeout}",
+            f"max_file_size: {self.max_file_size}",
+            f"service: {self.service}",
+            f"catchup: {self.catchup}",
+            f"automatic_retry_delay: {self.automatic_retry_delay}",
+        ]
+        config_string = "\n".join(config_items)
+        return f"Engine Configuration:\n{config_string}"
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}({self.__str__()})"
 
 
 class UserConfig:
@@ -337,7 +341,6 @@ class UserConfig:
         return config
 
     def logging_setup(self, logging_conf_path: str):
-
         if logging_conf_path is not None:
             try:
                 with open(logging_conf_path, "r") as f:
@@ -430,7 +433,7 @@ class UserConfig:
         assert "max_file_size" in ce, "configuration_engine max_file_size has not been configured"
         assert "timeout" in ce, "configuration_engine timeout has not been configured"
         assert "automatic_retry_delay" in ce, "configuration_engine automatic_retry_delay has not been configured"
-        if type(ce["https"]) is str:
+        if isinstance(ce["https"], str):
             ce["https"] = ce["https"].casefold() == "true".casefold()
 
         # exclude file_based from the options for the configuration engine
@@ -461,7 +464,7 @@ class UserConfig:
     @remote_schema.setter
     def remote_schema(self, remote_schema: str):
         self._remote_schema = self._configure_property(remote_schema, "remote_schema")
-        if type(self._remote_schema) is str:
+        if isinstance(self._remote_schema, str):
             self._remote_schema = self._remote_schema.casefold() == "true".casefold()
 
     @property
@@ -519,7 +522,7 @@ class UserConfig:
     @no_fail.setter
     def no_fail(self, no_fail: str):
         self._no_fail = self._configure_property(no_fail, "no_fail")
-        if type(self._no_fail) is str:
+        if isinstance(self._no_fail, str):
             self._no_fail = self._no_fail.casefold() == "true".casefold()
         if self.no_fail:
             # define a function to run at exit
@@ -536,7 +539,7 @@ class UserConfig:
     @debug.setter
     def debug(self, debug: any):
         self._debug = self._configure_property(debug, "debug")
-        if type(self._debug) is str:
+        if isinstance(self._debug, str):
             self._debug = self._debug.casefold() == "true".casefold()
         if self._debug:
             logging_level = logging.DEBUG
@@ -557,7 +560,7 @@ class UserConfig:
     @quiet.setter
     def quiet(self, quiet: any):
         self._quiet = self._configure_property(quiet, "quiet")
-        if type(self._quiet) is str:
+        if isinstance(self._quiet, str):
             self._quiet = self._quiet.casefold() == "true".casefold()
         if self._quiet:
             logging_level = logging.ERROR
@@ -570,20 +573,24 @@ class UserConfig:
                 pass
 
     def __str__(self):
-        config_string = (
-            f"notification_engine: {self.notification_engine}"
-            + f", configuration_engine: {self.configuration_engine}"
-            + f", auth_type: {self.auth_type}"
-            + f", debug: {self.debug}"
-            + f", quiet: {self.quiet}"
-            + f", username: {self.username}"
-            + f", username_file: {self.username_file}"
-            + f", no_fail: {self.no_fail}"
-            + f", key_ttl: {self.key_ttl}"
-            + f", schema_parser: {self.schema_parser}"
-            + f", remote_schema: {self.remote_schema}"
-        )
-        return config_string
+        config_items = [
+            f"notification_engine: {self.notification_engine}",
+            f"configuration_engine: {self.configuration_engine}",
+            f"auth_type: {self.auth_type}",
+            f"debug: {self.debug}",
+            f"quiet: {self.quiet}",
+            f"username: {self.username}",
+            f"username_file: {self.username_file}",
+            f"no_fail: {self.no_fail}",
+            f"key_ttl: {self.key_ttl}",
+            f"schema_parser: {self.schema_parser}",
+            f"remote_schema: {self.remote_schema}",
+        ]
+        config_string = "\n".join(config_items)
+        return f"User Configuration:\n{config_string}"
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}({self.__str__()})"
 
     def _configure_default_log(self):
         try:
