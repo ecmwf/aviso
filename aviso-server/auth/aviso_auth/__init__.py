@@ -9,7 +9,7 @@
 import logging
 
 # version number for the application.
-__version__ = "0.3.1"
+__version__ = "0.4.0"
 
 # setting application logger
 logger = logging.getLogger("aviso-auth")
