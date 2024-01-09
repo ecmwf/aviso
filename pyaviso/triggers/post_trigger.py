@@ -48,7 +48,7 @@ class PostTrigger(trigger.Trigger):
         self.protocol = ProtocolType[protocol_params.get("type").lower()].get_class()(notification, protocol_params)
 
     def execute(self):
-        logger.info("Starting Post Trigger for (params.get('protocol'))...'")
+        logger.info("Starting Post Trigger...'")
 
         # execute the specific protocol
         self.protocol.execute()
