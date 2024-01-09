@@ -5,6 +5,25 @@
 What's New
 ==============
 
+Version 1.0.0 (09 January 2024)
+--------------------------------
+
+- **File-based Engine Update**
+  The backend for the file-based engine has been upgraded from Pyinotify to Watchdog, enhancing performance and reliability.
+
+- **MacOS Support**
+  Version 1.0.0 introduces initial support for MacOS, broadening the platform compatibility.
+
+- **Test Enhancements**
+  Tests have been improved to utilize relative paths, increasing the robustness and portability of the testing process.
+
+- **Prometheus Metrics**
+  Added token support for Prometheus metrics.
+
+- **Kubernetes Compatibility**
+  Enhancements in aviso-monitoring to offer better support for Kubernetes environments.
+
+
 v0.11.1 (02 February 2022)
 --------------------------
 

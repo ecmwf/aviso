@@ -11,6 +11,12 @@ This section presents how Aviso has been configured and deployed at ECMWF. This 
 
 __ https://www.ecmwf.int/en/about/contact-us
 
+.. note::
+
+   The `aviso-examples`_ repository includes helpful scripts and configuration files as examples for using aviso with ECMWF notifications.
+
+.. _aviso-examples: https://github.com/ecmwf/aviso-examples
+
 ECMWF Aviso service
 -------------------
 
