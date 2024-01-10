@@ -62,10 +62,19 @@ jobs:
           pip install -U -r tests/requirements-dev.txt
           pip install -r docs/requirements.txt
 
-      - name: Tests
+      - name: Tests on Ubuntu
+        if: matrix.platform == 'ubuntu-20.04'
         run: |
           pip freeze
           pytest
+        env:
+          AVISO_DEBUG: True
+
+      - name: Tests on macOS
+        if: matrix.platform == 'macos-13'
+        run: |
+          pip freeze
+          pytest -v --cov=pyaviso --cache-clear
         env:
           AVISO_DEBUG: True
 
