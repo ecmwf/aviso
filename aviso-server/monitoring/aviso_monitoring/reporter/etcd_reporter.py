@@ -79,6 +79,7 @@ class EtcdChecker:
         self.member_urls = kwargs["member_urls"]
         self.raw_tlms = kwargs["raw_tlms"]
         self.msg_receiver = kwargs["msg_receiver"]
+        self.req_mem_count = kwargs["req_mem_count"]
 
     def metric(self):
         pass
