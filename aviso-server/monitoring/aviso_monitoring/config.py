@@ -228,6 +228,7 @@ class Config:
         if isinstance(e["enabled"], str):
             e["enabled"] = e["enabled"].casefold() == "true".casefold()
         assert e.get("frequency") is not None, "etcd_reporter frequency has not been configured"
+        assert e.get("req_mem_count") is not None, "etcd_reporter req_mem_count has not been configured"
         assert e.get("member_urls") is not None, "etcd_reporter member_urls has not been configured"
         assert e.get("req_timeout") is not None, "etcd_reporter req_timeout has not been configured"
         self._etcd_reporter = e
