@@ -12,5 +12,5 @@ It allows users to:
 This enables the creation of automatic workflows, timely triggered as events are notified.
  
 
-The documentation can be found at https://pyaviso.readthedocs.io/
+The documentation can be found at https://pyaviso.readthedocs.io/ \
 Examples demonstrating the usage of aviso for ECMWF notifications can be found at https://github.com/ecmwf/aviso-examples
