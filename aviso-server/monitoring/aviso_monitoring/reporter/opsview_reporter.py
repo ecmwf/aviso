@@ -149,38 +149,35 @@ class OpsviewReporter(ABC):
         
         logger.debug(f"tlms: {tlms}")
 
-        # read only the telemetry field of the tlm
-        r_tlms = list(map(lambda t: t.get("telemetry"), tlms))
+        # Initialize the aggregated telemetry
+        agg_tlm = {}
+        summation = {}
 
-        # determine tlm_type
-        first_key = list(r_tlms[0].keys())[0]
-        tlm_type = first_key[: first_key.rfind("_")]
+        for tlm in tlms:
+            r_tlm = tlm.get("telemetry")
+            for key in r_tlm.keys():
+                tlm_type = key[:key.rfind("_")]
 
-        logger.debug(f"tlm_type: {tlm_type}")
-        # setup the aggregated tlm to return
-        agg_tlm = {
-            tlm_type + "_counter": 0,
-            tlm_type + "_avg": 0,
-            tlm_type + "_max": -math.inf,
-            tlm_type + "_min": math.inf,
-        }
+                # Initialize if tlm_type is new
+                if tlm_type not in agg_tlm:
+                    agg_tlm[tlm_type + "_counter"] = 0
+                    agg_tlm[tlm_type + "_avg"] = 0
+                    agg_tlm[tlm_type + "_max"] = -math.inf
+                    agg_tlm[tlm_type + "_min"] = math.inf
+                    summation[tlm_type] = 0
+
+                agg_tlm[tlm_type + "_counter"] += r_tlm[tlm_type + "_counter"]
+                agg_tlm[tlm_type + "_max"] = max(agg_tlm[tlm_type + "_max"], r_tlm[tlm_type + "_max"])
+                agg_tlm[tlm_type + "_min"] = min(agg_tlm[tlm_type + "_min"], r_tlm[tlm_type + "_min"])
+                summation[tlm_type] += r_tlm[tlm_type + "_counter"] * r_tlm[tlm_type + "_avg"]
+
+        for tlm_type in summation:
+            if agg_tlm[tlm_type + "_counter"] > 0:
+                agg_tlm[tlm_type + "_avg"] = summation[tlm_type] / agg_tlm[tlm_type + "_counter"]
+            else:
+                agg_tlm[tlm_type + "_avg"] = 0
+
         logger.debug(f"agg_tlm: {agg_tlm}")
-        summation = 0
-        for tlm in r_tlms:
-            agg_tlm[tlm_type + "_counter"] += tlm[tlm_type + "_counter"]
-            agg_tlm[tlm_type + "_max"] = (
-                tlm[tlm_type + "_max"]
-                if tlm[tlm_type + "_max"] > agg_tlm[tlm_type + "_max"]
-                else agg_tlm[tlm_type + "_max"]
-            )
-            agg_tlm[tlm_type + "_min"] = (
-                tlm[tlm_type + "_min"]
-                if tlm[tlm_type + "_min"] < agg_tlm[tlm_type + "_min"]
-                else agg_tlm[tlm_type + "_min"]
-            )
-            summation += tlm[tlm_type + "_counter"] * tlm[tlm_type + "_avg"]
-        agg_tlm[tlm_type + "_avg"] = summation / agg_tlm[tlm_type + "_counter"]
-
         return agg_tlm
 
     def aggregate_unique_counter_tlms(tlms):
