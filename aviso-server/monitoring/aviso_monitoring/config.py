@@ -103,6 +103,7 @@ class Config:
             "frequency": 4,  # min
             "member_urls": ["http://localhost:2379"],
             "req_timeout": 60,  # s
+            "req_mem_count": 1,
             "tlms": {"etcd_store_size": {}, "etcd_cluster_status": {}, "etcd_error_log": {}},
         }
 
