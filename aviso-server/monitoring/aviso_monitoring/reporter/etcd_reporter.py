@@ -153,8 +153,10 @@ class ClusterStatus(EtcdChecker):
         message = "Cluster status is nominal"
 
         # first retrieve the member size
-        cluster_size = self.cluster_size(self.member_urls[0])  # any of the member should give the same info
+        cluster_size = self.cluster_size(self.member_urls[0])
+        logger.debug(f"selected member url: {self.member_urls[0]}")  # any of the member should give the same info
         if cluster_size != self.req_mem_count:
+            logger.debug(f"cluster size: {cluster_size}, required: {self.req_mem_count}, url: {self.member_urls[0]}")
             status = 2
             if cluster_size:
                 message = f"Cluster size is {cluster_size}"
