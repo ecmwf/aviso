@@ -146,7 +146,7 @@ class OpsviewReporter(ABC):
         """
         if len(tlms) == 0:
             return None
-        
+
         logger.debug(f"tlms: {tlms}")
 
         # Initialize the aggregated telemetry
@@ -156,7 +156,7 @@ class OpsviewReporter(ABC):
         for tlm in tlms:
             r_tlm = tlm.get("telemetry")
             for key in r_tlm.keys():
-                tlm_type = key[:key.rfind("_")]
+                tlm_type = key[: key.rfind("_")]
 
                 # Initialize if tlm_type is new
                 if tlm_type not in agg_tlm:
@@ -193,25 +193,28 @@ class OpsviewReporter(ABC):
         if len(tlms) == 0:
             return None
 
-        # read only the telemetry field of the tlm
-        r_tlms = list(map(lambda t: t.get("telemetry"), tlms))
+        agg_tlms = {}
 
-        # determine tlm_type
-        first_key = list(r_tlms[0].keys())[0]
-        tlm_type = first_key[: first_key.rfind("_")]
+        for tlm in tlms:
+            telemetry_data = tlm.get("telemetry", {})
+            for key, values in telemetry_data.items():
+                if key.endswith("_values"):
+                    tlm_type = key[: key.rfind("_")]
 
-        # create a unique list of values
-        aggr_values = []
-        for tlm in r_tlms:
-            for v in tlm[tlm_type + "_values"]:
-                if v not in aggr_values:
-                    aggr_values.append(v)
+                    if tlm_type not in agg_tlms:
+                        agg_tlms[tlm_type] = {
+                            tlm_type + "_counter": 0,
+                            tlm_type + "_values": set(),
+                        }
 
-        agg_tlm = {
-            tlm_type + "_counter": len(aggr_values),
-            tlm_type + "_values": aggr_values,
-        }
-        return agg_tlm
+                    agg_tlms[tlm_type][tlm_type + "_values"].update(values)
+
+        # Convert sets to lists and update counters
+        for tlm_type, data in agg_tlms.items():
+            data[tlm_type + "_values"] = list(data[tlm_type + "_values"])
+            data[tlm_type + "_counter"] = len(data[tlm_type + "_values"])
+
+        return agg_tlms
 
     @classmethod
     def retrieve_metrics(cls, metric_servers, req_timeout):
