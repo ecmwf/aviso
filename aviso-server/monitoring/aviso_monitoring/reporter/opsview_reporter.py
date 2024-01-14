@@ -146,6 +146,8 @@ class OpsviewReporter(ABC):
         """
         if len(tlms) == 0:
             return None
+        
+        logger.debug(f"tlms: {tlms}")
 
         # read only the telemetry field of the tlm
         r_tlms = list(map(lambda t: t.get("telemetry"), tlms))
@@ -154,6 +156,7 @@ class OpsviewReporter(ABC):
         first_key = list(r_tlms[0].keys())[0]
         tlm_type = first_key[: first_key.rfind("_")]
 
+        logger.debug(f"tlm_type: {tlm_type}")
         # setup the aggregated tlm to return
         agg_tlm = {
             tlm_type + "_counter": 0,
@@ -161,6 +164,7 @@ class OpsviewReporter(ABC):
             tlm_type + "_max": -math.inf,
             tlm_type + "_min": math.inf,
         }
+        logger.debug(f"agg_tlm: {agg_tlm}")
         summation = 0
         for tlm in r_tlms:
             agg_tlm[tlm_type + "_counter"] += tlm[tlm_type + "_counter"]
