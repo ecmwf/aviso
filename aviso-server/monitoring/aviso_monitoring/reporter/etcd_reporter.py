@@ -23,6 +23,7 @@ class EtcdReporter(OpsviewReporter):
         self.req_timeout = self.etcd_config["req_timeout"]
         self.member_urls = self.etcd_config["member_urls"]
         self.tlms = self.etcd_config["tlms"]
+        self.req_mem_count = self.etcd_config["req_mem_count"]
         super().__init__(config, *args, **kwargs)
 
     def process_messages(self):
@@ -152,7 +153,7 @@ class ClusterStatus(EtcdChecker):
 
         # first retrieve the member size
         cluster_size = self.cluster_size(self.member_urls[0])  # any of the member should give the same info
-        if cluster_size != len(self.member_urls):
+        if cluster_size != self.req_mem_count:
             status = 2
             if cluster_size:
                 message = f"Cluster size is {cluster_size}"
