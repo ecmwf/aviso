@@ -245,7 +245,6 @@ class Config:
     def server_type(self, server_type: str):
         self._server_type = self._configure_property(server_type, "server_type")
 
-
     @property
     def debug(self) -> bool:
         return self._debug

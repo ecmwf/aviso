@@ -1,14 +1,15 @@
-from fastapi import FastAPI, Request, HTTPException
-from fastapi.responses import JSONResponse, HTMLResponse
 from typing import Dict
-import uvicorn
-from cloudevents.http import from_http
 
+import uvicorn
 from aviso_monitoring import __version__ as monitoring_version
 from aviso_monitoring.collector.time_collector import TimeCollector
 from aviso_monitoring.reporter.aviso_rest_reporter import AvisoRestMetricType
 from aviso_rest import __version__, logger
 from aviso_rest.config import Config
+from cloudevents.http import from_http
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import HTMLResponse, JSONResponse
+
 from pyaviso.custom_exceptions import InvalidInputError
 from pyaviso.notification_manager import NotificationManager
 from pyaviso.version import __version__ as aviso_version
@@ -74,14 +75,20 @@ class Frontend:
         logger.info(f"Configuration loaded: {self.config}")
 
         if self.config.server_type == "uvicorn":
-            uvicorn.run("aviso_rest.frontend:app", host=self.config.host, port=self.config.port,
-                        log_level="info" if self.config.debug else "warning")
+            uvicorn.run(
+                "aviso_rest.frontend:app",
+                host=self.config.host,
+                port=self.config.port,
+                log_level="info" if self.config.debug else "warning",
+            )
         else:
             logger.error(f"server_type {self.config.server_type} not supported")
             raise NotImplementedError
 
+
 config = Config()
 frontend = Frontend(config)
+
 
 @app.on_event("startup")
 async def startup_event():
@@ -145,9 +152,11 @@ async def api_notify(request: Request):
 
     return {"message": "Notification successfully submitted"}
 
+
 def main():
     # create the frontend class and run it
     frontend.run_server()
+
 
 if __name__ == "__main__":
     main()
