@@ -66,6 +66,12 @@ class Frontend:
             if s in notification and notification[s] in skips[s]:
                 return True
         return False
+    
+    def timed_notify(self, notification, config):
+        """
+        This method allows to submit a notification to the store and to time it
+        """
+        return self.timer(self.notification_manager.notify, args=(notification, config))
 
     def run_server(self):
         logger.info(
@@ -148,11 +154,12 @@ async def api_notify(request: Request):
         if frontend._skip_request(notification, frontend.config.skips):
             logger.info("Notification skipped")
             return {"message": "Notification skipped"}
-        # Implement the notification logic here.
+        response = await frontend.timed_notify(notification, config.aviso)
+        logger.info("Notification successfully submitted")
+        return JSONResponse(content=response)
     except InvalidInputError as e:
         raise HTTPException(status_code=400, detail=str(e))
-    logger.info("Notification successfully submitted")
-    return {"message": "Notification successfully submitted"}
+
 
 
 def main():
