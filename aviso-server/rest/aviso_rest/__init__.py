@@ -9,7 +9,7 @@
 import logging
 
 # version number for the application.
-__version__ = "0.4.0"
+__version__ = "0.5.0"
 
 # setting application logger
 logger = logging.getLogger("aviso-rest")
