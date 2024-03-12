@@ -137,19 +137,21 @@ async def api_notify(request: Request):
     :param request: The incoming HTTP request with the notification.
     :return: A JSON response indicating the result of the notification processing.
     """
+    logger.debug("New notification received")
     body = await request.json()
     if body is None:
         raise HTTPException(status_code=400, detail="Invalid notification, Body cannot be empty")
-
+    logger.debug(body)
     try:
         notification = await frontend._parse_cloud_event(request)
+        logger.info(f"New event received: {notification}")
         if frontend._skip_request(notification, frontend.config.skips):
             logger.info("Notification skipped")
             return {"message": "Notification skipped"}
         # Implement the notification logic here.
     except InvalidInputError as e:
         raise HTTPException(status_code=400, detail=str(e))
-
+    logger.info("Notification successfully submitted")
     return {"message": "Notification successfully submitted"}
 
 
