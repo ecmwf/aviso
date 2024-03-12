@@ -1,9 +1,9 @@
 # Aviso Rest
 
 This component is a REST frontend that allows notification providers to submit notifications to the Aviso service 
-via REST. Internally it uses Aviso API as if it was a client towards the store.
+via REST. Internally it uses Aviso API as if it is a client towards the notification store.
 
-Install it by, from the main project directory:
+Run the following commands in the main project directory to install aviso-rest:
 ```
  % pip install -e .
  % pip install -e aviso-server/monitoring
@@ -11,9 +11,8 @@ Install it by, from the main project directory:
 ```
 The aviso and aviso-monitoring packages are required by aviso-rest.
 
-Launch it by:
+Aviso rest can be launched by:
 
 ```
 % aviso-rest
 ```
-
