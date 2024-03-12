@@ -67,7 +67,7 @@ class Frontend:
                 return True
         return False
     
-    def timed_notify(self, notification, config):
+    async def timed_notify(self, notification, config):
         """
         This method allows to submit a notification to the store and to time it
         """
