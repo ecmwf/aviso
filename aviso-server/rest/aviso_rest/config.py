@@ -42,7 +42,6 @@ class Config:
         host=None,
         port=None,
         server_type=None,
-        workers=None,
         aviso=None,
         monitoring=None,
         skips=None,
@@ -73,7 +72,6 @@ class Config:
             self.host = host
             self.port = port
             self.server_type = server_type
-            self.workers = workers
             self.aviso = aviso
             self.monitoring = monitoring
             self.skips = skips
@@ -94,8 +92,7 @@ class Config:
         config["debug"] = False
         config["host"] = "127.0.0.1"
         config["port"] = 8080
-        config["server_type"] = "flask"
-        config["workers"] = "1"
+        config["server_type"] = "uvicorn"
         config["skips"] = {}
         return config
 
@@ -159,8 +156,6 @@ class Config:
             config["port"] = int(os.environ["AVISO_REST_PORT"])
         if "AVISO_REST_SERVER_TYPE" in os.environ:
             config["server_type"] = os.environ["AVISO_REST_SERVER_TYPE"]
-        if "AVISO_REST_WORKERS" in os.environ:
-            config["workers"] = int(os.environ["AVISO_REST_WORKERS"])
         return config
 
     def logging_setup(self, logging_conf_path: str):
@@ -251,14 +246,6 @@ class Config:
         self._server_type = self._configure_property(server_type, "server_type")
 
     @property
-    def workers(self):
-        return self._workers
-
-    @workers.setter
-    def workers(self, workers: int):
-        self._workers = self._configure_property(workers, "workers")
-
-    @property
     def debug(self) -> bool:
         return self._debug
 
@@ -293,7 +280,6 @@ class Config:
             + f", port: {self.port}"
             + f", server_type: {self.server_type}"
             + f", debug: {self.debug}"
-            + f", workers: {self.workers}"
             + f", aviso: {self.aviso}"
             + f", monitoring: {self.monitoring}"
             + f", skips: {self.skips}"

@@ -13,7 +13,7 @@ jobs:
     name: Code QA
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - run: pip install black flake8 isort
       - run: black --version
       - run: isort --check .
@@ -24,16 +24,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: ["ubuntu-20.04","macos-13"]
-        python-version: ["3.6", "3.7", "3.8", "3.9", "3.10", "3.11"]
+        platform: ["ubuntu-latest","macos-13"]
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
 
     name: Python ${{ matrix.python-version }} on ${{ matrix.platform }}
     runs-on: ${{ matrix.platform }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v3
         with:
           python-version: ${{ matrix.python-version }}
 
