@@ -1,3 +1,11 @@
+# (C) Copyright 1996- ECMWF.
+#
+# This software is licensed under the terms of the Apache Licence Version 2.0
+# which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+# In applying this licence, ECMWF does not waive the privileges and immunities
+# granted to it by virtue of its status as an intergovernmental organisation
+# nor does it submit to any jurisdiction.
+
 from typing import Dict
 
 import uvicorn
@@ -66,7 +74,7 @@ class Frontend:
             if s in notification and notification[s] in skips[s]:
                 return True
         return False
-    
+
     async def timed_notify(self, notification, config):
         """
         This method allows to submit a notification to the store and to time it
@@ -159,7 +167,6 @@ async def api_notify(request: Request):
         return JSONResponse(content=response)
     except InvalidInputError as e:
         raise HTTPException(status_code=400, detail=str(e))
-
 
 
 def main():
