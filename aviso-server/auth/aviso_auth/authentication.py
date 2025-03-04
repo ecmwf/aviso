@@ -1,16 +1,18 @@
-# aviso_auth/authentication.py
+# (C) Copyright 1996- ECMWF.
+#
+# This software is licensed under the terms of the Apache Licence Version 2.0
+# which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+# In applying this licence, ECMWF does not waive the privileges and immunities
+# granted to it by virtue of its status as an intergovernmental organisation
+# nor does it submit to any jurisdiction.
 
-import base64
 import logging
 import random
 import time
 
 import jwt
 import requests
-from aviso_auth.custom_exceptions import (
-    InternalSystemError,
-    TokenNotValidException,
-)
+from aviso_auth.custom_exceptions import InternalSystemError, TokenNotValidException
 from aviso_monitoring.collector.time_collector import TimeCollector
 from aviso_monitoring.reporter.aviso_auth_reporter import AvisoAuthMetricType
 
@@ -231,7 +233,7 @@ class Authenticator:
                 )
                 return resp
 
-            except requests.exceptions.HTTPError as err:
+            except requests.exceptions.HTTPError:
                 status_code = resp.status_code
                 if status_code in [401, 403]:
                     logger.warning(
