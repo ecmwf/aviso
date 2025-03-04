@@ -86,14 +86,14 @@ class Config:
     def _create_default_config() -> Dict[str, any]:
         # authentication_server
         authentication_server = {}
-        authentication_server["url"] = "https://api.ecmwf.int/v1/who-am-i"
+        authentication_server["url"] = "http://0.0.0.0:8080"
         authentication_server["req_timeout"] = 60  # seconds
         authentication_server["cache_timeout"] = 86400  # 1 day in seconds
         authentication_server["monitor"] = False
 
         # authorisation_server
         authorisation_server = {}
-        authorisation_server["url"] = "https://127.0..0.1:8080"
+        authorisation_server["url"] = "http://127.0.0.1:8080"
         authorisation_server["req_timeout"] = 60  # seconds
         authorisation_server["cache_timeout"] = 86400  # 1 day in seconds
         authorisation_server["open_keys"] = ["/ec/mars", "/ec/config/aviso"]
