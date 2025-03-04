@@ -16,12 +16,9 @@ from aviso_auth.authorisation import Authoriser
 from aviso_auth.backend_adapter import BackendAdapter
 from aviso_auth.config import Config
 from aviso_monitoring import __version__ as monitoring_version
-
-
 from aviso_monitoring.collector.count_collector import UniqueCountCollector
 from aviso_monitoring.collector.time_collector import TimeCollector
 from aviso_monitoring.reporter.aviso_auth_reporter import AvisoAuthMetricType
-
 from flask import Flask, Response, render_template, request
 from flask_caching import Cache
 
