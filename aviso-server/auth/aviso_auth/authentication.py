@@ -1,15 +1,15 @@
 # aviso_auth/authentication.py
 
+import base64
 import logging
 import random
 import time
-import requests
-import base64
-import jwt
 
+import jwt
+import requests
 from aviso_auth.custom_exceptions import (
-    TokenNotValidException,
     InternalSystemError,
+    TokenNotValidException,
 )
 from aviso_monitoring.collector.time_collector import TimeCollector
 from aviso_monitoring.reporter.aviso_auth_reporter import AvisoAuthMetricType
