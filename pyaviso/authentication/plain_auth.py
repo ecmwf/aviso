@@ -8,17 +8,16 @@
 
 import base64
 
+
 class PlainAuth:
     """
     PlainAuth implements Basic authentication.
     """
+
     def __init__(self, config):
         self.config = config
 
     def header(self):
         credentials = f"{self.config.username}:{self.config.password}"
         encoded = base64.b64encode(credentials.encode("utf-8")).decode("utf-8")
-        return {
-            "Authorization": f"Basic {encoded}",
-            "X-Auth-Type": "plain"
-        }
+        return {"Authorization": f"Basic {encoded}", "X-Auth-Type": "plain"}

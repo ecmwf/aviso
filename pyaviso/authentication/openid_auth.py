@@ -6,18 +6,17 @@
 # granted to it by virtue of its status as an intergovernmental organisation
 # nor does it submit to any jurisdiction.
 
+
 class OpenidAuth:
     """
     OpenidAuth implements an OpenID authentication flow.
-    
+
     It returns a Bearer header (using the shared secret from config.password) and adds
     an extra header "X-Auth-Type" with the value "openid".
     """
+
     def __init__(self, config):
         self.config = config
 
     def header(self):
-        return {
-            "Authorization": f"Bearer {self.config.password}",
-            "X-Auth-Type": "openid"
-        }
+        return {"Authorization": f"Bearer {self.config.password}", "X-Auth-Type": "openid"}
