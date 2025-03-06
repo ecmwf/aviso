@@ -16,6 +16,8 @@ class AuthType(Enum):
     """
 
     ECMWF = ("ecmwf_auth", "EcmwfAuth")
+    OPENID = ("openid_auth", "OpenidAuth")
+    PLAIN = ("plain_auth", "PlainAuth")
     ETCD = ("etcd_auth", "EtcdAuth")
     NONE = ("none_auth", "NoneAuth")
 

@@ -352,7 +352,7 @@ cli.add_command(value)
 cli.add_command(notify)
 
 if __name__ == "__main__":
-    listen()
+    cli()
 
 
 def _parse_inline_params(params: str) -> Dict[str, any]:

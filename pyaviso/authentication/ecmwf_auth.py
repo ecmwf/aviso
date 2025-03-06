@@ -21,5 +21,4 @@ class EcmwfAuth(EtcdAuth):
         self._username = config.username
 
     def header(self):
-        header = {"Authorization": f"EmailKey {self.username}:{self.password}"}
-        return header
+        return {"Authorization": f"Bearer {self._password}", "X-Auth-Type": "ecmwf"}
