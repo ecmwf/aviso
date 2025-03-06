@@ -77,12 +77,29 @@ class Frontend:
         @handler.errorhandler(custom.TokenNotValidException)
         def token_not_valid(e):
             """
-            Return a 401 and attach the
-            "WWW-Authenticate" header from Authenticator.
+            Return a 401 and attach a dynamic WWW-Authenticate header if present in the exception message.
+            If not, fall back to the default header from the Authenticator.
             """
             logger.debug(f"Authentication failed: {e}")
 
-            return json_response(e, 401, self.authenticator.UNAUTHORISED_RESPONSE_HEADER)
+            # Try to extract a dynamic www-authenticate header from the exception message.
+            # We assume the exception message is formatted like:
+            # "Invalid credentials or unauthorized token; www-authenticate: <header value>"
+            msg = str(e)
+            header = {}
+            if "www-authenticate:" in msg.lower():
+                try:
+                    # Split on "www-authenticate:" and take the remainder.
+                    dynamic_value = msg.split("www-authenticate:")[1].strip()
+                    header["WWW-Authenticate"] = dynamic_value
+                    logger.debug("Using dynamic WWW-Authenticate header: %s", dynamic_value)
+                except Exception as parse_err:
+                    logger.error("Failed to parse dynamic WWW-Authenticate header: %s", parse_err)
+                    header = self.authenticator.UNAUTHORISED_RESPONSE_HEADER
+            else:
+                header = self.authenticator.UNAUTHORISED_RESPONSE_HEADER
+
+            return json_response(e, 401, header)
 
         @handler.errorhandler(custom.ForbiddenDestinationException)
         def forbidden_destination(e):
