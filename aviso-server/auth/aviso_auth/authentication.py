@@ -125,13 +125,20 @@ class Authenticator:
     def extract_token(self, auth_header, x_auth_type):
         """
         Parses the Authorization header to extract the token.
-        For "plain" auth, expects a Basic scheme; otherwise, expects Bearer.
+        For "plain" auth, expects a Basic scheme; for all other auth types, expects Bearer.
+        Legacy clients sending "EmailKey" are automatically mapped to "Bearer".
         """
         try:
             scheme, token = auth_header.split(" ", 1)
         except Exception as e:
             logger.error("Failed to parse Authorization header: %s", e, exc_info=True)
             raise TokenNotValidException("Invalid Authorization header format")
+
+        # Map legacy "EmailKey" scheme to "Bearer"
+        if scheme.lower() == "emailkey":
+            logger.debug("Mapping legacy 'EmailKey' scheme to 'Bearer'")
+            scheme = "Bearer"
+
         expected_scheme = "basic" if x_auth_type.lower() == "plain" else "bearer"
         if scheme.lower() != expected_scheme:
             logger.error("Expected '%s' scheme, got: %s", expected_scheme.capitalize(), scheme)
