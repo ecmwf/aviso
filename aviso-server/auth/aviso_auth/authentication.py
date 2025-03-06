@@ -21,15 +21,17 @@ MAX_N_TRIES = 25
 
 
 class Authenticator:
-    UNAUTHORISED_RESPONSE_HEADER = {"WWW-Authenticate": "Bearer realm='auth-o-tron',info='Provide a valid token'"}
+    # Following is the fallback response header in case of an unauthorized response
+    # from the authentication server does not provide a WWW-Authenticate header.
+    UNAUTHORISED_RESPONSE_HEADER = {"WWW-Authenticate": 'Bearer realm="auth-o-tron"'}
 
     def __init__(self, config, cache=None):
         """
         Initialize the Authenticator.
-        Loads authentication server settings from the configuration.
-        Uses Flask-Caching if 'cache' is provided to memoize token validation.
-        If monitoring is enabled (authentication_server["monitor"] = True),
-        wraps the authentication method in a TimeCollector.
+        - Loads the authentication server URL and request timeout from the configuration.
+        - If a cache is provided, token validation is memoized to avoid repeated calls.
+        - If monitoring is enabled (authentication_server["monitor"] is True),
+        wraps the authenticate method with a TimeCollector.
         """
         logger.debug("Initializing Authenticator with config: %s", config)
         self.config = config
@@ -37,158 +39,99 @@ class Authenticator:
         self.req_timeout = config.authentication_server.get("req_timeout", 10)
         logger.debug("Authentication server URL: %s, timeout: %s", self.url, self.req_timeout)
 
-        self._cached_providers = None
-
         self.cache = cache
 
+        # Setup monitoring if enabled.
         if config.authentication_server.get("monitor"):
             self.timer = TimeCollector(
                 config.monitoring, tlm_type=AvisoAuthMetricType.auth_resp_time.name, tlm_name="att"
             )
-            logger.debug("Monitoring enabled for authentication; using timed_authenticate")
+            logger.debug("Monitoring enabled; using timed_authenticate")
             self.authenticate = self.timed_authenticate
         else:
             self.authenticate = self.authenticate_impl
 
+        # Wrap the token validation function with caching if available.
         if self.cache:
             logger.debug(
                 "Using memoized token validator with cache timeout = %s",
                 config.authentication_server.get("cache_timeout", 300),
             )
-            # Wrap _validate_token_uncached with memoize
             self.validate_token_cached = self.cache.memoize(
                 timeout=config.authentication_server.get("cache_timeout", 300)
             )(self._validate_token_uncached)
         else:
-            logger.debug("No cache provided; validation calls are uncached.")
+            logger.debug("No cache provided; using uncached token validation")
             self.validate_token_cached = self._validate_token_uncached
 
     def timed_authenticate(self, request):
         """
-        Wraps the authenticate_impl with a time collector.
+        Wraps the authenticate_impl method with a TimeCollector.
         """
         logger.debug("timed_authenticate: Starting timed authentication")
         return self.timer(self.authenticate_impl, args=(request,))
 
     def authenticate_impl(self, request):
         """
-        Main authentication flow.
-
-        Steps:
+        Main authentication flow:
           1. Extract the Authorization and X-Auth-Type headers.
-          2. Map the X-Auth-Type value to the expected provider type.
-          3. Ensure a matching provider exists (via get_providers).
-          4. Extract the token from the Authorization header.
-          5. Validate the token (cached).
-          6. Extract user information (username, realm).
-          7. Return the username.
+          2. Extract the token from the Authorization header.
+          3. Gather the client IP (for logging).
+          4. Validate the token (cached).
+          5. Decode the JWT from the validation response to extract username and realm.
+          6. Return the username.
         """
         logger.debug("authenticate_impl: Starting authentication process")
 
         # Step 1: Extract headers.
         auth_header, x_auth_type = self.extract_auth_headers(request)
 
-        # Step 2: Map incoming auth type.
-        expected_provider_type = self.map_auth_type(x_auth_type)
-
-        # Step 3: Ensure a matching provider exists.
-        self.get_matching_provider(expected_provider_type)
-
-        # Step 4: Extract the token from the Authorization header.
+        # Step 2: Extract the token from the Authorization header.
         token = self.extract_token(auth_header, x_auth_type)
 
-        # Optionally, gather client IP for logging:
+        # Step 3: Get the client IP.
         client_ip = request.headers.get("X-Forwarded-For", request.remote_addr) or "unknown"
 
-        # Step 5: Validate the token. (NEW: using the memoized version!)
+        # Step 4: Validate the token (cached).
         resp = self.validate_token_cached(token, x_auth_type, client_ip=client_ip)
 
-        # Step 6: Extract user information.
+        # Step 5: Decode the JWT to extract user information.
         username, realm = self._token_to_username_impl(resp)
 
-        # Step 7: Return the username.
         logger.debug("authenticate_impl: Returning username: %s", username)
         return username
 
     def extract_auth_headers(self, request):
         """
-        Extracts the Authorization header and the X-Auth-Type header.
+        Extracts the HTTP_AUTHORIZATION header from request.environ and the custom X-Auth-Type header.
         """
         if not hasattr(request, "environ"):
             logger.error("Request missing environ attribute")
             raise TokenNotValidException("Invalid request: no environ attribute")
         auth_header = request.environ.get("HTTP_AUTHORIZATION")
         if not auth_header:
-            logger.error("Missing Authorization header in request")
+            logger.error("Missing Authorization header")
             raise TokenNotValidException("Missing Authorization header")
         logger.debug("Extracted Authorization header: %s", auth_header)
 
         x_auth_type = request.headers.get("X-Auth-Type")
         if not x_auth_type:
-            logger.error("Missing X-Auth-Type header in request")
+            logger.error("Missing X-Auth-Type header")
             raise TokenNotValidException("Missing X-Auth-Type header")
         logger.debug("Extracted X-Auth-Type header: %s", x_auth_type)
 
         return auth_header, x_auth_type
 
-    def map_auth_type(self, x_auth_type):
-        """
-        Maps the X-Auth-Type to the expected provider type.
-        """
-        mapping = {"ecmwf": "ecmwf-api", "plain": "plain", "openid": "openid-offline"}
-        expected = mapping.get(x_auth_type.lower())
-        if not expected:
-            logger.error("Unknown X-Auth-Type value: %s", x_auth_type)
-            raise TokenNotValidException(f"Unknown auth type: {x_auth_type}")
-        logger.debug("Mapped X-Auth-Type '%s' to expected provider type '%s'", x_auth_type, expected)
-        return expected
-
-    def get_providers(self):
-        """
-        Retrieves providers from auth-o-tron /providers, caches them locally.
-        """
-        if self._cached_providers is not None:
-            logger.debug("Using cached providers data: %s", self._cached_providers)
-            return self._cached_providers
-
-        providers_url = f"{self.url}/providers"
-        logger.debug("Querying providers from auth-o-tron at: %s", providers_url)
-        try:
-            resp = requests.get(providers_url, timeout=self.req_timeout)
-            logger.debug("Received providers response, status: %s", resp.status_code)
-            resp.raise_for_status()
-            providers_data = resp.json()
-            logger.debug("Providers data: %s", providers_data)
-            self._cached_providers = providers_data
-            return providers_data
-        except Exception as e:
-            logger.error("Error querying providers endpoint: %s", e, exc_info=True)
-            raise InternalSystemError("Failed to retrieve providers from auth-o-tron")
-
-    def get_matching_provider(self, expected_provider_type):
-        """
-        Check if the retrieved providers contain the given expected_provider_type.
-        """
-        providers = self.get_providers()
-        for provider in providers.get("providers", []):
-            p_type = provider.get("type", "").lower()
-            logger.debug("Checking provider: %s", provider)
-            if p_type == expected_provider_type:
-                logger.debug("Matched provider: %s", provider)
-                return provider
-        logger.error("No provider found for expected auth type: %s", expected_provider_type)
-        raise TokenNotValidException(f"No provider available for auth type matching '{expected_provider_type}'")
-
     def extract_token(self, auth_header, x_auth_type):
         """
-        Splits the Authorization header and ensures the correct scheme based on x_auth_type.
+        Parses the Authorization header to extract the token.
+        For "plain" auth, expects a Basic scheme; otherwise, expects Bearer.
         """
         try:
             scheme, token = auth_header.split(" ", 1)
         except Exception as e:
             logger.error("Failed to parse Authorization header: %s", e, exc_info=True)
             raise TokenNotValidException("Invalid Authorization header format")
-
         expected_scheme = "basic" if x_auth_type.lower() == "plain" else "bearer"
         if scheme.lower() != expected_scheme:
             logger.error("Expected '%s' scheme, got: %s", expected_scheme.capitalize(), scheme)
@@ -198,15 +141,17 @@ class Authenticator:
 
     def _validate_token_uncached(self, token, x_auth_type, client_ip="unknown"):
         """
-        The real token validation logic that calls auth-o-tron /authenticate.
-        This method is NOT decorated. The memoized version wraps it if caching is set.
+        Implements the actual token validation by calling auth-o-tron /authenticate.
+        For "ecmwf" and "openid", a Bearer header is used.
+        For "plain", a Basic header is used.
+        Retries on temporary errors.
         """
         if x_auth_type.lower() in ["ecmwf", "openid"]:
             auth_header = f"Bearer {token}"
         elif x_auth_type.lower() == "plain":
             auth_header = f"Basic {token}"
         else:
-            logger.warning("validate_token: Unknown auth type: %s", x_auth_type)
+            logger.warning("Unknown auth type: %s", x_auth_type)
             raise TokenNotValidException(f"Unknown auth type: {x_auth_type}")
 
         headers = {"Authorization": auth_header}
@@ -227,7 +172,7 @@ class Authenticator:
                     n_tries += 1
                     continue
 
-                resp.raise_for_status()  # 4xx or 5xx => HTTPError
+                resp.raise_for_status()  # Raises HTTPError for 4xx/5xx statuses
                 logger.debug(
                     "validate_token: Token validated successfully [auth_type=%s, ip=%s]", x_auth_type, client_ip
                 )
@@ -235,15 +180,20 @@ class Authenticator:
 
             except requests.exceptions.HTTPError:
                 status_code = resp.status_code
+                # Use dynamic www-authenticate from the response header.
+                www_authenticate = resp.headers.get("www-authenticate", "Not provided")
                 if status_code in [401, 403]:
                     logger.warning(
-                        "validate_token: %d Unauthorized/forbidden [auth_type=%s, ip=%s, reason=%.200s]",
+                        "validate_token: %d Unauthorized [auth_type=%s, ip=%s, www-authenticate=%s, reason=%.200s]",
                         status_code,
                         x_auth_type,
                         client_ip,
+                        www_authenticate,
                         resp.text,
                     )
-                    raise TokenNotValidException("Invalid credentials or unauthorized token")
+                    raise TokenNotValidException(
+                        f"Invalid credentials or unauthorized token; www-authenticate: {www_authenticate}"
+                    )
                 if status_code == 408 or (500 <= status_code < 600):
                     logger.warning(
                         "validate_token: Temporary HTTP error %d [auth_type=%s, ip=%s], reason=%s, retrying",
@@ -274,7 +224,6 @@ class Authenticator:
                 )
                 n_tries += 1
                 time.sleep(random.uniform(1, 5))
-
             except Exception as e:
                 logger.error(
                     "validate_token: Unexpected error on attempt %d [auth_type=%s, ip=%s]: %s",
@@ -292,17 +241,17 @@ class Authenticator:
 
     def validate_token(self, token, x_auth_type, client_ip="unknown"):
         """
-        Public wrapper that calls the memoized validation function (if caching is enabled)
-        or the uncached version if no cache. This function name is the one
-        used in authenticate_impl for consistency.
+        Public wrapper that calls the memoized token validation function (if caching is enabled),
+        or the uncached version otherwise.
         """
         return self.validate_token_cached(token, x_auth_type, client_ip=client_ip)
 
     def _token_to_username_impl(self, resp):
         """
         Extracts user info from the auth-o-tron /authenticate response.
-        Decodes a JWT from the response header "authorization".
-        Logs an INFO message for successful authentication.
+        Expects a JWT in the "authorization" header (format: "Bearer <jwt_token>"),
+        decodes the JWT without signature verification, and extracts the "username" and "realm".
+        Logs an INFO-level message on successful authentication.
         """
         auth_header = resp.headers.get("authorization")
         if not auth_header:
