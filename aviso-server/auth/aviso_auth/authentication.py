@@ -152,6 +152,7 @@ class Authenticator:
             if x_auth_type.lower() != "ecmwf":
                 logger.debug("EmailKey detected but X-Auth-Type is '%s', overriding to 'ecmwf'", x_auth_type)
                 x_auth_type = "ecmwf"
+                token = token.split(":")[-1]
 
         expected_scheme = "basic" if x_auth_type.lower() == "plain" else "bearer"
         if scheme.lower() != expected_scheme:
