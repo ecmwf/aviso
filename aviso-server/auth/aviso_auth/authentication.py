@@ -104,21 +104,30 @@ class Authenticator:
     def extract_auth_headers(self, request):
         """
         Extracts the HTTP_AUTHORIZATION header from request.environ and the custom X-Auth-Type header.
+        If Authorization header uses EmailKey scheme, X-Auth-Type is assumed to be "ecmwf" even if missing.
         """
         if not hasattr(request, "environ"):
             logger.error("Request missing environ attribute")
             raise TokenNotValidException("Invalid request: no environ attribute")
+
         auth_header = request.environ.get("HTTP_AUTHORIZATION")
         if not auth_header:
             logger.error("Missing Authorization header")
             raise TokenNotValidException("Missing Authorization header")
         logger.debug("Extracted Authorization header: %s", auth_header)
 
-        x_auth_type = request.headers.get("X-Auth-Type")
-        if not x_auth_type:
-            logger.error("Missing X-Auth-Type header")
-            raise TokenNotValidException("Missing X-Auth-Type header")
-        logger.debug("Extracted X-Auth-Type header: %s", x_auth_type)
+        # Check if this is an EmailKey authorization before requiring X-Auth-Type
+        if auth_header.lower().startswith("emailkey "):
+            # For EmailKey, assume X-Auth-Type is "ecmwf" if not provided
+            x_auth_type = request.headers.get("X-Auth-Type", "ecmwf")
+            logger.debug("EmailKey detected: Using X-Auth-Type '%s'", x_auth_type)
+        else:
+            # For other auth schemes, X-Auth-Type is required
+            x_auth_type = request.headers.get("X-Auth-Type")
+            if not x_auth_type:
+                logger.error("Missing X-Auth-Type header")
+                raise TokenNotValidException("Missing X-Auth-Type header")
+            logger.debug("Extracted X-Auth-Type header: %s", x_auth_type)
 
         return auth_header, x_auth_type
 
@@ -126,7 +135,8 @@ class Authenticator:
         """
         Parses the Authorization header to extract the token.
         For "plain" auth, expects a Basic scheme; for all other auth types, expects Bearer.
-        Legacy clients sending "EmailKey" are automatically mapped to "Bearer".
+        Legacy clients sending "EmailKey" are automatically mapped to "Bearer" and
+        X-Auth-Type is assumed to be "ecmwf".
         """
         try:
             scheme, token = auth_header.split(" ", 1)
@@ -134,10 +144,14 @@ class Authenticator:
             logger.error("Failed to parse Authorization header: %s", e, exc_info=True)
             raise TokenNotValidException("Invalid Authorization header format")
 
-        # Map legacy "EmailKey" scheme to "Bearer"
+        # Map legacy "EmailKey" scheme to "Bearer" and ensure X-Auth-Type is "ecmwf"
         if scheme.lower() == "emailkey":
             logger.debug("Mapping legacy 'EmailKey' scheme to 'Bearer'")
             scheme = "Bearer"
+            # Ensure X-Auth-Type is "ecmwf" when EmailKey is used
+            if x_auth_type.lower() != "ecmwf":
+                logger.debug("EmailKey detected but X-Auth-Type is '%s', overriding to 'ecmwf'", x_auth_type)
+                x_auth_type = "ecmwf"
 
         expected_scheme = "basic" if x_auth_type.lower() == "plain" else "bearer"
         if scheme.lower() != expected_scheme:
