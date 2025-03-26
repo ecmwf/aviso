@@ -148,11 +148,11 @@ class Authenticator:
         if scheme.lower() == "emailkey":
             logger.debug("Mapping legacy 'EmailKey' scheme to 'Bearer'")
             scheme = "Bearer"
+            token = token.split(":")[-1].strip()  # Extract the token part
             # Ensure X-Auth-Type is "ecmwf" when EmailKey is used
             if x_auth_type.lower() != "ecmwf":
                 logger.debug("EmailKey detected but X-Auth-Type is '%s', overriding to 'ecmwf'", x_auth_type)
                 x_auth_type = "ecmwf"
-                token = token.split(":")[-1]
 
         expected_scheme = "basic" if x_auth_type.lower() == "plain" else "bearer"
         if scheme.lower() != expected_scheme:
