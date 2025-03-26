@@ -209,7 +209,7 @@ class Engine(ABC):
         """
         # create the status payload
         status = {
-            "etcd_user": self.auth.username,
+            "etcd_user": getattr(self.auth, "username", None),
             "message": message,
             "unix_user": getpass.getuser(),
             "aviso_version": __version__,
