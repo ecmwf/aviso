@@ -117,7 +117,10 @@ jobs:
       - name: Check version
         run: |
           release=${GITHUB_REF##*/}
+          release=${release#v}
           version=$(python setup.py --version)
+          echo "Release tag: $release"
+          echo "Setup.py version: $version"
           test "$release" == "$version"
 
       - name: Install dependencies
