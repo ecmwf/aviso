@@ -28,7 +28,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: ["ubuntu-latest", "macos-13"]
+        # macOS dropped: GitHub retired the macos-13 (Intel) runners, so those
+        # jobs queue forever. This project is deprecated; Linux coverage suffices.
+        platform: ["ubuntu-latest"]
         python-version: ["3.9", "3.10", "3.11", "3.12"]
 
     name: Python ${{ matrix.python-version }} on ${{ matrix.platform }}
