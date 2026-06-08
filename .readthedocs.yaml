@@ -1,0 +1,26 @@
+# Read the Docs configuration file.
+# See https://docs.readthedocs.io/en/stable/config-file/v2.html
+#
+# Read the Docs has required a configuration file in the repository since
+# 2023; without this file the build is skipped, which is why the published
+# documentation went stale. This repository is deprecated, but the config is
+# kept so the archival/deprecation notice still builds and publishes.
+version: 2
+
+build:
+  os: ubuntu-22.04
+  tools:
+    python: "3.11"
+
+sphinx:
+  configuration: docs/source/conf.py
+
+# Only the documentation toolchain is installed. The Sphinx build reads the
+# version string directly from pyaviso/version.py (see docs/source/conf.py),
+# so the pyaviso package and its heavy runtime dependencies do not need to be
+# installed to build the docs.
+python:
+  install:
+    - requirements: docs/requirements.txt
+
+formats: []

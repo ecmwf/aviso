@@ -15,13 +15,19 @@
 # sys.path.insert(0, os.path.abspath('.'))
 
 import datetime
+import io
 import os
-import sys
+import re
 
-top = os.path.realpath(os.path.dirname(os.path.dirname(__file__)))
-sys.path.insert(0, top)
+_repo_root = os.path.realpath(os.path.join(os.path.dirname(__file__), "..", ".."))
 
-from pyaviso.version import __version__ as aviso_version  # noqa: E402
+# Regex-read the version (as setup.py does) instead of importing pyaviso, whose
+# __init__ pulls in the heavy runtime stack (etcd3, boto3, ...) and broke the RTD build.
+_version_file = os.path.join(_repo_root, "pyaviso", "version.py")
+aviso_version = re.search(
+    r"__version__\s*=\s*['\"]([^'\"]*)['\"]",
+    io.open(_version_file, encoding="utf_8_sig").read(),
+).group(1)
 
 source_suffix = ".rst"
 master_doc = "index"
@@ -64,7 +70,7 @@ extensions = [
 ]
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = []
+templates_path = ["_templates"]
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
