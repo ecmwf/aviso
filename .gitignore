@@ -1,6 +1,7 @@
 .*
 !.gitignore
 !.github
+!.readthedocs.yaml
 __pycache*
 htmlcov
 pyaviso.egg-info/*

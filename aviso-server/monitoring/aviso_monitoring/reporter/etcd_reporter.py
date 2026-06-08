@@ -44,8 +44,7 @@ class EtcdReporter(OpsviewReporter):
             # create the relative metric checker
             m_type = EtcdMetricType[tlm_type.lower()]
             checker = eval(
-                m_type.value
-                + "(tlm_type, msg_receiver=self.msg_receiver, raw_tlms=raw_tlms, **self.tlms[tlm_type], \
+                m_type.value + "(tlm_type, msg_receiver=self.msg_receiver, raw_tlms=raw_tlms, **self.tlms[tlm_type], \
                     **self.etcd_config)"
             )
 

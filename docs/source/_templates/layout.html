@@ -1,0 +1,25 @@
+{% extends "!layout.html" %}
+
+{% block document %}
+  <div class="admonition warning">
+    <p class="admonition-title">This documentation is no longer maintained</p>
+    <p>
+      Aviso has been re-engineered and is now developed as two separate,
+      actively maintained projects. This site is frozen and its source
+      repository will be archived soon. Please use the new documentation:
+    </p>
+    <ul>
+      <li>
+        <strong>Aviso client</strong> &mdash;
+        <a href="https://sites.ecmwf.int/docs/aviso-client/main/">documentation</a>,
+        <a href="https://github.com/ecmwf/aviso-client">source code</a>
+      </li>
+      <li>
+        <strong>Aviso server</strong> &mdash;
+        <a href="https://sites.ecmwf.int/docs/aviso-server/main/">documentation</a>,
+        <a href="https://github.com/ecmwf/aviso-server">source code</a>
+      </li>
+    </ul>
+  </div>
+  {{ super() }}
+{% endblock %}

@@ -1,6 +1,19 @@
 Welcome to Aviso's documentation!
 =================================
 
+.. warning::
+
+   **This documentation is deprecated and will be archived soon.** Aviso is now
+   developed as two separate, actively maintained projects. Please migrate to
+   them:
+
+   * **Aviso client** —
+     `documentation <https://sites.ecmwf.int/docs/aviso-client/main/>`_,
+     `source code <https://github.com/ecmwf/aviso-client>`_
+   * **Aviso server** —
+     `documentation <https://sites.ecmwf.int/docs/aviso-server/main/>`_,
+     `source code <https://github.com/ecmwf/aviso-server>`_
+
 Aviso is a software developed by ECMWF that allows to notify  **time-critical events** across HPC and Cloud systems in order to enable workflows among multiple domains.
 
 It allows users to:

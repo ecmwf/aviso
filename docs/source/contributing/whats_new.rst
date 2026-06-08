@@ -5,6 +5,20 @@
 What's New
 ==============
 
+Version 1.0.2 (June 2026)
+-------------------------
+
+- **Deprecation**
+  This project is deprecated and will be archived. Aviso is now developed as two
+  separate, actively maintained projects: the
+  `Aviso client <https://github.com/ecmwf/aviso-client>`_
+  (`documentation <https://sites.ecmwf.int/docs/aviso-client/main/>`_) and the
+  `Aviso server <https://github.com/ecmwf/aviso-server>`_
+  (`documentation <https://sites.ecmwf.int/docs/aviso-server/main/>`_). Please
+  migrate to them. This release exists to surface the deprecation notice and is
+  otherwise a maintenance update (Read the Docs build repaired, ``cloudevents``
+  pinned to ``<2``).
+
 Version 1.0.0 (09 January 2024)
 --------------------------------
 
